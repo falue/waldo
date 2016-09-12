@@ -88,7 +88,6 @@ def playback_servo(projectname, channelname):
   global mainpath
   global step
   global recording
-  print "Channelname:\t"+channelname
   #print servopin
   
   # Open files with pulse data
@@ -106,13 +105,13 @@ def playback_servo(projectname, channelname):
       servopin = int(getservopin[1])
       
   pulses_list.close()
-
-  print "Servopin:\t",
+  
+  print "Channelname:\t"+channelname+"\tServopin:\t"+str(servopin)
   #getservopin = pulses_list[0] #.split("\t")
   #servopin = getservopin[1]
-  print servopin
-  print "Pulses:"
-  print pulses
+  #print servopin
+  #print "Pulses:"
+  #print pulses
 
   def setServoPulse(channel, pulse):        # copypasta-überbleibsel...?
     pulseLength = 1000000                   # 1,000,000 us per second
@@ -126,7 +125,7 @@ def playback_servo(projectname, channelname):
 
   servoname.setPWMFreq(60)                  # Set frequency to 60 Hz
 
-  # servo bewegen
+  # Move servo
   print "Servo start:"
   for pulse in pulses:
     if recording : # if poject is without sound...
@@ -318,10 +317,10 @@ elif arg[1] == "p" :
       #  firstline = f.readline().strip().split("\t")
       #servopin = firstline[1]
       #print channel +":\t Servopin: "+ servopin
-      print "arg[2]:\t",
-      print arg[2]
-      print "\tchannel:\t"
-      print channel
+      #print "arg[2]:\t",
+      #print arg[2]
+      #print "\tchannel:\t"
+      #print channel
       # play servo thread:
       processThread1 = threading.Thread(target=playback_servo, args=(arg[2], channel,)); # <- note extra ','
       processThread1.start();
