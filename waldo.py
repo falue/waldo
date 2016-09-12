@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# ===========================================================================
+# WALDO
+# ===========================================================================
+
 from Adafruit_PWM_Servo_Driver import PWM
 import time
 import sys
@@ -11,33 +15,28 @@ from threading import Thread
 import serial
 from shutil import copyfile
 
-# ===========================================================================
-# WALDO
-# ===========================================================================
-
-# pfad zu verzeichnis
+# path to main dir
 mainpath = os.path.dirname(os.path.realpath(__file__))
 
-# Initialise the PWM device using the default address
-servoname = PWM(0x40)
-# Note if you'd like more debug output you can instead run:
-#pwm = PWM(0x40, debug=True)
-
-servoMin = 250  # Min pulse length out of 4096 (150)
-servoMax = 350  # Max pulse length out of 4096(600)
+servoname = PWM(0x40) # Initialise the PWM device using the default address
+servoMin = 250        # Min pulse length out of 4096 (150)
+servoMax = 350        # Max pulse length out of 4096(600)
 ruheposition = servoMin
-# 0.0585 recording
-step = 0.0570	# replaying time sleep zwischen schritte >5ms weil recording-step >5ms
+
+step = 0.0570	      # time.sleep between sevo steps
+# step_recording =  0.0585 # recording takes longer than playback...
 
 recording = False
 
 # ===========================================================================
-# FUNKTIONEN ALLGEMEIN
+# FUNCTIONS: GENERAL
 # ===========================================================================
 def mapvalue(x, in_min, in_max, out_min, out_max):
+  # map values
   return (x-in_min) * (out_max+1-out_min) / ( in_max-in_min) + out_min
 
 def getfilesize(size,precision=2):
+  # human readable filesizes
   # http://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python
   suffixes=['b','kb','mb','gb','tb']
   suffixIndex = 0
@@ -45,64 +44,63 @@ def getfilesize(size,precision=2):
       return "%.*f%s"%(precision,size,suffixes[suffixIndex])
   else :
     while size >= 1024 and suffixIndex < 4:
-      suffixIndex += 1 #increment the index of the suffix
-      size = size/1024.0 #apply the division
-      return "%.*f%s"%(precision,size,suffixes[suffixIndex])
-      #return str(size) + suffixes[suffixIndex]
+      suffixIndex += 1
+      size = size/1024.0
+      return "%.*f%s"%(precision,size,suffixes[suffixIndex]) #return str(size) + suffixes[suffixIndex]
 
 def usbdetection() :
-    print "Please unplug and replug desired usb device."
-    print "Listening to USB ports..."
-    usb_detected = False
-    usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
-    #print "start: ",
-    #print len(usbdevices)
+  # detect and write usb connection in file 'config'
+  print "Please unplug and replug desired usb device."
+  print "Listening to USB ports..."
+  usb_detected = False
+  usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
+  #print "start: ",
+  #print len(usbdevices)
 
-    while usb_detected == False :
-       if len(usbdevices)+1 == len(os.popen("ls /dev/tty*").read().strip().split("\n")) :
-           usbdevice = "".join(set(os.popen("ls /dev/tty*").read().strip().split("\n")).symmetric_difference(usbdevices))
-           print "USB device detected; yours is @ '" + usbdevice + "'."
-           print "Set baudrate:"
-           print "[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & [return]"
-           baudrate = raw_input()
-           usb_detected = True
-           return usbdevice + " " + baudrate
-       else :
-           usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
-           #print len(usbdevices)
-       
-       time.sleep(0.25)
+  while usb_detected == False :
+    if len(usbdevices)+1 == len(os.popen("ls /dev/tty*").read().strip().split("\n")) :
+      usbdevice = "".join(set(os.popen("ls /dev/tty*").read().strip().split("\n")).symmetric_difference(usbdevices))
+      print "USB device detected; yours is @ '" + usbdevice + "'."
+      print "Set baudrate:"
+      print "[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & [return]"
+      baudrate = raw_input()
+      usb_detected = True
+      return usbdevice + " " + baudrate
+    else :
+      usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
+      #print len(usbdevices)
+    time.sleep(0.25)
 
 # ===========================================================================
-# PLAYBACKS
+# FUNCTIONS: PLAYBACKS
 # ===========================================================================
 def playback_audio(audiofile):
+  # Playback audio
   global recording
   recording = True
-  #global mainpath # path als global deklarieren
-  # song abspielen
-  #print "funktion file: "+audiofile
+  # print "funktion file: "+audiofile
   system('play '+audiofile+' -q') # invoke 'sox' in quiet mode
   recording = False
   print "Audio stopped:\t"+audiofile
 
 def playback_servo(projectname, channelname):
-  global mainpath # path als global deklarieren
+  # Playback single servo
+  global mainpath
   global step
   global recording
   print "Channelname:\t"+channelname
   #print servopin
   
-  # files open
-  pulses_list = open(mainpath+"/projects/"+ projectname + "/" + channelname, "r") # datei zum lesen öffnen
+  # Open files with pulse data
+  pulses_list = open(mainpath+"/projects/"+ projectname + "/" + channelname, "r") # open to read
   pulses = []
 
   # fill list with file
   for line in pulses_list:
     # pulses.append(int(line))
-    if line.strip().isdigit() :
+    if line.strip().isdigit():
       pulses.append(mapvalue(int(line), 0, 1024, servoMin, servoMax))
-    else :
+    else:
       #print line
       getservopin = line.split("\t")
       servopin = int(getservopin[1])
@@ -116,7 +114,7 @@ def playback_servo(projectname, channelname):
   print "Pulses:"
   print pulses
 
-  def setServoPulse(channel, pulse):
+  def setServoPulse(channel, pulse):        # copypasta-überbleibsel...?
     pulseLength = 1000000                   # 1,000,000 us per second
     pulseLength /= 60                       # 60 Hz
     print "%d us per period" % pulseLength
@@ -126,13 +124,13 @@ def playback_servo(projectname, channelname):
     pulse /= pulseLength
     servoname.setPWM(channel, 0, pulse)
 
-  servoname.setPWMFreq(60)                        # Set frequency to 60 Hz
+  servoname.setPWMFreq(60)                  # Set frequency to 60 Hz
 
   # servo bewegen
   print "Servo start:"
   for pulse in pulses:
-    if recording : # an sich safety für wenn sound nicht läuft...
-      servoname.setPWM(servopin, 0, pulse)
+    if recording : # if poject is without sound...
+      servoname.setPWM(servopin, 0, pulse) # probably use function above...?
       print "Pin "+str(servopin) +":\t" + str(pulse)
       time.sleep(step)
     #else :
@@ -142,9 +140,10 @@ def playback_servo(projectname, channelname):
   #time.sleep(1)
 
 # ===========================================================================
-# RECORD
+# FUNCTIONS: RECORD
 # ===========================================================================
-def record(projectname, channelname, servopin, path_song) :
+def record(projectname, channelname, servopin, path_song):
+  # Listen to USB port and wite data into file
   global recording
   global mainpath # path als global deklarieren
   global step
@@ -154,7 +153,6 @@ def record(projectname, channelname, servopin, path_song) :
   # listen to USB
   with open(mainpath + "/config", 'r') as usbconfig:
     connection=usbconfig.read().replace('\n', '\t')
-
   usbdevice = connection.split("\t")
   usbport = usbdevice[1]
   baudrate = int(usbdevice[3])
@@ -165,6 +163,7 @@ def record(projectname, channelname, servopin, path_song) :
   print baudrate,
   print "baud"
 
+  # countdown for slow recordists
   print "start recording in..."
   time.sleep(1)
   print "3"
@@ -175,7 +174,7 @@ def record(projectname, channelname, servopin, path_song) :
   time.sleep(1)
   print "Start!"
 
-  #play audio...
+  # play audio file
   if path_song :
     processThread0 = threading.Thread(target=playback_audio, args=(path_song,)); # <- note extra ','
     processThread0.start();
@@ -228,12 +227,14 @@ for arguments in sys.argv:
 
 if arg[1] == "h" :
   # HELP
+  # Read/print help file
   with open(mainpath + "/help", 'r') as helpfile:
     print helpfile.read() #.replace('\n', '')
   helpfile.close()
   
 elif arg[1] == "usb":
   # CHANGE USB CONNECTION
+  # Listen to USB port and write it in config file
   connection = usbdetection().split()
   usbdevice = connection[0]
   baudrate = connection[1]
@@ -244,23 +245,27 @@ elif arg[1] == "usb":
   
 elif arg[1] == "r":
   # RECORD
+  # play audio, listen to USB port, follow with single servo and store data in file
   if not os.path.exists(mainpath + "/projects/"+arg[2]):
     os.mkdir (mainpath + "/projects/"+arg[2])
     os.mkdir (mainpath + "/projects/"+arg[2]+"/audio")
     os.mkdir (mainpath + "/projects/"+arg[2]+"/trash")
     
-  # check file
+  # file exists?
   if os.path.isfile(mainpath + "/projects/"+arg[2]+"/"+arg[3]) == True :
-    # überschreiben?
+    # overwite?
     print "'"+arg[3]+"' existiert bereits. Überschreiben? [Y/N]"
     answer = raw_input().lower()
 
     if answer == "y" :
-      # mache backup von zu überschreibender datei...
+      # backup file in 'trash'
       copyfile(mainpath + "/projects/"+arg[2]+"/"+arg[3], mainpath+"/projects/"+arg[2]+"/trash/"+time.strftime("%y-%m-%d_%H:%M:%S")+"_"+arg[3])
+      # Audiofile-arg submitted?
       if len(arg) > 5 :
+        # overwrite and record with playing audio
         record(arg[2], arg[3], arg[4], mainpath+"/projects/"+arg[2]+"/audio/"+arg[5])
       else :
+        # overwrite and record without playing audio
         record(arg[2], arg[3], arg[4], "")
     elif answer == "n" :
       print "Abbruch."
@@ -268,14 +273,15 @@ elif arg[1] == "r":
       print "[Y/N] motherfucker."
   else :
       if len(arg) > 5 :
+        # record with playing audio
         record(arg[2], arg[3], arg[4], mainpath+"/projects/"+arg[2]+"/audio/"+arg[5])
       else :
+        # record without playing audio
         record(arg[2], arg[3], arg[4], "")
         
-
-
 elif arg[1] == "sp" :
   # SINGLE PLAY
+  # Play audio file and single servo
   print "Play single servo."
   print "Projektname:\t"+arg[2]
   #print arg
@@ -292,12 +298,12 @@ elif arg[1] == "sp" :
 
 elif arg[1] == "p" :
   # PLAY ALL
+  # Play audio file and playback all servos there are
   # arg[2] == projektfoldername
   print "Play everything."
-  # play audio thread when set:
-
-  audiofile = os.listdir(mainpath+"/projects/"+arg[2]+"/audio/")  
   
+  # play audio thread when set:
+  audiofile = os.listdir(mainpath+"/projects/"+arg[2]+"/audio/")  
   if audiofile[0] :
     processThread0 = threading.Thread(target=playback_audio, args=(mainpath+"/projects/"+arg[2]+"/audio/"+ audiofile[0],)); # <- note extra ','
     processThread0.start();
@@ -305,12 +311,16 @@ elif arg[1] == "p" :
   # read folder...
   playchannels = os.listdir(mainpath+"/projects/"+arg[2]+"/")
 
+  # 'detect' servo pulse files
   for channel in playchannels :
     if channel != "audio" and channel != "trash" :
       #with open(mainpath+"/projects/"+arg[2]+"/"+channel, "r") as f :
       #  firstline = f.readline().strip().split("\t")
       #servopin = firstline[1]
       #print channel +":\t Servopin: "+ servopin
+      print "arg[2]:\t",
+      print arg[2]
+      print "\tchannel:\t"
       print channel
       # play servo thread:
       processThread1 = threading.Thread(target=playback_servo, args=(arg[2], channel,)); # <- note extra ','
@@ -318,14 +328,15 @@ elif arg[1] == "p" :
 
 elif arg[1] == "ls" :
   # LIST POJECTS AND CHANNELS
+  # print overview for all pojects including channels/servoPin connection
   print "List every channel in every project.\n"
+  
   # read folder...
   projects = os.listdir(mainpath+"/projects/")
   
   for project in projects :
     print project+":"
     playchannels = os.listdir(mainpath+"/projects/"+project+"/")
-
     for channel in playchannels :
       #print "\t->"+channel
       if channel != "audio" and channel != "trash" :
@@ -339,7 +350,6 @@ elif arg[1] == "ls" :
       elif channel == "audio" :
         audios = os.listdir(mainpath+"/projects/"+project+"/audio")
     firstline = []
-
     for audio in audios :
       print "  audio: "+audio
     print ""
@@ -352,7 +362,7 @@ elif arg[1] == "c":
     
 else :
   # what?
-  print "How did you do that? Type 'python waldo.py h' for help."
+  print "How did you do that? Type 'waldo.py h' for help."
 
 
 

@@ -16,7 +16,6 @@ type for detecting and saving usb port / baudrate for recording:
 type for channels infomation:
   waldo.py ls
            ^^
-
 type fo copyright information:
   python waldo.py c
                   ^
