@@ -5,7 +5,8 @@
 # WALDO
 # ===========================================================================
 
-from Adafruit_PWM_Servo_Driver import PWM
+#from Adafruit_PWM_Servo_Driver import PWM
+from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
 import time
 import sys
 from os import system
@@ -29,6 +30,8 @@ step = 0.0570  # time.sleep between sevo steps
 recording = False
 
 
+# TODO: FUNCTIONS TO SEPERATE FILES
+
 # ===========================================================================
 # FUNCTIONS: GENERAL
 # ===========================================================================
@@ -49,7 +52,7 @@ def getfilesize(size, precision=2):
             suffixIndex += 1
             size = size / 1024.0
             return "%.*f%s" % (precision, size, suffixes[suffixIndex]
-                               )  #return str(size) + suffixes[suffixIndex]
+                               )  # return str(size) + suffixes[suffixIndex]
 
 
 def usbdetection():
@@ -58,8 +61,8 @@ def usbdetection():
     print "Listening to USB ports..."
     usb_detected = False
     usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
-    #print "start: ",
-    #print len(usbdevices)
+    # print "start: ",
+    # print len(usbdevices)
 
     while usb_detected == False:
         if len(usbdevices) + 1 == len(
@@ -75,7 +78,7 @@ def usbdetection():
             return usbdevice + " " + baudrate
         else:
             usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
-            #print len(usbdevices)
+            # print len(usbdevices)
         time.sleep(0.25)
 
 
@@ -110,7 +113,7 @@ def playback_servo(projectname, channelname):
         if line.strip().isdigit():
             pulses.append(mapvalue(int(line), 0, 1024, servoMin, servoMax))
         else:
-            #print line
+            # print line
             getservopin = line.split("\t")
             servopin = int(getservopin[1])
 
@@ -118,11 +121,11 @@ def playback_servo(projectname, channelname):
 
     print "Channelname:\t" + channelname + "\tServopin:\t" + str(servopin)
 
-    #getservopin = pulses_list[0] #.split("\t")
-    #servopin = getservopin[1]
-    #print servopin
-    #print "Pulses:"
-    #print pulses
+    # getservopin = pulses_list[0] #.split("\t")
+    # servopin = getservopin[1]
+    # print servopin
+    # print "Pulses:"
+    # print pulses
 
     def setServoPulse(channel, pulse):  # copypasta-überbleibsel...?
         pulseLength = 1000000  # 1,000,000 us per second
@@ -239,6 +242,8 @@ def record(projectname, channelname, servopin, path_song):
 # ===========================================================================
 
 # get arguments from bash command line
+# pobably use 'click' for that
+# -----> every statement to seperate function
 arg = []
 for arguments in sys.argv:
     arg.append(arguments)
@@ -257,7 +262,7 @@ elif arg[1] == "usb":
     usbdevice = connection[0]
     baudrate = connection[1]
     usb = open(mainpath + "/config",
-               'w+')  #------------------------------- w+?
+               'w+')
     usb.write("usb port:\t" + usbdevice + "\nbaudrate:\t" + baudrate)
     usb.close()
     print "New USB connection saved."
@@ -308,7 +313,7 @@ elif arg[1] == "sp":
     print "Play single servo."
     print "Projektname:\t" + arg[2]
     #print arg
-    if __name__ == '__main__':
+    if __name__ == '__main__': # if primay/first executed file is waldo.py <------------------do better
         # play audio thread when set:
         if len(arg) > 4:
             processThread0 = threading.Thread(
