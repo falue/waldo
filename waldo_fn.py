@@ -1,10 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
 import os
-import time
+from os import system
 import serial
+import sys
+import threading
+# from threading import Thread
+import time
+from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_Servo_Driver import PWM
+from shutil import copyfile
+from waldo_fn import *
 
 
 # ===========================================================================
@@ -172,15 +178,15 @@ def record(projectname, channelname, servopin, path_song):
     print "baud"
 
     # countdown for slow recordists
-    print "start recording in..."
+    print "Start recording in..."
+    print "3"
     time.sleep(1)
-    print "3",
+    print "2"
     time.sleep(1)
-    print "\r2",
+    print "1"
     time.sleep(1)
-    print "\r1"
+    print "Go!"
     time.sleep(1)
-    print "Start!"
 
     # play audio file
     if path_song:
@@ -229,3 +235,162 @@ def record(projectname, channelname, servopin, path_song):
     print "Recorded file '" + channelname + "' is " + getfilesize(
         os.path.getsize(mainpath + "/projects/" + projectname + "/" +
                         channelname), 2) + " heavy."
+
+    
+# ===========================================================================
+# FUNCTIONS: ARGUMENTS
+# ===========================================================================
+
+def helpfile(mainpath):
+    # Read/print help file
+    with open(mainpath + "/help", 'r') as helpfile:
+        print helpfile.read()  # .replace('\n', '')
+    helpfile.close()
+
+def setconnection(mainpath):
+    # Listen to USB port and write it in config file
+    # if usb...
+    connection = usbdetection().split()
+    usbdevice = connection[0]
+    baudrate = connection[1]
+    usb = open(mainpath + "/config", 'w+')
+    usb.write("usb port:\t" + usbdevice + "\nbaudrate:\t" + baudrate)
+    usb.close()
+    print "New USB connection saved."
+    # if MCP3008...
+
+
+def record_setup(mainpath, arg):
+    # print arg
+    # play audio, listen to USB port, follow with single servo and store data in file
+    if not os.path.exists(mainpath + "/projects/" + arg[2]):
+        os.mkdir(mainpath + "/projects/" + arg[2])
+        os.mkdir(mainpath + "/projects/" + arg[2] + "/audio")
+        os.mkdir(mainpath + "/projects/" + arg[2] + "/trash")
+
+    # file exists?
+    if os.path.isfile(mainpath + "/projects/" + arg[2] + "/" + arg[3]) == True:
+        # overwite?
+        print "'" + arg[3] + "' already exists. Replace? [Y/N]"
+        answer = raw_input().lower()
+
+        if answer == "y":
+            # backup file in 'trash'
+            copyfile(mainpath + "/projects/" + arg[2] + "/" + arg[3],
+                     mainpath + "/projects/" + arg[2] + "/trash/" +
+                     time.strftime("%y-%m-%d_%H:%M:%S") + "_" + arg[3])
+            # Audiofile-arg submitted?
+            if len(arg) > 5:
+                # overwrite and record with playing audio
+                record(arg[2], arg[3], arg[4],
+                       mainpath + "/projects/" + arg[2] + "/audio/" + arg[5])
+            else:
+                # overwrite and record without playing audio
+                record(arg[2], arg[3], arg[4], "")
+        elif answer == "n":
+            print "Abort."
+        else:
+            print "[Y/N] murmel, murmel"
+    else:
+        if len(arg) > 5:
+            # record with playing audio
+            record(arg[2], arg[3], arg[4],
+                   mainpath + "/projects/" + arg[2] + "/audio/" + arg[5])
+        else:
+            # record without playing audio
+            record(arg[2], arg[3], arg[4], "")
+
+
+def singleplay(mainpath, arg):
+    # Play audio file and single servo
+    print "Play single servo."
+    print "Projektname:\t" + arg[2]
+    #print arg
+    # play audio thread when set:
+    if len(arg) > 4:
+        processThread0 = threading.Thread(
+            target=playback_audio,
+            args=(mainpath + "/projects/" + arg[2] + "/audio/" + arg[4], ))
+        # <- note extra ','
+        processThread0.start()
+    #else :
+    #  recording = True
+    # play servo thread:
+    processThread1 = threading.Thread(
+        target=playback_servo, args=(arg[2],
+                                     arg[3], ))
+    # <- note extra ','
+    processThread1.start()
+
+
+def playall(mainpath, arg):
+    # Play audio file and playback all servos there are
+    # arg[2] == projektfoldername
+    print "Play everything."
+
+    # play audio thread when set:
+    audiofile = os.listdir(mainpath + "/projects/" + arg[2] + "/audio/")
+    if audiofile[0]:
+        processThread0 = threading.Thread(
+            target=playback_audio,
+            args=(
+                mainpath + "/projects/" + arg[2] + "/audio/" + audiofile[0], ))
+        # <- note extra ','
+        processThread0.start()
+
+    # read folder...
+    playchannels = os.listdir(mainpath + "/projects/" + arg[2] + "/")
+
+    # 'detect' servo pulse files
+    for channel in playchannels:
+        if channel != "audio" and channel != "trash":
+            #with open(mainpath+"/projects/"+arg[2]+"/"+channel, "r") as f :
+            #  firstline = f.readline().strip().split("\t")
+            #servopin = firstline[1]
+            #print channel +":\t Servopin: "+ servopin
+            #print "arg[2]:\t",
+            #print arg[2]
+            #print "\tchannel:\t"
+            #print channel
+            # play servo thread:
+            processThread1 = threading.Thread(
+                target=playback_servo, args=(arg[2],
+                                             channel, ))
+            # <- note extra ','
+            processThread1.start()
+
+
+def listprojects(mainpath):
+    # print overview for all pojects including channels/servoPin connection
+    print "List every channel in every project.\n"
+
+    # read folder...
+    projects = os.listdir(mainpath + "/projects/")
+
+    for project in projects:
+        print project + ":"
+        playchannels = os.listdir(mainpath + "/projects/" + project + "/")
+        for channel in playchannels:
+            #print "\t->"+channel
+            if channel != "audio" and channel != "trash":
+                with open(mainpath + "/projects/" + project + "/" + channel,
+                          "r") as f:
+                    firstline = f.readline().strip().split("\t")
+                if len(firstline) > 1:
+                    servopin = firstline[1]
+                else:
+                    servopin = "?"
+                print "  ↳ " + channel + "\t[Pin " + servopin + "]"
+            elif channel == "audio":
+                audios = os.listdir(mainpath + "/projects/" + project +
+                                    "/audio")
+        firstline = []
+        for audio in audios:
+            print "  audio: " + audio
+        print ""
+
+
+def legal():
+    print "done by me."
+    print "2016."
+    print "huehuehue."

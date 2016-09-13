@@ -1,21 +1,21 @@
 type for playback all:
-  waldo.py p pojectfoldername
-           ^
+  waldo.py -p pojectfoldername
+            ^
 type for single playback:
-  waldo.py sp pojectfoldername channelfilename (songname)
-           ^^
+  waldo.py -sp pojectfoldername channelfilename (songname)
+            ^^
 type for recording:
-  waldo.py r pojectfoldername channelfilename servopin (songname)
-           ^
+  waldo.py -r pojectfoldername channelfilename servopin (songname)
+            ^
 abort recoding
   ctrl + c
 
-type for detecting and saving usb port / baudrate for recording:
-  waldo.py usb
-           ^^^
+type for input detecting / usb detecting and saving connection / baudrate for recording:
+  waldo.py -c
+            ^
 type for channels infomation:
-  waldo.py ls
-           ^^
+  waldo.py -ls
+            ^^
 type fo copyright information:
-  python waldo.py c
-                  ^
+  python waldo.py -cc
+                   ^^
