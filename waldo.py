@@ -8,6 +8,8 @@
 import os
 import sys
 from waldo_fn import *
+import click
+
 '''
 # from os import system
 import serial

@@ -19,7 +19,7 @@ from waldo_fn import *
 
 # PROBABLY DELETE ALL THIS AFTER GETTING RID OF GLOBALS
 
-servoname = PWM(0x40)  # Initialise the PWM device using the default address
+servoname = PWM(0x40)  # ServoHat o. 1
 servoMin = 250  # Min pulse length out of 4096 (150)
 servoMax = 350  # Max pulse length out of 4096(600)
 ruheposition = servoMin
@@ -47,8 +47,7 @@ def getfilesize(size, precision=2):
         while size >= 1024 and suffixIndex < 4:
             suffixIndex += 1
             size = size / 1024.0
-            return "%.*f%s" % (precision, size, suffixes[suffixIndex]
-                               )  # return str(size) + suffixes[suffixIndex]
+            return "%.*f%s" % (precision, size, suffixes[suffixIndex])
 
 
 def usbdetection():
@@ -66,7 +65,7 @@ def usbdetection():
             usbdevice = "".join(
                 set(os.popen("ls /dev/tty*").read().strip().split("\n"))
                 .symmetric_difference(usbdevices))
-            print "USB device detected; yours is @ '" + usbdevice + "'."
+            print "USB device detected; yours is @",usbdevice,"."
             print "Set baudrate:"
             print "[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & [return]"
             baudrate = raw_input()
@@ -88,12 +87,12 @@ def playback_audio(audiofile):
     # print "funktion file: "+audiofile
     system('play ' + audiofile + ' -q')  # invoke 'sox' in quiet mode
     recording = False
-    print "Audio stopped:\t" + audiofile
+    print "Audio stopped:\t", audiofile
 
 
-def playback_servo(projectname, channelname):
+def playback_servo(mainpath, projectname, channelname):
     # Playback single servo
-    global mainpath
+    # global mainpath
     global step
     global recording
     #print servopin
@@ -115,7 +114,7 @@ def playback_servo(projectname, channelname):
 
     pulses_list.close()
 
-    print "Channelname:\t" + channelname + "\tServopin:\t" + str(servopin)
+    print "Channelname:\t", channelname, "\tServopin:\t", servopin
 
     # getservopin = pulses_list[0] #.split("\t")
     # servopin = getservopin[1]
@@ -141,25 +140,25 @@ def playback_servo(projectname, channelname):
         if recording:  # if poject is without sound...
             servoname.setPWM(servopin, 0,
                              pulse)  # probably use function above...?
-            print "Pin " + str(servopin) + ":\t" + str(pulse)
+            print "Pin", servopin, "\t", pulse
             time.sleep(step)
         #else :
         #  print "Not recording."
     servoname.setPWM(servopin, 0, ruheposition)
-    print "Servo playback stopped:\t" + channelname
+    print "Servo playback stopped:\t", channelname
     #time.sleep(1)
 
 
 # ===========================================================================
 # FUNCTIONS: RECORD
 # ===========================================================================
-def record(projectname, channelname, servopin, path_song):
+def record(mainpath, projectname, channelname, servopin, path_song):
     # Listen to USB port and wite data into file
     global recording  # really necessary
     #global mainpath  # path als global deklarieren
-    global step  # will get lost
-    global servoMin  # will get lost
-    global servoMax  # will get lost
+    global step  # will get lost -> will be timed by default
+    global servoMin  # will get lost -> will be defined in config file per project
+    global servoMax  # will get lost -> will be defined in config file per project
 
     # listen to USB
     with open(mainpath + "/config", 'r') as usbconfig:
@@ -170,9 +169,7 @@ def record(projectname, channelname, servopin, path_song):
     #print usbdevice
 
     #ser = serial.Serial(usbdevice[0], int(usbdevice[1]))
-    print "USB port: '" + usbport + "' @",
-    print baudrate,
-    print "baud"
+    print "USB port:",usbport,"@",baudrate,"baud"
 
     # countdown for slow recordists
     print "Start recording in..."
@@ -210,7 +207,7 @@ def record(projectname, channelname, servopin, path_song):
             record = serial_line[1]
         else:
             record = last_record
-            print ''.join(serial_line) + "\t[interpolated " + str(record) + "]"
+            print ''.join(serial_line),"\t[interpolated",record,"]"
 
         if record.isdigit():
             recordfile.write(record + "\n")  # write 0-1024 in file...
@@ -219,8 +216,7 @@ def record(projectname, channelname, servopin, path_song):
             record = mapvalue(int(record), 0, 1024, servoMin,
                               servoMax)  # map value to sevo values
             servoname.setPWM(int(servopin), 0, record)  # move servo
-            print "\t",
-            print record  # servoMin - servoMax
+            print "\t",record  # servoMin - servoMax
         millis = time.time() - millis
         if millis > step:
             millis = 0
@@ -229,9 +225,9 @@ def record(projectname, channelname, servopin, path_song):
 
     recordfile.close()
     print "Recording ended."
-    print "Recorded file '" + channelname + "' is " + getfilesize(
+    print "Recorded file",channelname,"is",getfilesize(
         os.path.getsize(mainpath + "/projects/" + projectname + "/" +
-                        channelname), 2) + " heavy."
+                        channelname), 2),"heavy."
 
     
 # ===========================================================================
@@ -268,7 +264,7 @@ def record_setup(mainpath, arg):
     # file exists?
     if os.path.isfile(mainpath + "/projects/" + arg[2] + "/" + arg[3]) == True:
         # overwite?
-        print "'" + arg[3] + "' already exists. Replace? [Y/N]"
+        print "'",arg[3],"' already exists. Replace? [Y/N]"
         answer = raw_input().lower()
 
         if answer == "y":
@@ -279,11 +275,11 @@ def record_setup(mainpath, arg):
             # Audiofile-arg submitted?
             if len(arg) > 5:
                 # overwrite and record with playing audio
-                record(arg[2], arg[3], arg[4],
+                record(mainpath, arg[2], arg[3], arg[4],
                        mainpath + "/projects/" + arg[2] + "/audio/" + arg[5])
             else:
                 # overwrite and record without playing audio
-                record(arg[2], arg[3], arg[4], "")
+                record(mainpath, arg[2], arg[3], arg[4], "")
         elif answer == "n":
             print "Abort."
         else:
@@ -291,18 +287,18 @@ def record_setup(mainpath, arg):
     else:
         if len(arg) > 5:
             # record with playing audio
-            record(arg[2], arg[3], arg[4],
+            record(mainpath, arg[2], arg[3], arg[4],
                    mainpath + "/projects/" + arg[2] + "/audio/" + arg[5])
         else:
             # record without playing audio
-            record(arg[2], arg[3], arg[4], "")
+            record(mainpath, arg[2], arg[3], arg[4], "")
 
 
 def singleplay(mainpath, arg):
     # Play audio file and single servo
     print "Play single servo."
-    print "Projektname:\t" + arg[2]
-    #print arg
+    # print "Projektname:\t",arg[2]
+    # print arg
     # play audio thread when set:
     if len(arg) > 4:
         processThread0 = threading.Thread(
@@ -314,9 +310,8 @@ def singleplay(mainpath, arg):
     #  recording = True
     # play servo thread:
     processThread1 = threading.Thread(
-        target=playback_servo, args=(arg[2],
-                                     arg[3], ))
-    # <- note extra ','
+        target=playback_servo, args=(mainpath, arg[2], arg[3], ))
+    # ^ note extra ','
     processThread1.start()
 
 
@@ -351,7 +346,7 @@ def playall(mainpath, arg):
             #print channel
             # play servo thread:
             processThread1 = threading.Thread(
-                target=playback_servo, args=(arg[2],
+                target=playback_servo, args=(mainpath, arg[2],
                                              channel, ))
             # <- note extra ','
             processThread1.start()
@@ -359,7 +354,7 @@ def playall(mainpath, arg):
 
 def listprojects(mainpath):
     # print overview for all pojects including channels/servoPin connection
-    print "List every channel in every project.\n"
+    print "List every channel in every project.\n------------------------------"
 
     # read folder...
     projects = os.listdir(mainpath + "/projects/")
@@ -377,14 +372,14 @@ def listprojects(mainpath):
                     servopin = firstline[1]
                 else:
                     servopin = "?"
-                print "  ↳ " + channel + "\t[Pin " + servopin + "]"
+                print "    ↳",channel,"\t[Pin ",servopin,"]"
             elif channel == "audio":
                 audios = os.listdir(mainpath + "/projects/" + project +
                                     "/audio")
         firstline = []
         for audio in audios:
-            print "  audio: " + audio
-        print ""
+            print "    ↳ audio:\t",audio
+        print "------------------------------"
 
 
 def legal():
