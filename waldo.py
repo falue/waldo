@@ -16,23 +16,6 @@ from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_
 from shutil import copyfile
 from waldo_fn import *
 
-# ===========================================================================
-# MAIN VARIABLES
-# ===========================================================================
-
-# path to main dir
-mainpath = os.path.dirname(os.path.realpath(__file__))
-
-servoname = PWM(0x40)  # Initialise the PWM device using the default address
-servoMin = 250  # Min pulse length out of 4096 (150)
-servoMax = 350  # Max pulse length out of 4096(600)
-ruheposition = servoMin
-
-step = 0.0570  # time.sleep between sevo steps
-# step_recording =  0.0585 # recording takes longer than playback...
-
-recording = False
-
 
 # ===========================================================================
 # MAIN
