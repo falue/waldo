@@ -6,6 +6,9 @@
 # ===========================================================================
 
 import os
+import sys
+from waldo_fn import *
+'''
 # from os import system
 import serial
 import sys
@@ -15,6 +18,10 @@ import time
 from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_Servo_Driver import PWM
 from shutil import copyfile
 from waldo_fn import *
+'''
+
+# path to main dir
+mainpath = os.path.dirname(os.path.realpath(__file__))
 
 
 # ===========================================================================
@@ -35,7 +42,7 @@ if __name__ == '__main__':
         
     elif arg[1] == "-c" or arg[1] == "--connection":
         # SET CONNECTION FOR RECORDING
-        setconnection()
+        setconnection(mainpath)
         
     elif arg[1] == "-r" or arg[1] == "--record":
         # RECORD

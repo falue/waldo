@@ -19,9 +19,6 @@ from waldo_fn import *
 
 # PROBABLY DELETE ALL THIS AFTER GETTING RID OF GLOBALS
 
-# path to main dir
-mainpath = os.path.dirname(os.path.realpath(__file__))
-
 servoname = PWM(0x40)  # Initialise the PWM device using the default address
 servoMin = 250  # Min pulse length out of 4096 (150)
 servoMax = 350  # Max pulse length out of 4096(600)
@@ -158,11 +155,11 @@ def playback_servo(projectname, channelname):
 # ===========================================================================
 def record(projectname, channelname, servopin, path_song):
     # Listen to USB port and wite data into file
-    global recording
-    global mainpath  # path als global deklarieren
-    global step
-    global servoMin
-    global servoMax
+    global recording  # really necessary
+    #global mainpath  # path als global deklarieren
+    global step  # will get lost
+    global servoMin  # will get lost
+    global servoMax  # will get lost
 
     # listen to USB
     with open(mainpath + "/config", 'r') as usbconfig:
