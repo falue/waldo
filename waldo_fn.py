@@ -242,24 +242,23 @@ def helpfile(mainpath):
 
 def setconnection(mainpath):
     # Listen to USB port and write it in config file
-    # if usb...
-    connection = usbdetection().split()
-    usbdevice = connection[0]
-    baudrate = connection[1]
-    usb = open(mainpath + "/config", 'w+')
-    usb.write("usb port:\t" + usbdevice + "\nbaudrate:\t" + baudrate)
-    usb.close()
-    print "New USB connection saved."
-    # if MCP3008...
+    print "Set up USB connection or analog input via MCP3008? [USB/MCP]"
+    answer = raw_input().lower()
+    if answer == "usb":
+        connection = usbdetection().split()
+        usbdevice = connection[0]
+        baudrate = connection[1]
+        usb = open(mainpath + "/config", 'w+')
+        usb.write("usb port:\t" + usbdevice + "\nbaudrate:\t" + baudrate)
+        usb.close()
+        print "New USB connection saved."
+    elif answer == "mcp":
 
 
 def record_setup(mainpath, arg):
     # print arg
     # play audio, listen to USB port, follow with single servo and store data in file
-    if not os.path.exists(mainpath + "/projects/" + arg[2]):
-        os.mkdir(mainpath + "/projects/" + arg[2])
-        os.mkdir(mainpath + "/projects/" + arg[2] + "/audio")
-        os.mkdir(mainpath + "/projects/" + arg[2] + "/trash")
+    newproject(mainpath, arg)
 
     # file exists?
     if os.path.isfile(mainpath + "/projects/" + arg[2] + "/" + arg[3]) == True:
@@ -346,10 +345,20 @@ def playall(mainpath, arg):
             #print channel
             # play servo thread:
             processThread1 = threading.Thread(
-                target=playback_servo, args=(mainpath, arg[2],
-                                             channel, ))
-            # <- note extra ','
+                target=playback_servo, args=(mainpath, arg[2], channel, ))
+            # ^ note extra ','
             processThread1.start()
+
+
+def newproject(mainpath, arg):
+    if not os.path.exists(mainpath + "/projects/" + arg[2]):
+        os.mkdir(mainpath + "/projects/" + arg[2])
+        os.mkdir(mainpath + "/projects/" + arg[2] + "/audio")
+        os.mkdir(mainpath + "/projects/" + arg[2] + "/trash")
+        # os.mknod(mainpath + "/projects/" + arg[2] + "/config")
+        print "Created new project structure."
+    else:
+        print "Project already exists."
 
 
 def listprojects(mainpath):

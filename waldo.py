@@ -46,7 +46,7 @@ if __name__ == '__main__':
         # SET CONNECTION FOR RECORDING
         setconnection(mainpath)
         
-    elif arg[1] == "-r" or arg[1] == "--record":
+    elif arg[1]== "-r" or arg[1] == "--record":
         # RECORD
         record_setup(mainpath, arg)
         
@@ -57,6 +57,10 @@ if __name__ == '__main__':
     elif arg[1] == "-p" or arg[1] == "--play":
         # PLAY ALL
         playall(mainpath, arg)
+        
+    elif arg[1] == "-n" or arg[1] == "--new":
+        # CREATE NEW FOLDER SYSTEM
+        newproject(mainpath, arg)
         
     elif arg[1] == "-ls" or arg[1] == "--list":
         # LIST PROJECTS AND CHANNELS
