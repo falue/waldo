@@ -3,7 +3,8 @@ Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
   Puppeteering tool for animatronics.
 
 Options:
-  -p  --play projectdir  Playback of every servo in projectdir and,
+  -p  --play projectdir [from]
+                         Playback of every servo in projectdir and,
                          if existent, audio.
   -sp --singleplay projectdir channelfilename [audiofilename]
                          Playback of one specific servo though a specific
