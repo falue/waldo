@@ -1,0 +1,2 @@
+Connection:	MCP3008	CLK	18	MISO	23	MOSI	24	CS	25
+Name:	GPIOin:	->	Servopin:	MapMin:	MapMax:	Startpoint:

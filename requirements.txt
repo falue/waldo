@@ -1,1 +1,4 @@
 Adafruit_MotorHAT
+RPi.GPIO
+pyserial
+click

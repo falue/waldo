@@ -11,7 +11,8 @@ Options:
   -r  --record projectdir channelfilename servopin [audiofilename]
                          Record channelfilename for servopin. Optional
                          audioplayback.
-  -c  --connection       Set connection type (USB/MCP3008).
+  -c  --connection projectdir
+                         Set connection type (USB/MCP3008).
   -n  --new              Create new project structure.
   -ls --list             List evey project and every channel with their
                          ServoHAT-pin-associations.
