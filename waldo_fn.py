@@ -11,7 +11,6 @@ import threading
 import time
 from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_Servo_Driver import PWM
 from shutil import copyfile
-from waldo_fn import *
 
 # ===========================================================================
 # MCP3008 CONFIG
