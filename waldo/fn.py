@@ -6,9 +6,16 @@ import threading
 import time
 from shutil import copyfile
 
-import RPi.GPIO as GPIO
 import serial
-from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
+
+# install fakeRPiGPIO when not on a raspberry pi
+import RPi.GPIO as GPIO
+GPIO.VERBOSE = False
+
+try:
+    from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
+except ImportError:
+    from fake import PWM
 
 # ===========================================================================
 # MCP3008 CONFIG
