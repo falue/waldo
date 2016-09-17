@@ -69,15 +69,15 @@ def mapvalue(x, in_min, in_max, out_min, out_max):
 def getfilesize(size, precision=2):
     # human readable filesizes
     # http://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python
-    suffixes = ['b', 'kb', 'mb', 'gb', 'tb']
+    suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
     suffixIndex = 0
     if size < 1024:
         return "%.*f%s" % (precision, size, suffixes[suffixIndex])
     else:
         while size >= 1024 and suffixIndex < 4:
             suffixIndex += 1
-            size = size / 1024.0
-            return "%.*f%s" % (precision, size, suffixes[suffixIndex])
+            size /= 1024.0
+        return "%.*f %s" % (precision, size, suffixes[suffixIndex])
 
 
 def usbdetection():
