@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # ===========================================================================
@@ -10,8 +10,8 @@ import sys
 
 import click
 
-from waldo_fn import (helpfile, setconnection, record_setup, singleplay,
-                      playall, newproject, listprojects, legal, GPIO)
+from fn import (helpfile, setconnection, record_setup, singleplay,
+                playall, newproject, listprojects, legal, GPIO)
 
 
 # path to main dir
