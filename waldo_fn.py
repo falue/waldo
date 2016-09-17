@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-from os import system
+import threading
+import time
+from shutil import copyfile
+
 import RPi.GPIO as GPIO
 import serial
-import sys
-import threading
-# from threading import Thread
-import time
-from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_Servo_Driver import PWM
-from shutil import copyfile
+from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
 
 # ===========================================================================
 # MCP3008 CONFIG
@@ -111,7 +109,7 @@ def playback_audio(audiofile, play_from=0):
     recording = True
     # print "funktion file: "+audiofile
     bashcommando = 'play %s -q trim %s' % (audiofile, play_from)
-    system(bashcommando)  # invoke 'sox' in quiet mode
+    os.system(bashcommando)  # invoke 'sox' in quiet mode
     recording = False
     print "Audio stopped:\t", audiofile
 
