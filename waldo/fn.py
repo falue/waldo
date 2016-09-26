@@ -2,16 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import os
-from os import system
-import RPi.GPIO as GPIO
-import serial
-import sys
 import threading
-# from threading import Thread
 import time
-from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_Servo_Driver import PWM
 from shutil import copyfile
-from waldo_fn import *
+
+import serial
+
+# install fakeRPiGPIO when not on a raspberry pi
+import RPi.GPIO as GPIO
+GPIO.VERBOSE = False
+
+try:
+    from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
+except ImportError:
+    from fake import PWM
 
 # ===========================================================================
 # MCP3008 CONFIG
@@ -65,15 +69,15 @@ def mapvalue(x, in_min, in_max, out_min, out_max):
 def getfilesize(size, precision=2):
     # human readable filesizes
     # http://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python
-    suffixes = ['b', 'kb', 'mb', 'gb', 'tb']
+    suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
     suffixIndex = 0
     if size < 1024:
         return "%.*f%s" % (precision, size, suffixes[suffixIndex])
     else:
         while size >= 1024 and suffixIndex < 4:
             suffixIndex += 1
-            size = size / 1024.0
-            return "%.*f%s" % (precision, size, suffixes[suffixIndex])
+            size /= 1024.0
+        return "%.*f %s" % (precision, size, suffixes[suffixIndex])
 
 
 def usbdetection():
@@ -112,7 +116,7 @@ def playback_audio(audiofile, play_from=0):
     recording = True
     # print "funktion file: "+audiofile
     bashcommando = 'play %s -q trim %s' % (audiofile, play_from)
-    system(bashcommando)  # invoke 'sox' in quiet mode
+    os.system(bashcommando)  # invoke 'sox' in quiet mode
     recording = False
     print "Audio stopped:\t", audiofile
 
