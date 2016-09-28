@@ -118,10 +118,14 @@ def playback_audio(audiofile, play_from=0):
     global recording
     recording = True
     # print "funktion file: "+audiofile
-    bashcommando = 'play %s -q trim %s' % (audiofile, play_from)
+    if play_from > 0:
+        bashcommando = 'play %s -q trim %s' % (audiofile, play_from)
+    else:
+        bashcommando = 'play %s -q' % (audiofile)
     system(bashcommando)  # invoke 'sox' in quiet mode
     recording = False
     print "Audio stopped:\t", audiofile
+
 
 '''
 # doesn't work because servoname.setPWMFreq(60) isn't set...?
