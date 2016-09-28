@@ -36,20 +36,27 @@ GPIO.setup(CS, GPIO.OUT)
 #mcp_connection = "CLK\t"+CLK+"\tMISO\t"+MISO+"\tMOSI\t"+MOSI+"\tCS\t"+CS
 mcp_connection = "CLK\t%d\tMISO\t%d\tMOSI\t%d\tCS\t%d" % (CLK, MISO, MOSI, CS)
 
-
 # ===========================================================================
 # MAIN VARIABLES
 # ===========================================================================
 
 # PROBABLY DELETE ALL THIS AFTER GETTING RID OF GLOBALS
 
-servoname = PWM(0x40)  # ServoHat o. 1
-servoMin = 250  # Min pulse length out of 4096 (150)
-servoMax = 350  # Max pulse length out of 4096(600)
+servoname = PWM(0x40)  # ServoHat no. 1
+servoMin = 150  # Min pulse length out of 4096 (150)
+servoMax = 275 # Max pulse length out of 4096(600)
 # startposition = servoMin # defined in function by pulse[1]
 
-step = 0.0570  # time.sleep between sevo steps
-# step_recording =  0.0585 # recording takes longer than playback...
+# count_servo = 16  # just for step correction?! -> read channel =>count_servo
+
+step = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16*0.0022=0.0352)
+step_playback = 0.032 # 1 servo @ 0.0022 # step - float(count_servo)/0.8 * 0.0022 # orig 0.0178 # recording takes longer than playback...  step - 0.00155
+
+# @ 1  servo:  0.0022
+# @ 3  servos: 0.032
+# @ 8  servos: 0.0504~
+# @ 16 servos: 0.05162
+
 
 recording = False
 
@@ -132,8 +139,8 @@ def setServoPulse(channel, pulse):  # copypasta-überbleibsel...?
 def playback_servo(mainpath, projectname, channelname, play_from=0):
     # Playback single servo
     # global mainpath
-    global step # wichtig
-    global recording # wichtig
+    global step_playback  # wichtig
+    global recording  # wichtig
     #print servopin
 
     # Open files with pulse data
