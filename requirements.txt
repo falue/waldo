@@ -1,4 +1,5 @@
 Adafruit_MotorHAT
-RPi.GPIO
-pyserial
 click
+pyserial
+pytest
+RPi.GPIO
