@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # ===========================================================================
@@ -7,19 +7,12 @@
 
 import os
 import sys
-from waldo_fn import *
+
 import click
-'''
-# from os import system
-import serial
-import sys
-import threading
-# from threading import Thread
-import time
-from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_Servo_Driver import PWM
-from shutil import copyfile
-from waldo_fn import *
-'''
+
+from fn import (helpfile, setconnection, record_setup, singleplay,
+                playall, newproject, listprojects, legal, GPIO)
+
 
 # path to main dir
 mainpath = os.path.dirname(os.path.realpath(__file__))

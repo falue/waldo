@@ -1,2 +1,4 @@
 *.pyc
 projects
+.cache
+.idea
