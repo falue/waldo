@@ -9,7 +9,8 @@ import sys
 import threading
 # from threading import Thread
 import time
-from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM # from Adafruit_PWM_Servo_Driver import PWM
+from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
+# from Adafruit_PWM_Servo_Driver import PWM
 from shutil import copyfile
 from waldo_fn import *
 
@@ -98,12 +99,12 @@ def usbdetection():
             usbdevice = "".join(
                 set(os.popen("ls /dev/tty*").read().strip().split("\n"))
                 .symmetric_difference(usbdevices))
-            print "USB device detected; yours is @",usbdevice,"."
+            print "USB device detected; yours is @", usbdevice, "."
             print "Set baudrate:"
             print "[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & [return]"
             baudrate = raw_input()
             usb_detected = True
-            return usbdevice + " " + baudrate
+            return "%s %s" % (usbdevice, baudrate)
         else:
             usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
             # print len(usbdevices)
@@ -140,6 +141,7 @@ def setServoPulse(channel, pulse):  # copypasta-überbleibsel...?
     servoname.setPWM(channel, 0, pulse)
     '''
 
+
 def playback_servo(mainpath, projectname, channelname, play_from=0):
     # Playback single servo
     # global mainpath
@@ -148,8 +150,9 @@ def playback_servo(mainpath, projectname, channelname, play_from=0):
     #print servopin
 
     # Open files with pulse data
-    pulses_list = open(mainpath + "/projects/" + projectname + "/" +
-                       channelname, "r")  # open to read
+    pulses_list = open(
+        mainpath + "/projects/" + projectname + "/" + channelname,
+        "r")  # open to read
     pulses = []
 
     # fill list with file
@@ -163,7 +166,8 @@ def playback_servo(mainpath, projectname, channelname, play_from=0):
 
     pulses_list.close()
     startposition = pulses[1]
-    print "Channelname:\t%s\tServopin:\t%s\tStat @\t%s" %(channelname, servopin, play_from)
+    print "Channelname:\t%s\tServopin:\t%s\tStat @\t%s" % (channelname,
+                                                           servopin, play_from)
 
     # getservopin = pulses_list[0] #.split("\t")
     # servopin = getservopin[1]
@@ -172,11 +176,12 @@ def playback_servo(mainpath, projectname, channelname, play_from=0):
     # print pulses
 
     servoname.setPWMFreq(60)  # Set frequency to 60 Hz
-    
-    play_from_index = int(1.0/step*float(play_from)) # steps to n seconds
-    # Move servo
-    print "Servo start:\t%s frames, start @ %s. frame" % (len(pulses), play_from_index)
 
+    play_from_index = int(1.0 / step * float(play_from))  # steps to n seconds
+    # Move servo
+    print "Servo start:\t%s frames, start @ %s. frame" % (len(pulses),
+                                                          play_from_index)
+    # cut off beginning instants of list
     if play_from_index > 0:
         pulses = pulses[play_from_index:]
 
@@ -185,13 +190,14 @@ def playback_servo(mainpath, projectname, channelname, play_from=0):
             servoname.setPWM(servopin, 0, pulse)
             # setServoPulse(servopin, pulse)
             print "Pin %d\t%d" % (servopin, pulse)
-            time.sleep(step)
+            time.sleep(step_playback)  # compensation fo slow recording...
         # else :
-         # print "Not recording."
-
-    servoname.setPWM(servopin, 0, startposition) # <---- erster pulse = ruhepos.?
+        # print "Not recording."
+    servoname.setPWM(servopin, 0,
+                     startposition)  # <---- erster pulse = ruhepos.?
     # setServoPulse(servopin, startposition)
-    print "Servo playback stopped: %s\tStart position: %d" % (channelname, startposition)
+    print "Servo playback stopped: %s\tStart position: %d" % (channelname,
+                                                              startposition)
     # Set GPIO to default
     GPIO.cleanup()
 
@@ -207,7 +213,8 @@ def record(mainpath, projectname, channelname, servopin, path_song):
     global servoMax  # will get lost -> will be defined in config file per project
 
     # listen to USB o mcp3008?
-    with open(mainpath + "/projects/"+projectname+"/config", 'r') as config:
+    with open(mainpath + "/projects/" + projectname + "/config",
+              'r') as config:
         #connection = usbconfig.read().replace('\n', '\t')
         config_data = config.read()
     # print config_data
@@ -219,14 +226,14 @@ def record(mainpath, projectname, channelname, servopin, path_song):
         baudrate = int(connection[4])
         #print usbdevice
         #ser = serial.Serial(usbdevice[0], int(usbdevice[1]))
-        print "USB port:",usbport,"@",baudrate,"baud"
+        print "USB port:", usbport, "@", baudrate, "baud"
     else:
         CLK = int(connection[3])
         MISO = int(connection[5])
         MOSI = int(connection[7])
         CS = int(connection[9])
         servoname.setPWMFreq(60)
-        print "Connection via MCP3008 (%d %d %d %d)" % (CLK,MISO,MOSI,CS)
+        print "Connection via MCP3008 (%d %d %d %d)" % (CLK, MISO, MOSI, CS)
 
     # countdown for slow recordists
     print "Start recording in..."
@@ -253,7 +260,7 @@ def record(mainpath, projectname, channelname, servopin, path_song):
         mainpath + "/projects/" + projectname + "/" + channelname, 'w+')
     recordfile.write("Pin:\t" + servopin + "\n")
     last_record = "0"
-    
+
     while recording == True:
         millis = time.time()
 
@@ -274,7 +281,7 @@ def record(mainpath, projectname, channelname, servopin, path_song):
         servoname.setPWM(int(servopin), 0, record)  # move servo
         # setServoPulse(int(servopin), record)
         print "\t%s" % record  # servoMin <-> servoMax
-            
+
         millis = time.time() - millis
         if millis > step:
             millis = 0
@@ -283,7 +290,7 @@ def record(mainpath, projectname, channelname, servopin, path_song):
 
     recordfile.close()
     if connection[1] == "MCP":
-       GPIO.cleanup()
+        GPIO.cleanup()
     print "Recording ended."
     heavyness = getfilesize(
         os.path.getsize(mainpath + "/projects/" + projectname + "/" +
@@ -300,10 +307,11 @@ def read_usb(usbport, baudrate):
         record = serial_line[1]
     else:
         record = last_record
-        print ''.join(serial_line),"\t[interpolated",record,"]"
+        print ''.join(serial_line), "\t[interpolated", record, "]"
     if record.isdigit():
         return record
     last_record = record
+
 
 '''
 def read_mcp(channel):
@@ -312,43 +320,45 @@ def read_mcp(channel):
     return record
 '''
 
+
 def read_mcp(adcnum, clockpin, mosipin, misopin, cspin):
-        if ((adcnum > 7) or (adcnum < 0)):
-                return -1
-        GPIO.output(cspin, True)
+    if ((adcnum > 7) or (adcnum < 0)):
+        return -1
+    GPIO.output(cspin, True)
 
-        GPIO.output(clockpin, False)  # start clock low
-        GPIO.output(cspin, False)     # bring CS low
+    GPIO.output(clockpin, False)  # start clock low
+    GPIO.output(cspin, False)  # bring CS low
 
-        commandout = adcnum
-        commandout |= 0x18  # start bit + single-ended bit
-        commandout <<= 3    # we only need to send 5 bits here
-        for i in range(5):
-                if (commandout & 0x80):
-                        GPIO.output(mosipin, True)
-                else:
-                        GPIO.output(mosipin, False)
-                commandout <<= 1
-                GPIO.output(clockpin, True)
-                GPIO.output(clockpin, False)
+    commandout = adcnum
+    commandout |= 0x18  # start bit + single-ended bit
+    commandout <<= 3  # we only need to send 5 bits here
+    for i in range(5):
+        if (commandout & 0x80):
+            GPIO.output(mosipin, True)
+        else:
+            GPIO.output(mosipin, False)
+        commandout <<= 1
+        GPIO.output(clockpin, True)
+        GPIO.output(clockpin, False)
 
-        adcout = 0
-        # read in one empty bit, one null bit and 10 ADC bits
-        for i in range(12):
-                GPIO.output(clockpin, True)
-                GPIO.output(clockpin, False)
-                adcout <<= 1
-                if (GPIO.input(misopin)):
-                        adcout |= 0x1
+    adcout = 0
+    # read in one empty bit, one null bit and 10 ADC bits
+    for i in range(12):
+        GPIO.output(clockpin, True)
+        GPIO.output(clockpin, False)
+        adcout <<= 1
+        if (GPIO.input(misopin)):
+            adcout |= 0x1
 
-        GPIO.output(cspin, True)
-        
-        adcout >>= 1       # first bit is 'null' so drop it
-        return adcout
+    GPIO.output(cspin, True)
+
+    adcout >>= 1  # first bit is 'null' so drop it
+    return adcout
 
 # ===========================================================================
 # FUNCTIONS: ARGUMENTS
 # ===========================================================================
+
 
 def helpfile(mainpath):
     # Read/print help file
@@ -356,13 +366,15 @@ def helpfile(mainpath):
         print helpfile.read()  # .replace('\n', '')
     helpfile.close()
 
+
 def setconnection(mainpath, project):
     global mcp_connection
     # Listen to USB port and write it in config file
     print "Set up connection with USB or analog input via MCP3008? [USB/MCP]"
     answer = raw_input().lower()
-    
-    config_list = open(mainpath + "/projects/"+ project+"/config", "r")  # open to read
+
+    config_list = open(mainpath + "/projects/" + project + "/config",
+                       "r")  # open to read
     config_data = []
 
     # fill list with file
@@ -370,8 +382,8 @@ def setconnection(mainpath, project):
         config_data.append(line.strip())
     # print config_data
     if len(config_data) <= 2:
-        config_data = ["",""]
-        
+        config_data = ["", ""]
+
     if answer == "usb":
         print "Connection set: USB"
         connection = usbdetection().split()
@@ -381,12 +393,13 @@ def setconnection(mainpath, project):
         print "New connection saved."
     elif answer == "mcp":
         print "Connection set: MCP3008 %s" % (mcp_connection)
-        config_data[0] = "Connection:\tMCP3008\t"+mcp_connection
+        config_data[0] = "Connection:\tMCP3008\t" + mcp_connection
         print "New connection saved."
     else:
         print "Either enter USB or MCP, pretty please."
-    config_data[1] = "Name:\tGPIOin:\t->\tServopin:\tMapMin:\tMapMax:\tStartpoint:"
-    configfile = open(mainpath + "/projects/"+ project+"/config", 'w+')
+    config_data[
+        1] = "Name:\tGPIOin:\t->\tServopin:\tMapMin:\tMapMax:\tStartpoint:"
+    configfile = open(mainpath + "/projects/" + project + "/config", 'w+')
     configfile.write("\n".join(config_data))
     configfile.close()
 
@@ -432,6 +445,7 @@ def record_setup(mainpath, arg):
 def singleplay(mainpath, arg):
     # Play audio file and single servo
     print "Play single servo."
+    global recording
     # print "Projektname:\t",arg[2]
     # print arg
     # play audio thread when set:
@@ -441,11 +455,14 @@ def singleplay(mainpath, arg):
             args=(mainpath + "/projects/" + arg[2] + "/audio/" + arg[4], ))
         # <- note extra ','
         processThread0.start()
-    #else :
-    #  recording = True
+    else :
+      recording = True # if no audio
+   
     # play servo thread:
     processThread1 = threading.Thread(
-        target=playback_servo, args=(mainpath, arg[2], arg[3], ))
+        target=playback_servo, args=(mainpath,
+                                     arg[2],
+                                     arg[3], ))
     # ^ note extra ','
     processThread1.start()
 
@@ -458,16 +475,16 @@ def playall(mainpath, arg):
         play_from = arg[3]
     else:
         play_from = 0
-        
+
     print "Play everything; start @ %ss" % play_from
-        
+
     # play audio thread when set:
     audiofile = os.listdir(mainpath + "/projects/" + arg[2] + "/audio/")
     if len(audiofile) > 0:
         processThread0 = threading.Thread(
             target=playback_audio,
-            args=(
-                mainpath + "/projects/" + arg[2] + "/audio/" + audiofile[0], play_from, ))
+            args=(mainpath + "/projects/" + arg[2] + "/audio/" + audiofile[0],
+                  play_from, ))
         # <- note extra ','
         processThread0.start()
 
@@ -487,7 +504,11 @@ def playall(mainpath, arg):
             #print channel
             # play servo thread:
             processThread1 = threading.Thread(
-                target=playback_servo, args=(mainpath, arg[2], channel, play_from, ))
+                target=playback_servo,
+                args=(mainpath,
+                      arg[2],
+                      channel,
+                      play_from, ))
             # ^ note extra ','
             processThread1.start()
 
