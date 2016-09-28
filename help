@@ -3,9 +3,9 @@ Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
   Puppeteering tool for animatronics.
 
 Options:
-  -p  --play projectdir [from]
+  -p  --play projectdir [start]
                          Playback of every servo in projectdir and,
-                         if existent, audio.
+                         if existent, audio, fom startpoint [start]
   -sp --singleplay projectdir channelfilename [audiofilename]
                          Playback of one specific servo though a specific
                          servo. Optional audioplayback.
@@ -14,7 +14,7 @@ Options:
                          audioplayback.
   -c  --connection projectdir
                          Set connection type (USB/MCP3008).
-  -n  --new              Create new project structure.
+  -n  --new projectname	 Create new project structure.
   -ls --list             List evey project and every channel with their
                          ServoHAT-pin-associations.
   -cc --copy             Show copyright infos.
