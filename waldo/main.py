@@ -8,14 +8,14 @@
 import os
 import sys
 
-import click
 
-from fn import (helpfile, setconnection, record_setup, singleplay,
-                playall, newproject, listprojects, legal, GPIO)
+from fn import (helpfile, set_connection, record_setup, singleplay,
+                play_all, newproject, listprojects, legal, GPIO)
 
 
 # path to main dir
-mainpath = os.path.dirname(os.path.realpath(__file__))
+
+
 
 # ===========================================================================
 # MAIN
@@ -25,46 +25,46 @@ mainpath = os.path.dirname(os.path.realpath(__file__))
 if __name__ == '__main__':
     # keyboard interrupt fallback
     try:
-        # get arguments from bash command line
-        arg = []
-        for arguments in sys.argv:
-            arg.append(arguments)
-
-        if arg[1] == "-h" or arg[1] == "--help":
+        if sys.argv[1] == "-h" or sys.argv[1] == "--help":
             # HELP
-            helpfile(mainpath)
+            helpfile()
 
-        elif arg[1] == "-c" or arg[1] == "--connection":
+        elif sys.argv[1] == "-c" or sys.argv[1] == "--connection":
             # SET CONNECTION FOR RECORDING
-            setconnection(mainpath, arg[2])
+            set_connection(sys.argv[2])
 
-        elif arg[1] == "-r" or arg[1] == "--record":
+        elif sys.argv[1] == "-r" or sys.argv[1] == "--record":
             # RECORD
-            record_setup(mainpath, arg)
+            record_setup(sys.argv)
 
-        elif arg[1] == "-sp" or arg[1] == "--singleplay":
+        elif sys.argv[1] == "-sp" or sys.argv[1] == "--singleplay":
             # SINGLE PLAY
-            singleplay(mainpath, arg)
+            singleplay(sys.argv)
 
-        elif arg[1] == "-p" or arg[1] == "--play":
+        elif sys.argv[1] == "-p" or sys.argv[1] == "--play":
             # PLAY ALL
-            playall(mainpath, arg)
+            try:
+                play_all(sys.argv[2], sys.argv[3])
+            except IndexError:
+                play_all(sys.argv[2])
 
-        elif arg[1] == "-n" or arg[1] == "--new":
+        elif sys.argv[1] == "-n" or sys.argv[1] == "--new":
             # CREATE NEW FOLDER SYSTEM
-            newproject(mainpath, arg)
+            newproject(sys.argv[2])
 
-        elif arg[1] == "-ls" or arg[1] == "--list":
+        elif sys.argv[1] == "-ls" or sys.argv[1] == "--list":
             # LIST PROJECTS AND CHANNELS
-            listprojects(mainpath)
+            listprojects()
 
-        elif arg[1] == "-cc" or arg[1] == "--copy":
+        elif sys.argv[1] == "-cc" or sys.argv[1] == "--copy":
             # COPYRIGHT
             legal()
 
         else:
-            # SAY WHAT?
-            print "How did you do that? Type 'waldo.py -h' for help."
+            helpfile()
+
+    # except IndexError:
+       # helpfile()
 
     except KeyboardInterrupt:
         print "\nExit by user."
