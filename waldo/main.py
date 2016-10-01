@@ -9,7 +9,7 @@ import os
 import sys
 
 
-from fn import (helpfile, set_connection, record_setup, singleplay,
+from fn import (helpfile, set_connection, set_servo, record_setup, singleplay,
                 play_all, newproject, listprojects, legal, GPIO)
 
 
@@ -36,6 +36,10 @@ if __name__ == '__main__':
         elif sys.argv[1] == "-r" or sys.argv[1] == "--record":
             # RECORD
             record_setup(sys.argv)
+
+        elif sys.argv[1] == "-ss" or sys.argv[1] == "--setservo":
+            # RECORD
+            set_servo(sys.argv[2], sys.argv[3])
 
         elif sys.argv[1] == "-sp" or sys.argv[1] == "--singleplay":
             # SINGLE PLAY

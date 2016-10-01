@@ -9,9 +9,11 @@ Options:
   -sp --singleplay projectname channelfilename [audiofilename]
                          Playback of one specific servo though a specific
                          servo. Optional audioplayback.
-  -r  --record projectname channelfilename servopin [audiofilename]
-                         Record channelfilename for servopin. Optional
-                         audioplayback.
+  -r  --record projectname channelfilename [audiofilename]
+                         Record channelfilename. Optional audioplayback.
+  -ss --setservo projectname channelname
+			 Set config file for project - MCPin, servo_pin,
+			 map_min, map_max, start_pos
   -c  --connection projectname
                          Set connection type (USB/MCP3008).
   -n  --new projectname	 Create new project structure.
