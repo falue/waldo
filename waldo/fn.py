@@ -415,7 +415,7 @@ def set_connection(project):
         set_connection(project)
         return
 
-    config_data[1] = "Name:\tGPIOin:\t->\tServopin:\tMapMin:\tMapMax:\tStartpoint:"
+    config_data[1] = "Name:\tGPIOin:\t->\tServopin:\tMapMin:\tMapMax:\tStartpoint:\n"
 
     config_path = os.path.join(PROJECT_PATH, project, 'config')
     with open(config_path, 'w+') as c:
