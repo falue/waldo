@@ -8,6 +8,7 @@ import time
 from shutil import copyfile
 
 import serial
+from utils import (read_config, write_config)
 
 # install fakeRPiGPIO when not on a raspberry pi
 import RPi.GPIO as GPIO
@@ -51,7 +52,9 @@ MCP_CONNECTION = "CLK\t%d\tMISO\t%d\tMOSI\t%d\tCS\t%d" % (CLK, MISO, MOSI, CS)
 # PROBABLY DELETE ALL THIS AFTER GETTING RID OF GLOBALS
 
 # set project folder path
-PROJECT_PATH = os.path.expanduser('~/waldo_projects')
+preferences = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+PROJECT_PATH = os.path.expanduser(preferences["PROJECT_PATH"])
+# PROJECT_PATH = os.path.expanduser('~/waldo_projects')
 
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
