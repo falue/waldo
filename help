@@ -3,9 +3,9 @@ Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
   Puppeteering tool for animatronics.
 
 Options:
-  -p  --play projectname [start]
+  -p  --play projectname [start_from]
                          Playback of every servo in projectname and,
-                         if existent, audio, fom startpoint [start]
+                         if existent, audio, from startpoint [start_from]
   -sp --singleplay projectname channelfilename [audiofilename]
                          Playback of one specific servo though a specific
                          servo. Optional audioplayback.

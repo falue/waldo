@@ -30,20 +30,19 @@ except ImportError:
 GPIO.setmode(GPIO.BCM)
 
 # standard mcp3008 connection pins
-CLK = 18
-MISO = 23
-MOSI = 24
-CS = 25
+MCP_CONNECTION = {'CLK': 18,
+                  'MISO': 23,
+                  'MOSI': 24,
+                  'CS': 25
+                  }
+
 
 # set up the SPI interface pins
-GPIO.setup(MOSI, GPIO.OUT)
-GPIO.setup(MISO, GPIO.IN)
-GPIO.setup(CLK, GPIO.OUT)
-GPIO.setup(CS, GPIO.OUT)
+GPIO.setup(MCP_CONNECTION['MOSI'], GPIO.OUT)
+GPIO.setup(MCP_CONNECTION['MISO'], GPIO.IN)
+GPIO.setup(MCP_CONNECTION['CLK'], GPIO.OUT)
+GPIO.setup(MCP_CONNECTION['CS'], GPIO.OUT)
 # GPIO.setwarnings(False) # doesn't work
-
-# MCP_CONNECTION = "CLK\t"+CLK+"\tMISO\t"+MISO+"\tMOSI\t"+MOSI+"\tCS\t"+CS
-MCP_CONNECTION = "CLK\t%d\tMISO\t%d\tMOSI\t%d\tCS\t%d" % (CLK, MISO, MOSI, CS)
 
 # ===========================================================================
 # MAIN VARIABLES
@@ -237,24 +236,17 @@ def record(project, channel, servopin, audiofile):
     global RECORDING  # really totally necessary
 
     # listen to USB o mcp3008?
-    with open(os.path.join(PROJECT_PATH, project, "config"), 'r') as config:
-        # connection = usbconfig.read().replace('\n', '\t')
-        config_data = config.read()
-    # print config_data
-    config_rows = config_data.split("\n")
-    connection = config_rows[0].split("\t")
-    # print connection
-    if connection[1] == "USB":
-        usbport = connection[2]
-        baudrate = int(connection[4])
-        #print usbdevice
-        #ser = serial.Serial(usbdevice[0], int(usbdevice[1]))
-        print "USB port:", usbport, "@", baudrate, "baud"
+    config = read_config(os.path.join(PROJECT_PATH, project))
+
+    if(config['connection'] == "usb"):
+        usb_port = config['device']
+        baudrate = config['baudrate']
+        print "USB port: %s @ %d baud" % (usb_port, baudrate)
     else:
-        CLK = int(connection[3])
-        MISO = int(connection[5])
-        MOSI = int(connection[7])
-        CS = int(connection[9])
+        CLK = config['CLK']
+        MOSI = config['MOSI']
+        MISO = config['MISO']
+        CS = config['CS']
         SERVO_NAME.setPWMFreq(60)
         print "Connection via MCP3008 (%d %d %d %d)" % (CLK, MISO, MOSI, CS)
 
@@ -288,8 +280,8 @@ def record(project, channel, servopin, audiofile):
         millis = time.time()
 
         # python: listen to usb port or MCP3008...
-        if connection[1] == "USB":
-            record = read_usb(usbport, baudrate)
+        if config['connection'] == "usb":
+            record = read_usb(usb_port, baudrate)
         else:
             record = read_mcp(0, CLK, MOSI, MISO, CS)
             #                 ^ channel 0-7 on Chip MCP3008!
@@ -312,7 +304,7 @@ def record(project, channel, servopin, audiofile):
         time.sleep(STEP - millis)
 
     recordfile.close()
-    if connection[1] == "MCP":
+    if config['connection'] == "MCP":
         GPIO.cleanup()
     print "Recording ended."
     heavyness = getfilesize(os.path.getsize(os.path.join(PROJECT_PATH, project, channel)), 2)
@@ -402,27 +394,30 @@ def set_connection(project):
         config_data = ["", ""]
 
     answer = raw_input("Set up connection with USB or analog input via MCP3008? [USB/MCP] ").lower()
+
     if answer == "usb":
         print "Connection set: USB"
         connection = usbdetection().split()
-        usbdevice = connection[0]
-        baudrate = connection[1]
-        config_data[0] = "Connection:\tUSB\t%s\t@\t%s" % (usbdevice, baudrate)
-        print "New connection saved."
+        config = {'connection': 'usb',
+                  'device': connection[0],
+                  'baudrate': int(connection[1])
+                  }
     elif answer == "mcp":
-        print "Connection set: MCP3008 %s" % MCP_CONNECTION
-        config_data[0] = "Connection:\tMCP3008\t" + MCP_CONNECTION
-        print "New connection saved."
+        print "Connection set: MCP3008 %s" % '-'.join(MCP_CONNECTION)
+        config = {'connection': 'mcp3008',
+                  'CLK': MCP_CONNECTION['CLK'],
+                  'MISO': MCP_CONNECTION['MISO'],
+                  'MOSI': MCP_CONNECTION['MOSI'],
+                  'CS': MCP_CONNECTION['CS']
+                  }
     else:
         print "Either enter USB or MCP, pretty please."
         set_connection(project)
         return
 
-    config_data[1] = "Name:\tGPIOin:\t->\tServopin:\tMapMin:\tMapMax:\tStartpoint:\n"
-
-    config_path = os.path.join(PROJECT_PATH, project, 'config')
-    with open(config_path, 'w+') as c:
-        c.write("\n".join(config_data))
+    path = os.path.join(PROJECT_PATH, project)
+    write_config(path, config)
+    print "New connection saved."
 
 
 def record_setup(arg):
@@ -521,7 +516,7 @@ def play_all(project, play_from=0):
 
     # 'detect' servo pulse files
     for channel in playchannels:
-        if channel != "audio" and channel != "trash" and channel != "config":
+        if channel != "audio" and channel != "trash" and channel != "config" and channel != ".AppleDouble":
             # with open(mainpath+"/projects/"+project+"/"+channel, "r") as f :
             #  firstline = f.readline().strip().split("\t")
             # servopin = firstline[1]
