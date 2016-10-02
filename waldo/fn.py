@@ -36,19 +36,15 @@ MCP_CONNECTION = {'CLK': 18,
                   'CS': 25
                   }
 
-
 # set up the SPI interface pins
 GPIO.setup(MCP_CONNECTION['MOSI'], GPIO.OUT)
 GPIO.setup(MCP_CONNECTION['MISO'], GPIO.IN)
 GPIO.setup(MCP_CONNECTION['CLK'], GPIO.OUT)
 GPIO.setup(MCP_CONNECTION['CS'], GPIO.OUT)
-# GPIO.setwarnings(False) # doesn't work
 
 # ===========================================================================
 # MAIN VARIABLES
 # ===========================================================================
-
-# PROBABLY DELETE ALL THIS AFTER GETTING RID OF GLOBALS
 
 # set project folder path
 preferences = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
@@ -58,26 +54,17 @@ PROJECT_PATH = os.path.expanduser(preferences["PROJECT_PATH"])
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
 
-SERVO_NAME = PWM(0x40)  # ServoHat no. 1
+SERVO_NAME = PWM(0x40)  # ServoHat no. 1 (Servo hat no. 2: PWM(0x41) & solder bridge A0)
 
-# count_servo = 16  # just for step correction?! -> read channel =>count_servo
+STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 = 0.0352)
+STEP_PLAYBACK = 0.033 # 1 servo @ 0.0022 # step - float(count_servo)/0.8 * 0.0022 # orig 0.0178 # recording takes longer than playback...  step - 0.00155
 
-STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16*0.0022=0.0352)
-STEP_PLAYBACK = 0.032 # 1 servo @ 0.0022 # step - float(count_servo)/0.8 * 0.0022 # orig 0.0178 # recording takes longer than playback...  step - 0.00155
-
-# @ 1  servo:  0.0022
-# @ 3  servos: 0.032
-# @ 8  servos: 0.0504~
-# @ 16 servos: 0.05162
-
+# @ 1  servo:  STEP_PLAYBACK = 0.0022
+# @ 3  servos: STEP_PLAYBACK = 0.033
+# @ 8  servos: STEP_PLAYBACK = 0.0504~
+# @ 16 servos: STEP_PLAYBACK = 0.05162
 
 RECORDING = False
-
-
-# ===========================================================================
-# FUNCTIONS: GENERAL
-# ===========================================================================
-
 
 
 # ===========================================================================
@@ -138,7 +125,7 @@ def playback_servo(project, channel, play_from=0):
 
     SERVO_NAME.setPWMFreq(60)  # Set frequency to 60 Hz
 
-    play_from_index = int(1.0 / STEP * float(play_from))  # steps to n seconds
+    play_from_index = int(1.0 / STEP_PLAYBACK * float(play_from))  # steps to n seconds
     # Move servo
     print "Servo start:\t%s frames, start @ %s. frame" % (len(pulses),
                                                           play_from_index)
@@ -386,11 +373,11 @@ def set_servo(project, channel):
     :param servo_pin:
     :return:
     """
-    mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7]\nDefault: 0 " % channel) or 0)
+    mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7] (Default: 0)\n" % channel) or 0)
     servo_pin = int(raw_input("Set servo pin out pin [0-15]\n"))
     map_min = int(raw_input("Set minimum position [150-600]\n"))
     map_max = int(raw_input("Set maximum position [150-600]\n"))
-    start_pos = int(raw_input("Set start position [150-600]\nDefault: %s " % map_min) or map_min)
+    start_pos = int(raw_input("Set start position [150-600] (Default: %s)\n" % map_min) or map_min)
 
     config = read_config(os.path.join(PROJECT_PATH, project))
     # if not config.has_key('channels'):
@@ -551,6 +538,7 @@ def listprojects():
 
     for project in projects:
         ch = ""
+        error = ""
         disturbence = []
         play_channels = read_config(os.path.join(PROJECT_PATH, project))
         # print play_channels
@@ -559,8 +547,6 @@ def listprojects():
             if data['servo_pin'] in disturbence:
                 error = "ERROR: MULTIPLE USE OF SERVOPIN %s" % data['servo_pin']
             disturbence = {data['servo_pin']}
-
-
 
             dof_prepend = mapvalue(data['map_min'], 150, 600, 0, servo_dof_deg)
             dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 600, 0, servo_dof_deg)
@@ -583,7 +569,6 @@ def listprojects():
                   "▒" * mapvalue(dof_append, 0, servo_dof_deg, 0, 53) +\
                   "\n"
         print "%s:\t%s\n%s" % (project, error, ch)
-        error = ""
         """
         with open(os.path.join(PROJECT_PATH, project, 'config'), 'r') as myfile:
             data = myfile.read()
