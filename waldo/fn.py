@@ -386,13 +386,16 @@ def set_servo(project, channel):
     :param servo_pin:
     :return:
     """
-    mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7]\n" % channel))
+    mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7]\nDefault: 0 " % channel) or 0)
     servo_pin = int(raw_input("Set servo pin out pin [0-15]\n"))
     map_min = int(raw_input("Set minimum position [150-600]\n"))
     map_max = int(raw_input("Set maximum position [150-600]\n"))
-    start_pos = int(raw_input("Set start position [150-600]\n"))
+    start_pos = int(raw_input("Set start position [150-600]\nDefault: %s " % map_min) or map_min)
 
     config = read_config(os.path.join(PROJECT_PATH, project))
+    # if not config.has_key('channels'):
+    if 'channels' not in config:
+            config.update({'channels': {}})
 
     config['channels'].update({channel: {
                 'mcp_in': mcp_in,
@@ -440,6 +443,7 @@ def record_setup(arg):
             print "[Y/N] murmel, murmel"
             record_setup(arg)
             return # sure?
+
     else:
         set_servo(project, channel)
 
@@ -536,7 +540,8 @@ def listprojects():
     :return:
     """
 
-    print "List every channel in every project and point out difficulties.\n\n------------------------------------------------------------"
+    print "List every channel in every project and point out difficulties.\n\n" \
+          "------------------------------------------------------------"
 
     # read folder...
     # projects = os.listdir(PROJECT_PATH) # os.path.join()
@@ -570,7 +575,8 @@ def listprojects():
                 dof_append_temp = dof_append
                 dof_prepend = servo_dof_deg-dof_append_temp
                 dof_append = servo_dof_deg-dof_prepend_temp
-            #ch += "\t%s + %s + %s = %s (%s)\n" % (dof_prepend, dof, dof_append, dof_prepend+dof+dof_append, servo_dof_deg)
+            #ch += "\t%s + %s + %s = %s (%s)\n" % (dof_prepend, dof,
+            # dof_append, dof_prepend+dof+dof_append, servo_dof_deg)
             ch += "\t" +\
                   "▒" * mapvalue(dof_prepend, 0, servo_dof_deg, 0, 53) +\
                   "█" * mapvalue(dof, 0, servo_dof_deg, 0, 51) +\
@@ -585,31 +591,6 @@ def listprojects():
         """
         print "------------------------------------------------------------"
 
-
-    """
-    filelist = os.listdir(PROJECT_PATH)
-    projects = [a for a in filelist if not a.startswith(".")]
-
-    for project in projects:
-        print "%s:" % project
-        playchannels = os.listdir(os.path.join(PROJECT_PATH, project))
-        for channel in playchannels:
-            # print "\t->"+channel
-            if channel != "audio" and channel != "trash" and not channel.startswith("."):
-                with open(os.path.join(PROJECT_PATH, project, channel), "r") as f:
-                    firstline = f.readline().strip().split("\t")
-                if len(firstline) > 1:
-                    servopin = firstline[1]
-                else:
-                    servopin = "?"
-                print "    ↳ %s\t%s" % (channel, servopin)
-            elif channel == "audio":
-                audiolist = os.listdir(os.path.join(PROJECT_PATH, project, "audio"))
-                audios = [a for a in audiolist if not a.startswith(".")]
-        for audio in audios:
-            print "    ↳ audio:\t%s" % audio
-        print "------------------------------"
-    """
 
 def legal():
     print "done by me."
