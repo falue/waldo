@@ -531,11 +531,12 @@ def newproject(project_name):
 
 def listprojects():
     """
+    List every channel in every project and point out difficulties.
     print overview for all pojects including channels/servoPin connection
     :return:
     """
 
-    print "List every channel in every project.\n------------------------------"
+    print "List every channel in every project and point out difficulties.\n\n------------------------------------------------------------"
 
     # read folder...
     # projects = os.listdir(PROJECT_PATH) # os.path.join()
@@ -544,11 +545,45 @@ def listprojects():
     projects = [a for a in filelist if not a.startswith(".")]
 
     for project in projects:
-        print "%s:" % project
+        ch = ""
+        disturbence = []
+        play_channels = read_config(os.path.join(PROJECT_PATH, project))
+        # print play_channels
+        for channel, data in play_channels['channels'].iteritems():
+            servo_dof_deg = 89
+            if data['servo_pin'] in disturbence:
+                error = "ERROR: MULTIPLE USE OF SERVOPIN %s" % data['servo_pin']
+            disturbence = {data['servo_pin']}
+
+
+
+            dof_prepend = mapvalue(data['map_min'], 150, 600, 0, servo_dof_deg)
+            dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 600, 0, servo_dof_deg)
+            dof = servo_dof_deg-dof_append-dof_prepend
+            ch += "\tchannel\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF\n"
+            ch += "\t%s\t%s\t%s\t%s\t%s\t%s\t%s°\n" % (channel, data['servo_pin'], data['mcp_in'], data['map_min'],
+                                                data['map_max'], data['start_pos'], dof)
+            if dof < 0:
+                ch += "REVERSE"
+                dof *= -1
+                dof_prepend_temp = dof_prepend
+                dof_append_temp = dof_append
+                dof_prepend = servo_dof_deg-dof_append_temp
+                dof_append = servo_dof_deg-dof_prepend_temp
+            #ch += "\t%s + %s + %s = %s (%s)\n" % (dof_prepend, dof, dof_append, dof_prepend+dof+dof_append, servo_dof_deg)
+            ch += "\t" +\
+                  "▒" * mapvalue(dof_prepend, 0, servo_dof_deg, 0, 53) +\
+                  "█" * mapvalue(dof, 0, servo_dof_deg, 0, 51) +\
+                  "▒" * mapvalue(dof_append, 0, servo_dof_deg, 0, 53) +\
+                  "\n"
+        print "%s:\t%s\n%s" % (project, error, ch)
+        error = ""
+        """
         with open(os.path.join(PROJECT_PATH, project, 'config'), 'r') as myfile:
             data = myfile.read()
         print data
-        print "------------------------------"
+        """
+        print "------------------------------------------------------------"
 
 
     """
