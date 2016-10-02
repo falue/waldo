@@ -8,6 +8,7 @@ import time
 from shutil import copyfile
 
 import serial
+import yaml
 from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection)
 
 # install fakeRPiGPIO when not on a raspberry pi
@@ -57,14 +58,14 @@ if not os.path.isdir(PROJECT_PATH):
 SERVO_NAME = PWM(0x40)  # ServoHat no. 1 (Servo hat no. 2: PWM(0x41) & solder bridge A0)
 
 STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 = 0.0352)
-STEP_PLAYBACK = 0.033 # 1 servo @ 0.0022 # step - float(count_servo)/0.8 * 0.0022 # orig 0.0178 # recording takes longer than playback...  step - 0.00155
+# STEP_PLAYBACK = 0.033 # 1 servo @ 0.0022 # step - float(count_servo)/0.8 * 0.0022 # orig 0.0178 # recording takes longer than playback...  step - 0.00155
 
 # @ 1  servo:  STEP_PLAYBACK = 0.0022
 # @ 3  servos: STEP_PLAYBACK = 0.033
 # @ 8  servos: STEP_PLAYBACK = 0.0504~
 # @ 16 servos: STEP_PLAYBACK = 0.05162
 
-RECORDING = False
+REC_REPL = False
 
 
 # ===========================================================================
@@ -72,18 +73,24 @@ RECORDING = False
 # ===========================================================================
 def playback_audio(audiofile, play_from=0):
     # Playback audio
-    global RECORDING
-    RECORDING = True
+    global REC_REPL
+
     # print "funktion file: "+audiofile
 
-    if play_from > 0:
+    # wait for every servo to catch up
+    time.sleep(5)
+    REC_REPL = True
+
+    print "Audio started:\t%s" % audiofile
+
+    if play_from:
         bashcommando = 'play %s -q trim %s' % (audiofile, play_from)
     else:
         bashcommando = 'play %s -q' % (audiofile)
     os.system(bashcommando)  # invoke 'sox' in quiet mode
 
-    RECORDING = False
-    print "Audio stopped:\t", audiofile
+    REC_REPL = False
+    print "Audio stopped:\t%s" % audiofile
 
 
 '''
@@ -108,7 +115,6 @@ def playback_servo(project, channel, play_from=0):
     :param play_from:
     :return:
     """
-
     # read config data
     config = read_config(os.path.join(PROJECT_PATH, project))
     servo_pin = config['channels'][channel]['servo_pin']
@@ -116,31 +122,50 @@ def playback_servo(project, channel, play_from=0):
     map_max = config['channels'][channel]['map_max']
     start_pos = config['channels'][channel]['start_pos']
 
-
-    # fill list with file
-    pulse_list = open(os.path.join(PROJECT_PATH, project, channel), 'r')
-    pulses = [mapvalue(int(line.strip()), 0, 1024, map_min, map_max) for line in pulse_list]
-
-    print "Channelname:\t%s\tServopin:\t%s\tStat @\t%s" % (channel, servo_pin, play_from)
+    print "Channelname:\t%s\tServopin:\t%s\tStart @\t%ss" % (channel, servo_pin, play_from)
 
     SERVO_NAME.setPWMFreq(60)  # Set frequency to 60 Hz
 
-    play_from_index = int(1.0 / STEP_PLAYBACK * float(play_from))  # steps to n seconds
-    # Move servo
-    print "Servo start:\t%s frames, start @ %s. frame" % (len(pulses),
-                                                          play_from_index)
-    # cut off beginning instants of list
-    if play_from_index:
-        pulses = pulses[play_from_index:]
+    # fill list with file
+    with open(os.path.join(PROJECT_PATH, project, channel), 'r') as c:
+        pulse_list = yaml.load(c.read())
+    tot_pulse_size = len(pulse_list)
 
-    for pulse in pulses:
-        if RECORDING:  # if project is without sound...
-            SERVO_NAME.setPWM(servo_pin, 0, pulse)
+    if play_from:
+        play_from = float(play_from)
+        for key in [p for p in pulse_list]:
+            if key <= play_from:
+                del pulse_list[key]
+
+    print "Servo ready:\t%s\t%s frames\tstart @ %sth frame" % (servo_pin, tot_pulse_size, tot_pulse_size-len(pulse_list))
+
+    # wait for all servos to catch on...
+    while not REC_REPL:
+        time.sleep(0.05)
+
+    start_time = time.time()
+
+    for rec_time, pulse in sorted(pulse_list.iteritems()):
+        if REC_REPL:  # if project is without sound...
             # setServoPulse(servo_pin, pulse)
-            print "Pin %d\t%d" % (servo_pin, pulse)
-            time.sleep(STEP_PLAYBACK)  # compensation fo slow recording...
-        # else :
-            # print "Not recording."
+            cur_time = float("{0:.2f}".format(time.time()-start_time))
+            rec_time_abr = float("{0:.2f}".format(rec_time))
+            diff_time = rec_time_abr-cur_time
+            # if float("{0:.2f}".format(rec_time)) - float("{0:.2f}".format(cur_time)) == 0:
+
+            if diff_time >= -0.02 and diff_time <= 0.02:
+                # print "\t\t\t" * servo_pin, servo_pin, rec_time_abr, cur_time, diff_time
+                # print "Pin %d\t%d" % (servo_pin, pulse_map)
+                print "\t\t\t\t\t\t\t\t" * servo_pin, "█" * mapvalue(pulse, 0, 1024, 1, 50)
+                pulse_map = mapvalue(pulse, 0, 1024, map_min, map_max)
+                SERVO_NAME.setPWM(servo_pin, 0, pulse_map)
+            #else:
+            #    print "\t\t\t\t\t\t\t\t" * servo_pin, rec_time_abr, cur_time, diff_time, "not match"
+            if STEP + diff_time >= 0 :
+                sleeping = STEP + diff_time
+            else:
+                sleeping = 0
+            time.sleep(sleeping)  # -(rec_time-diff_time)
 
     SERVO_NAME.setPWM(servo_pin, 0, start_pos)  # <---- erster pulse = ruhepos.?
     # setServoPulse(servo_pin, startposition)
@@ -160,10 +185,13 @@ def record(project, channel, audiofile):
     :param audiofile:
     :return:
     """
-    global RECORDING  # really totally necessary
+    global REC_REPL  # really totally necessary
 
     # listen to USB o mcp3008?
     config = read_config(os.path.join(PROJECT_PATH, project))
+    servo_pin = config['channels'][channel]['servo_pin']
+    map_min = config['channels'][channel]['map_min']
+    map_max = config['channels'][channel]['map_max']
 
     if(config['connection']['type'] == "usb"):
         usb_port = config['connection']['device']
@@ -174,6 +202,7 @@ def record(project, channel, audiofile):
         MOSI = config['connection']['MOSI']
         MISO = config['connection']['MISO']
         CS = config['connection']['CS']
+        mcp_in = config['channels'][channel]['mcp_in']
         SERVO_NAME.setPWMFreq(60)
         print "Connection via MCP3008 (%d %d %d %d)" % (CLK, MISO, MOSI, CS)
 
@@ -196,31 +225,22 @@ def record(project, channel, audiofile):
         # <- note extra ','
         processThread0.start()
     else:
-        RECORDING = True
-
-    # set definitions
-    # recordfile.write("Pin:\t%s\n" % servopin)
-    config = read_config(os.path.join(PROJECT_PATH, project))
-    servo_pin = config['channels'][channel]['servo_pin']
-    map_min = config['channels'][channel]['map_min']
-    map_max = config['channels'][channel]['map_max']
+        REC_REPL = True
 
     # record!
     record_file = open(os.path.join(PROJECT_PATH, project, channel), 'w+')
+    start_time = time.time()
 
-    while RECORDING == True:
-        millis = time.time()
-
+    while REC_REPL == True:
         # python: listen to usb port or MCP3008...
         if config['connection']['type'] == "usb":
             record = read_usb(usb_port, baudrate)
         else:
-            record = read_mcp(0, CLK, MOSI, MISO, CS)
-            #                 ^ channel 0-7 on Chip MCP3008!
+            record = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
 
         # recording to file...
-        record_file.write(str(record) + "\n")  # write 0-1024 in file...
-        print record,  # 0-1024
+        record_file.write("%s: %s\n" % (time.time()-start_time, record))  # write timecode and 0-1024 in file...
+        print "%s\t%s" % (time.time()-start_time, record),  # 0-1024
 
         # playback on servo...
         record = mapvalue(int(record), 0, 1024, map_min,
@@ -229,11 +249,7 @@ def record(project, channel, audiofile):
         # setServoPulse(int(servo_pin), record)
         print "\t%s" % record  # servoMin <-> servoMax
 
-        millis = time.time() - millis
-        if millis > STEP:
-            millis = 0
-        # print millis
-        time.sleep(STEP - millis)
+        time.sleep(STEP)
 
     record_file.close()
     if config['connection']['type'] == "MCP":
@@ -375,9 +391,9 @@ def set_servo(project, channel):
     """
     mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7] (Default: 0)\n" % channel) or 0)
     servo_pin = int(raw_input("Set servo pin out pin [0-15]\n"))
-    map_min = int(raw_input("Set minimum position [150-600]\n"))
-    map_max = int(raw_input("Set maximum position [150-600]\n"))
-    start_pos = int(raw_input("Set start position [150-600] (Default: %s)\n" % map_min) or map_min)
+    map_min = int(raw_input("Set minimum position [150-500]\n"))
+    map_max = int(raw_input("Set maximum position [150-500]\n"))
+    start_pos = int(raw_input("Set start position [150-500] (Default: %s)\n" % map_min) or map_min)
 
     config = read_config(os.path.join(PROJECT_PATH, project))
     # if not config.has_key('channels'):
@@ -443,7 +459,7 @@ def singleplay(arg):
     :param arg:
     :return:
     """
-    global RECORDING
+    global REC_REPL
 
     project = arg[2]
     channelname = arg[3]
@@ -454,18 +470,19 @@ def singleplay(arg):
 
     print "Play single servo."
 
+    # play servo thread:
+    process_thread_1 = threading.Thread(
+        target=playback_servo,
+        args=(project, channelname, )) # ^ note extra ','
+    process_thread_1.start()
+
     if audiofile:
-        processThread0 = threading.Thread(
+        process_thread_0 = threading.Thread(
             target=playback_audio,
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile), )) # <- note extra ','
-        processThread0.start()
+        process_thread_0.start()
     else :
-      RECORDING = True # if no audio
-
-    # play servo thread:
-    processThread1 = threading.Thread(
-        target=playback_servo, args=(project, channelname, )) # ^ note extra ','
-    processThread1.start()
+      REC_REPL = True # if no audio
 
 
 def play_all(project, play_from=0):
@@ -476,34 +493,36 @@ def play_all(project, play_from=0):
     :return:
     """
 
-    global RECORDING
+    global REC_REPL
 
     print "Play everything; start @ %ss" % play_from
+
+    play_channels = read_config(os.path.join(PROJECT_PATH, project))
+    # print play_channels
+    for channel, data in play_channels['channels'].iteritems():
+        #print "%s --- %s" % (channel, data)
+        # threading.Thread(target=playback_servo, args=(project, channel, play_from,), name='channel').start()
+        process_thread_1 = threading.Thread(
+            target=playback_servo,
+            args=(project, channel, play_from,)
+        )
+        # ^ note extra ','
+        process_thread_1.start()
 
     # play audio thread when set:
     filelist = os.listdir(os.path.join(PROJECT_PATH, project, 'audio'))
     audiofiles = [a for a in filelist if a.lower().endswith(('.wav', '.mp3', '.aiff'))]
 
     if audiofiles:
-        processThread0 = threading.Thread(
+        process_thread_0 = threading.Thread(
             target=playback_audio,
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofiles[0]),
                   play_from, ))
         # <- note extra ','
-        processThread0.start()
+        process_thread_0.start()
     else:
-        RECORDING = True
+        REC_REPL = True
 
-    play_channels = read_config(os.path.join(PROJECT_PATH, project))
-    # print play_channels
-    for channel, data in play_channels['channels'].iteritems():
-        #print "%s --- %s" % (channel, data)
-        processThread1 = threading.Thread(
-            target=playback_servo,
-            args=(project, channel, play_from,)
-        )
-        # ^ note extra ','
-        processThread1.start()
 
 
 def newproject(project_name):
@@ -523,7 +542,6 @@ def newproject(project_name):
 def listprojects():
     """
     List every channel in every project and point out difficulties.
-    print overview for all pojects including channels/servoPin connection
     :return:
     """
 
@@ -548,8 +566,8 @@ def listprojects():
                 error = "ERROR: MULTIPLE USE OF SERVOPIN %s" % data['servo_pin']
             disturbence = {data['servo_pin']}
 
-            dof_prepend = mapvalue(data['map_min'], 150, 600, 0, servo_dof_deg)
-            dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 600, 0, servo_dof_deg)
+            dof_prepend = mapvalue(data['map_min'], 150, 500, 0, servo_dof_deg)
+            dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 500, 0, servo_dof_deg)
             dof = servo_dof_deg-dof_append-dof_prepend
             ch += "\tchannel\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF\n"
             ch += "\t%s\t%s\t%s\t%s\t%s\t%s\t%s°\n" % (channel, data['servo_pin'], data['mcp_in'], data['map_min'],
@@ -569,11 +587,6 @@ def listprojects():
                   "▒" * mapvalue(dof_append, 0, servo_dof_deg, 0, 53) +\
                   "\n"
         print "%s:\t%s\n%s" % (project, error, ch)
-        """
-        with open(os.path.join(PROJECT_PATH, project, 'config'), 'r') as myfile:
-            data = myfile.read()
-        print data
-        """
         print "------------------------------------------------------------"
 
 
