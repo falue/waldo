@@ -66,6 +66,7 @@ STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022
 # @ 16 servos: STEP_PLAYBACK = 0.05162
 
 REC_REPL = False
+SERVO_READY = {}
 
 
 # ===========================================================================
@@ -78,10 +79,14 @@ def playback_audio(audiofile, play_from=0):
     # print "funktion file: "+audiofile
 
     # wait for every servo to catch up
-    time.sleep(5)
-    REC_REPL = True
 
-    print "Audio started:\t%s" % audiofile
+    while not REC_REPL:
+        print "Wait for all servos..."
+        if all(value == True for value in SERVO_READY.values()):
+            REC_REPL = True
+        time.sleep(0.1)
+
+    print "Audio start:\t%s" % audiofile
 
     if play_from:
         bashcommando = 'play %s -q trim %s' % (audiofile, play_from)
@@ -90,7 +95,7 @@ def playback_audio(audiofile, play_from=0):
     os.system(bashcommando)  # invoke 'sox' in quiet mode
 
     REC_REPL = False
-    print "Audio stopped:\t%s" % audiofile
+    print "Audio stopp:\t%s" % audiofile
 
 
 '''
@@ -115,6 +120,9 @@ def playback_servo(project, channel, play_from=0):
     :param play_from:
     :return:
     """
+
+    global SERVO_READY
+
     # read config data
     config = read_config(os.path.join(PROJECT_PATH, project))
     servo_pin = config['channels'][channel]['servo_pin']
@@ -138,6 +146,8 @@ def playback_servo(project, channel, play_from=0):
                 del pulse_list[key]
 
     print "Servo ready:\t%s\t%s frames\tstart @ %sth frame" % (servo_pin, tot_pulse_size, tot_pulse_size-len(pulse_list))
+
+    SERVO_READY.update({channel: True})
 
     # wait for all servos to catch on...
     while not REC_REPL:
@@ -494,6 +504,7 @@ def play_all(project, play_from=0):
     """
 
     global REC_REPL
+    global SERVO_READY
 
     print "Play everything; start @ %ss" % play_from
 
@@ -506,6 +517,7 @@ def play_all(project, play_from=0):
             target=playback_servo,
             args=(project, channel, play_from,)
         )
+        SERVO_READY.update({channel: False})
         # ^ note extra ','
         process_thread_1.start()
 
