@@ -18,6 +18,7 @@ buttons = {
     21: '-p timeit'
           }
 
+button = []
 
 for key in sorted(buttons):
     print "GPIO.setup(%s, GPIO.IN, pull_up_down=GPIO.PUD_UP)" % key
@@ -31,12 +32,25 @@ main_path = os.path.dirname(os.path.realpath(__file__))
 while True:
     for key in buttons:
         if not GPIO.input(key):
-            print "Button: %s\tFunction '%s'" % (key, buttons[key])
-            bash_commando = 'cd %s && python waldo/main.py %s' % (main_path, buttons[key])
-            print bash_commando
-            os.system(bash_commando)
-            time.sleep(1)
-    time.sleep(0.1)
+            when_pressed = time.time()
+
+            while not GPIO.input(key):
+                if time.time() - when_pressed > 1.2:
+                    print "cancel all functions"
+                    time.sleep(2)
+                time.sleep(0.005)
+
+            when_released = time.time() - when_pressed
+
+            if GPIO.input(key) and when_released <= 1.2:
+                print "Button: %s\tFunction '%s'" % (key, buttons[key])
+                bash_commando = 'cd %s && python waldo/main.py %s' % (main_path, buttons[key])
+                print bash_commando
+                #os.system(bash_commando)
+                time.sleep(2)
+
+                # how to...?
+    time.sleep(0.005)
 
 # setze gpio zurück - nach programm ende sonst online!
 GPIO.cleanup()

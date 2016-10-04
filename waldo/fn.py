@@ -73,18 +73,15 @@ SERVO_READY = {}
 # FUNCTIONS: PLAYBACKS
 # ===========================================================================
 def playback_audio(audiofile, play_from=0):
-    # Playback audio
+    """
+    Playback audio
+    :param audiofile:
+    :param play_from:
+    :return:
+    """
     global REC_REPL
 
-    # print "funktion file: "+audiofile
-
-    # wait for every servo to catch up
-
-    while not REC_REPL:
-        print "Wait for all servos..."
-        if all(value == True for value in SERVO_READY.values()):
-            REC_REPL = True
-        time.sleep(0.1)
+    wait_for_servos()
 
     print "Audio start:\t%s" % audiofile
 
@@ -98,9 +95,25 @@ def playback_audio(audiofile, play_from=0):
     print "Audio stopp:\t%s" % audiofile
 
 
-'''
-# doesn't work because servoname.setPWMFreq(60) isn't set...?
+def wait_for_servos():
+    """
+    Wait for servos to initiate and set REC_REPL to True if they do so.
+    :return:
+    """
+    global REC_REPL
+
+    # wait for every servo to catch up
+    while not REC_REPL:
+        print "Wait for all servos to be ready..."
+        if all(value == True for value in SERVO_READY.values()):
+            print "All servos ready."
+            REC_REPL = True
+        time.sleep(0.1)
+
+
 def setServoPulse(channel, pulse):  # copypasta-überbleibsel...?
+    # doesn't work because servoname.setPWMFreq(60) isn't set...?
+    '''
     pulseLength = 1000000  # 1,000,000 us per second
     pulseLength /= 60  # 60 Hz
     # print "%d us per period" % pulseLength
@@ -145,7 +158,9 @@ def playback_servo(project, channel, play_from=0):
             if key <= play_from:
                 del pulse_list[key]
 
-    print "Servo ready:\t%s\t%s frames\tstart @ %sth frame" % (servo_pin, tot_pulse_size, tot_pulse_size-len(pulse_list))
+    print "Servo ready:\t%s\t%s frames\tstart @ %sth frame" % \
+          (servo_pin, tot_pulse_size, tot_pulse_size - len(pulse_list))
+
 
     SERVO_READY.update({channel: True})
 
@@ -176,6 +191,8 @@ def playback_servo(project, channel, play_from=0):
             else:
                 sleeping = 0
             time.sleep(sleeping)  # -(rec_time-diff_time)
+        else:
+            print "nothing"
 
     SERVO_NAME.setPWM(servo_pin, 0, start_pos)  # <---- erster pulse = ruhepos.?
     # setServoPulse(servo_pin, startposition)
@@ -486,13 +503,15 @@ def singleplay(arg):
         args=(project, channelname, )) # ^ note extra ','
     process_thread_1.start()
 
+    wait_for_servos()
+
     if audiofile:
         process_thread_0 = threading.Thread(
             target=playback_audio,
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile), )) # <- note extra ','
         process_thread_0.start()
-    else :
-      REC_REPL = True # if no audio
+    # else:
+        # REC_REPL = True # if no audio
 
 
 def play_all(project, play_from=0):
@@ -517,9 +536,11 @@ def play_all(project, play_from=0):
             target=playback_servo,
             args=(project, channel, play_from,)
         )
-        SERVO_READY.update({channel: False})
         # ^ note extra ','
+        SERVO_READY.update({channel: False})
         process_thread_1.start()
+
+    wait_for_servos()
 
     # play audio thread when set:
     filelist = os.listdir(os.path.join(PROJECT_PATH, project, 'audio'))
@@ -532,8 +553,8 @@ def play_all(project, play_from=0):
                   play_from, ))
         # <- note extra ','
         process_thread_0.start()
-    else:
-        REC_REPL = True
+    # else:
+        # REC_REPL = True
 
 
 
