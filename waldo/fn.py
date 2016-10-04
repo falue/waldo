@@ -202,8 +202,8 @@ def playback_servo(project, channel, play_from=0):
             else:
                 sleeping = 0
             time.sleep(sleeping)  # -(rec_time-diff_time)
-        else:
-            print "nothing"
+        # else:
+           # print "nothing"
 
     SERVO_NAME.setPWM(servo_pin, 0, start_pos)  # <---- erster pulse = ruhepos.?
     # setServoPulse(servo_pin, startposition)
