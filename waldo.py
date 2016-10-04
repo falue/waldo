@@ -18,12 +18,9 @@ buttons = {
     21: '-p timeit'
           }
 
-button = []
-
 for key in sorted(buttons):
     print "GPIO.setup(%s, GPIO.IN, pull_up_down=GPIO.PUD_UP)" % key
     GPIO.setup(key, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # set als eingang
-
 
 main_path = os.path.dirname(os.path.realpath(__file__))
 # button_state = GPIO.input(BUTTONpin) # getting input value from button
@@ -46,7 +43,7 @@ while True:
                 print "Button: %s\tFunction '%s'" % (key, buttons[key])
                 bash_commando = 'cd %s && python waldo/main.py %s' % (main_path, buttons[key])
                 print bash_commando
-                #os.system(bash_commando)
+                # os.system(bash_commando)
                 time.sleep(2)
 
                 # how to...?

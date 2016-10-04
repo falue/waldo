@@ -8,7 +8,7 @@ import time
 from shutil import copyfile
 
 import serial
-import yaml
+# import yaml
 from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection)
 
 # install fakeRPiGPIO when not on a raspberry pi
@@ -148,8 +148,19 @@ def playback_servo(project, channel, play_from=0):
     SERVO_NAME.setPWMFreq(60)  # Set frequency to 60 Hz
 
     # fill list with file
+
+    pulse_list = {}
+    pulse_file = open(os.path.join(PROJECT_PATH, project, channel), 'r')
+    for line in pulse_file.readlines():
+        timestamp, value = line.split(": ")
+        pulse_list[float(timestamp)] = int(value)
+
+    """
+    ^^faster than yaml
     with open(os.path.join(PROJECT_PATH, project, channel), 'r') as c:
         pulse_list = yaml.load(c.read())
+    """
+
     tot_pulse_size = len(pulse_list)
 
     if play_from:
