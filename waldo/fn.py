@@ -427,16 +427,27 @@ def set_servo(project, channel):
     :param servo_pin:
     :return:
     """
-    mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7] (Default: 0)\n" % channel) or 0)
-    servo_pin = int(raw_input("Set servo pin out pin [0-15]\n"))
-    map_min = int(raw_input("Set minimum position [150-500]\n"))
-    map_max = int(raw_input("Set maximum position [150-500]\n"))
-    start_pos = int(raw_input("Set start position [150-500] (Default: %s)\n" % map_min) or map_min)
-
     config = read_config(os.path.join(PROJECT_PATH, project))
-    # if not config.has_key('channels'):
+
     if 'channels' not in config:
-            config.update({'channels': {}})
+        config.update({'channels': {}})
+        default_mcp_in = 0
+        default_servo_pin = 0
+        default_map_min = 150
+        default_map_max = 500
+        default_start_pos = default_map_min
+    else:
+        default_mcp_in = config['channels'][channel]["mcp_in"]
+        default_servo_pin = config['channels'][channel]["servo_pin"]
+        default_map_min = config['channels'][channel]["map_min"]
+        default_map_max = config['channels'][channel]["map_max"]
+        default_start_pos =  config['channels'][channel]["start_pos"]
+
+    mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7] (Default: %s)\n" % (channel, default_mcp_in)) or default_mcp_in)
+    servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin)) or default_servo_pin)
+    map_min = int(raw_input("Set minimum position [150-500] (Default: %s)\n" % (default_map_min)) or default_map_min)
+    map_max = int(raw_input("Set maximum position [150-500] (Default: %s)\n" % (default_map_max)) or default_map_max)
+    start_pos = int(raw_input("Set start position [150-500] (Default: %s)\n" % default_start_pos) or default_start_pos)
 
     config['channels'].update({channel: {
                 'mcp_in': mcp_in,

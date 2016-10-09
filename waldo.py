@@ -16,7 +16,7 @@ buttons = {
     16: '-p timeit 15',
     19: '-sp timeit 8er count.wav',
     20: '-sp timeit 8er count.wav',
-    21: '-p timeit'
+    21: '-p vali'
           }
 
 for key in sorted(buttons):
@@ -36,7 +36,7 @@ while True:
                 if time.time() - when_pressed > 1.2:
                     print "cancel this function"
                     sp.Popen.terminate(extProc)  # closes the process
-                    time.sleep(2)
+                    time.sleep(3)
                 time.sleep(0.001)
 
             when_released = time.time() - when_pressed

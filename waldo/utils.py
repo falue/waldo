@@ -55,3 +55,9 @@ def usbdetection():
             usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
             # print len(usbdevices)
         time.sleep(0.25)
+
+
+def set_pwm(servo):
+    """
+    returns servo pins "base 16" and Servo hat board adress
+    """
