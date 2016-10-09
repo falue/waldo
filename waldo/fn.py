@@ -9,7 +9,7 @@ from shutil import copyfile
 
 import serial
 
-from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection, set_pwm)
+from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection, set_servo_connection)
 
 # install fakeRPiGPIO when not on a raspberry pi
 import RPi.GPIO as GPIO

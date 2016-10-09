@@ -71,8 +71,8 @@ if __name__ == '__main__':
         else:
             helpfile()
 
-    # except IndexError:
-       # helpfile()
+    except IndexError:
+       helpfile()
 
     except KeyboardInterrupt:
         print "\nExit by user."

@@ -67,8 +67,18 @@ def usbdetection():
         time.sleep(0.25)
 
 
-def set_pwm(servo):
+def set_servo_connection(servo_pin):
     """
-    returns servo pins "base 16" and Servo hat board adress
+    returns servo pins as int and Servo hat board adress as hex
     :param servo:
     """
+    hat_adress = servo_pin / 16
+    servo_pin = servo_pin % 16
+
+    hat_adress = hex(64+hat_adress)
+
+    connection = {'servo_pin': servo_pin,
+                  'hat_adress': hat_adress
+                 }
+
+    return connection
