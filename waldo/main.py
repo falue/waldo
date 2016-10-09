@@ -56,9 +56,13 @@ if __name__ == '__main__':
             # CREATE NEW FOLDER SYSTEM
             newproject(sys.argv[2])
 
+
         elif sys.argv[1] == "-ls" or sys.argv[1] == "--list":
             # LIST PROJECTS AND CHANNELS
-            listprojects(sys.argv[2])
+            try:
+                listprojects(sys.argv[2])
+            except IndexError:
+                listprojects()
 
         elif sys.argv[1] == "-cc" or sys.argv[1] == "--copy":
             # COPYRIGHT

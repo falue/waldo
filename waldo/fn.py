@@ -600,16 +600,18 @@ def listprojects(project=False):
     :return:
     """
 
-    print "List every channel in every project and point out difficulties.\n\n" \
-          "------------------------------------------------------------"
 
     # read folder...
     # projects = os.listdir(PROJECT_PATH) # os.path.join()
     if project:
         projects = [project]
+        print "List every channel in project '%s' and point out difficulties.\n\n" \
+              "------------------------------------------------------------" % project
     else:
         filelist = os.listdir(PROJECT_PATH)
         projects = [a for a in filelist if not a.startswith(".")]
+        print "List every channel in every project and point out difficulties.\n\n" \
+              "------------------------------------------------------------"
 
     for project in projects:
         ch = ""
