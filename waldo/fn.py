@@ -594,7 +594,7 @@ def newproject(project_name):
         print "Project already exists."
 
 
-def listprojects():
+def listprojects(project=False):
     """
     List every channel in every project and point out difficulties.
     :return:
@@ -605,9 +605,11 @@ def listprojects():
 
     # read folder...
     # projects = os.listdir(PROJECT_PATH) # os.path.join()
-
-    filelist = os.listdir(PROJECT_PATH)
-    projects = [a for a in filelist if not a.startswith(".")]
+    if project:
+        projects = [project]
+    else:
+        filelist = os.listdir(PROJECT_PATH)
+        projects = [a for a in filelist if not a.startswith(".")]
 
     for project in projects:
         ch = ""

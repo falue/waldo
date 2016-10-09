@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
         elif sys.argv[1] == "-ls" or sys.argv[1] == "--list":
             # LIST PROJECTS AND CHANNELS
-            listprojects()
+            listprojects(sys.argv[2])
 
         elif sys.argv[1] == "-cc" or sys.argv[1] == "--copy":
             # COPYRIGHT
