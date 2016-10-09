@@ -13,8 +13,18 @@ def write_config(path, config):
     with open(os.path.join(path, 'config'), 'w') as t:
         t.write(yaml.dump(config, default_flow_style=False))
 
+
 def mapvalue(x, in_min, in_max, out_min, out_max):
-    # map values fom one range into another
+    """
+    map values fom one range into another
+    :param x:
+    :param in_min:
+    :param in_max:
+    :param out_min:
+    :param out_max:
+    :return:
+    """
+    # FIXME: + 1?
     return (x - in_min) * (out_max + 1 - out_min) / (in_max - in_min) + out_min
 
 
@@ -60,4 +70,5 @@ def usbdetection():
 def set_pwm(servo):
     """
     returns servo pins "base 16" and Servo hat board adress
+    :param servo:
     """

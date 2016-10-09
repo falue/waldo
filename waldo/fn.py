@@ -8,8 +8,8 @@ import time
 from shutil import copyfile
 
 import serial
-# import yaml
-from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection)
+
+from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection, set_pwm)
 
 # install fakeRPiGPIO when not on a raspberry pi
 import RPi.GPIO as GPIO
@@ -431,11 +431,13 @@ def set_servo(project, channel):
 
     if 'channels' not in config:
         config.update({'channels': {}})
+
+    if channel not in config['channels']:
         default_mcp_in = 0
         default_servo_pin = 0
         default_map_min = 150
         default_map_max = 500
-        default_start_pos = default_map_min
+        default_start_pos = False
     else:
         default_mcp_in = config['channels'][channel]["mcp_in"]
         default_servo_pin = config['channels'][channel]["servo_pin"]
@@ -445,21 +447,56 @@ def set_servo(project, channel):
 
     mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7] (Default: %s)\n" % (channel, default_mcp_in)) or default_mcp_in)
     servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin)) or default_servo_pin)
-    map_min = int(raw_input("Set minimum position [150-500] (Default: %s)\n" % (default_map_min)) or default_map_min)
-    map_max = int(raw_input("Set maximum position [150-500] (Default: %s)\n" % (default_map_max)) or default_map_max)
-    start_pos = int(raw_input("Set start position [150-500] (Default: %s)\n" % default_start_pos) or default_start_pos)
+    map_min = raw_input("Set minimum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_min)) or default_map_min
+    if map_min == 'm':
+        map_min = detect_dof(project, mcp_in, servo_pin)
+    map_max = raw_input("Set maximum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_max)) or default_map_max
+    if map_max == 'm':
+        map_max = detect_dof(project, mcp_in, servo_pin)
+    if not default_start_pos:
+        default_start_pos = map_min
+    start_pos = int(raw_input("Set start position [150-500] (Default: %s; map_min: %s)\n" % (default_start_pos, map_min)) or default_start_pos)
 
     config['channels'].update({channel: {
                 'mcp_in': mcp_in,
                 'servo_pin': servo_pin,
-                'map_min': map_min,
-                'map_max': map_max,
+                'map_min': int(map_min),
+                'map_max': int(map_max),
                 'start_pos': start_pos
             }
         }
     )
 
     write_config(os.path.join(PROJECT_PATH, project), config)
+
+
+def detect_dof(project, mcp_in, servo_pin):
+    """
+    playback live analog input -> servo_pin
+    actually useful for direct replay?
+    :param mcp_in:
+    :param servo_pin:
+    :return:
+    """
+    config = read_config(os.path.join(PROJECT_PATH, project))
+    CLK = config['connection']['CLK']
+    MOSI = config['connection']['MOSI']
+    MISO = config['connection']['MISO']
+    CS = config['connection']['CS']
+
+    # FIXME: exit loop with return not ctrl+c
+
+    try:
+        while True:
+            value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
+            print value,
+            SERVO_NAME.setPWM(servo_pin, 0, value)
+            value = mapvalue(value, 0, 1024, 150, 500)
+            print value
+            time.sleep(0.01)
+    except KeyboardInterrupt:
+        print "\nDefined: %s" % value
+        return value
 
 
 def record_setup(arg):
@@ -599,8 +636,6 @@ def listprojects(project=False):
     List every channel in every project and point out difficulties.
     :return:
     """
-
-
     # read folder...
     # projects = os.listdir(PROJECT_PATH) # os.path.join()
     if project:
