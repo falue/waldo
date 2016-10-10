@@ -45,7 +45,7 @@ for mcps in preferences['mcp']:
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
 
-STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 = 0.0352)
+STEP = 0.01  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 = 0.0352)
 
 REC_REPL = False
 SERVO_READY = {}
@@ -640,18 +640,20 @@ def list_projects(project=False):
         ch = ""
         error = ""
         disturbence = []
+        channelfiles_spec = []
         play_channels = read_config(os.path.join(PROJECT_PATH, project))
         # print play_channels
         for channel, data in play_channels['channels'].iteritems():
             servo_dof_deg = 89
             if data['servo_pin'] in disturbence:
-                error = "ERROR: MULTIPLE USE OF SERVOPIN %s" % data['servo_pin']
+                error += "\n╳  Multiple use of servo pin %s (%s)" % (data['servo_pin'], channel)
             disturbence = {data['servo_pin']}
-
+            if not os.path.isfile(os.path.join(PROJECT_PATH, project, channel)):
+                error += "\n╳  No file '%s'" % channel
+            channelfiles_spec.append(channel)
             dof_prepend = mapvalue(data['map_min'], 150, 500, 0, servo_dof_deg)
             dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 500, 0, servo_dof_deg)
             dof = servo_dof_deg-dof_append-dof_prepend
-            ch += "\tchannel\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF\n"
             ch += "\t%s\t%s\t%s\t%s\t%s\t%s\t%s°\n" % (channel, data['servo_pin'], data['mcp_in'], data['map_min'],
                                                 data['map_max'], data['start_pos'], dof)
             if dof < 0:
@@ -668,7 +670,19 @@ def list_projects(project=False):
                   "█" * mapvalue(dof, 0, servo_dof_deg, 0, 51) +\
                   "▒" * mapvalue(dof_append, 0, servo_dof_deg, 0, 53) +\
                   "\n"
-        print "%s:\t%s\n%s" % (project, error, ch)
+
+        channel_list = os.listdir(os.path.join(PROJECT_PATH, project))
+        channelfiles = [a for a in channel_list if not a.startswith(".") and
+                        not a == 'config' and
+                        not a == 'trash' and
+                        not a == 'audio']
+
+        no_specs = "'\n╳  No specs in config for file '".join([item for item in channelfiles if item not in channelfiles_spec])
+        if no_specs:
+            error += "\n╳  No specs in config for file '%s'" % no_specs
+        thead = "\tchannel\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF"
+
+        print "%s:%s\n%s\n%s" % (project, error, thead, ch)
         print "------------------------------------------------------------"
 
 
