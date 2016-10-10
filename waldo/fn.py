@@ -308,14 +308,6 @@ def read_usb(usbport, baudrate):
     last_record = record
 
 
-'''
-def read_mcp(channel):
-    #############
-    record = analogread(channel, CLK, MOSI, MISO, CS)
-    return record
-'''
-
-
 def read_mcp(adcnum, clockpin, mosipin, misopin, cspin):
     if ((adcnum > 7) or (adcnum < 0)):
         return -1
@@ -441,10 +433,10 @@ def set_servo(project, channel):
     servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin)) or default_servo_pin)
     map_min = raw_input("Set minimum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_min)) or default_map_min
     if map_min == 'm':
-        map_min = detect_dof(mcp_in, servo_pin)
+        map_min = get_dof(mcp_in, servo_pin)
     map_max = raw_input("Set maximum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_max)) or default_map_max
     if map_max == 'm':
-        map_max = detect_dof(mcp_in, servo_pin)
+        map_max = get_dof(mcp_in, servo_pin)
     if not default_start_pos:
         default_start_pos = map_min
     start_pos = int(raw_input("Set start position [150-500] (Default: %s; map_min: %s)\n" % (default_start_pos, map_min)) or default_start_pos)
@@ -462,7 +454,7 @@ def set_servo(project, channel):
     write_config(os.path.join(PROJECT_PATH, project), config)
 
 
-def detect_dof(mcp_in, servo_pin):
+def get_dof(mcp_in, servo_pin):
     """
     playback live analog input -> servo_pin
     actually useful for direct replay?
@@ -478,13 +470,15 @@ def detect_dof(mcp_in, servo_pin):
     mcp_in %= 8
 
     # FIXME: exit loop with return not ctrl+c
+
     print "Press ctrl + c for returning value."
+
     try:
         while True:
             value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
+            value = mapvalue(value, 0, 1024, 150, 500)
             # print value,
             SERVO_NAME.setPWM(servo_pin, 0, value)
-            value = mapvalue(value, 0, 1024, 150, 500)
             print "\r%s " % value,
             time.sleep(0.01)
     except KeyboardInterrupt:
