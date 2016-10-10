@@ -45,16 +45,7 @@ for mcps in preferences['mcp']:
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
 
-# FIXME: use function just before servo usage
-# servo_obj = PWM(0x40)  # ServoHat no. 1 (Servo hat no. 2: PWM(0x41) & solder bridge A0)
-
 STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 = 0.0352)
-# STEP_PLAYBACK = 0.033 # 1 servo @ 0.0022 # step - float(count_servo)/0.8 * 0.0022 # orig 0.0178 # recording takes longer than playback...  step - 0.00155
-
-# @ 1  servo:  STEP_PLAYBACK = 0.0022
-# @ 3  servos: STEP_PLAYBACK = 0.033
-# @ 8  servos: STEP_PLAYBACK = 0.0504~
-# @ 16 servos: STEP_PLAYBACK = 0.05162
 
 REC_REPL = False
 SERVO_READY = {}
