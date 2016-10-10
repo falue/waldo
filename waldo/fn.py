@@ -42,14 +42,11 @@ for mcps in preferences['mcp']:
     GPIO.setup(preferences['mcp'][mcps]['CS'], GPIO.OUT)
 
 
-
-# PROJECT_PATH = os.path.expanduser('~/waldo_projects')
-
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
 
 # FIXME: use function just before servo usage
-SERVO_NAME = PWM(0x40)  # ServoHat no. 1 (Servo hat no. 2: PWM(0x41) & solder bridge A0)
+# servo_obj = PWM(0x40)  # ServoHat no. 1 (Servo hat no. 2: PWM(0x41) & solder bridge A0)
 
 STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 = 0.0352)
 # STEP_PLAYBACK = 0.033 # 1 servo @ 0.0022 # step - float(count_servo)/0.8 * 0.0022 # orig 0.0178 # recording takes longer than playback...  step - 0.00155
@@ -137,9 +134,13 @@ def playback_servo(project, channel, play_from=0):
     map_max = config['channels'][channel]['map_max']
     start_pos = config['channels'][channel]['start_pos']
 
+    servo_connection = get_servo_connection(servo_pin)
+    servo_pin = servo_connection['servo_pin']
+    servo_obj = PWM(servo_connection['hat_adress'])
+
     print "Channelname:\t%s\tServopin:\t%s\tStart @\t%ss" % (channel, servo_pin, play_from)
 
-    SERVO_NAME.setPWMFreq(60)  # Set frequency to 60 Hz
+    servo_obj.setPWMFreq(60)  # Set frequency to 60 Hz
 
     # fill list with file
 
@@ -188,7 +189,7 @@ def playback_servo(project, channel, play_from=0):
                 # print "Pin %d\t%d" % (servo_pin, pulse_map)
                 print "\t\t\t\t\t\t\t\t" * servo_pin, "█" * mapvalue(pulse, 0, 1024, 1, 50)
                 pulse_map = mapvalue(pulse, 0, 1024, map_min, map_max)
-                SERVO_NAME.setPWM(servo_pin, 0, pulse_map)
+                servo_obj.setPWM(servo_pin, 0, pulse_map)
             #else:
             #    print "\t\t\t\t\t\t\t\t" * servo_pin, rec_time_abr, cur_time, diff_time, "not match"
             if STEP + diff_time >= 0 :
@@ -199,7 +200,7 @@ def playback_servo(project, channel, play_from=0):
         # else:
            # print "nothing"
 
-    SERVO_NAME.setPWM(servo_pin, 0, start_pos)  # <---- erster pulse = ruhepos.?
+    servo_obj.setPWM(servo_pin, 0, start_pos)  # <---- erster pulse = ruhepos.?
     # setServoPulse(servo_pin, startposition)
     print "Servo playback stopped: %s\tStart position: %d" % (channel, start_pos)
     # Set GPIO to default
@@ -219,11 +220,16 @@ def record(project, channel, audiofile):
     """
     global REC_REPL  # really totally necessary
 
-    # listen to USB o mcp3008?
+    # listen to USB or mcp3008?
     config = read_config(os.path.join(PROJECT_PATH, project))
     servo_pin = config['channels'][channel]['servo_pin']
     map_min = config['channels'][channel]['map_min']
     map_max = config['channels'][channel]['map_max']
+
+    servo_connection = get_servo_connection(servo_pin)
+    servo_pin = servo_connection['servo_pin']
+    servo_obj = PWM(servo_connection['hat_adress'])
+    # servo_obj = PWM(servo_connection['hat_adress'])
 
     if(config['connection']['type'] == "usb"):
         usb_port = config['connection']['device']
@@ -237,7 +243,7 @@ def record(project, channel, audiofile):
         MISO = mcp_connection['MISO']
         CS = mcp_connection['CS']
         mcp_in %= 8
-        SERVO_NAME.setPWMFreq(60)
+        servo_obj.setPWMFreq(60)
         print "Connection via MCP3008 (%d %d %d %d)" % (CLK, MISO, MOSI, CS)
 
     # countdown for slow recordists
@@ -279,7 +285,7 @@ def record(project, channel, audiofile):
         # playback on servo...
         record = mapvalue(int(record), 0, 1024, map_min,
                           map_max)  # map value to sevo values
-        SERVO_NAME.setPWM(int(servo_pin), 0, record)  # move servo
+        servo_obj.setPWM(int(servo_pin), 0, record)  # move servo
         # setServoPulse(int(servo_pin), record)
         print "\t%s" % record  # servoMin <-> servoMax
 
@@ -469,6 +475,10 @@ def get_dof(mcp_in, servo_pin):
     CS = mcp_connection['CS']
     mcp_in %= 8
 
+    servo_connection = get_servo_connection(servo_pin)
+    servo_pin = servo_connection['servo_pin']
+    servo_obj = PWM(servo_connection['hat_adress'])
+
     # FIXME: exit loop with return not ctrl+c
 
     print "Press ctrl + c for returning value."
@@ -478,7 +488,7 @@ def get_dof(mcp_in, servo_pin):
             value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
             value = mapvalue(value, 0, 1024, 150, 500)
             # print value,
-            SERVO_NAME.setPWM(servo_pin, 0, value)
+            servo_obj.setPWM(servo_pin, 0, value)
             print "\r%s " % value,
             time.sleep(0.01)
     except KeyboardInterrupt:

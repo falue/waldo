@@ -73,9 +73,9 @@ def get_servo_connection(servo_pin):
     :param servo:
     """
     hat_adress = servo_pin / 16
-    servo_pin = servo_pin % 16
+    servo_pin %= 16
 
-    hat_adress = hex(64+hat_adress)
+    hat_adress = int(hex(64+hat_adress), 16)
 
     connection = {'servo_pin': servo_pin,
                   'hat_adress': hat_adress
