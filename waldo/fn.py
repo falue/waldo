@@ -9,7 +9,7 @@ from shutil import copyfile
 
 import serial
 
-from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection, set_servo_connection)
+from utils import (read_config, write_config, mapvalue, getfilesize, usbdetection, get_servo_connection, get_mcp_connection)
 
 # install fakeRPiGPIO when not on a raspberry pi
 import RPi.GPIO as GPIO
@@ -24,37 +24,31 @@ except ImportError:
     from fake import PWM
 
 # ===========================================================================
-# MCP3008 CONFIG
-# ===========================================================================
-
-# set GPIO
-GPIO.setmode(GPIO.BCM)
-
-# standard mcp3008 connection pins
-MCP_CONNECTION = {'CLK': 18,
-                  'MISO': 23,
-                  'MOSI': 24,
-                  'CS': 25
-                  }
-
-# set up the SPI interface pins
-GPIO.setup(MCP_CONNECTION['MOSI'], GPIO.OUT)
-GPIO.setup(MCP_CONNECTION['MISO'], GPIO.IN)
-GPIO.setup(MCP_CONNECTION['CLK'], GPIO.OUT)
-GPIO.setup(MCP_CONNECTION['CS'], GPIO.OUT)
-
-# ===========================================================================
 # MAIN VARIABLES
 # ===========================================================================
 
 # set project folder path
 preferences = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 PROJECT_PATH = os.path.expanduser(preferences["PROJECT_PATH"])
+
+# set GPIO
+GPIO.setmode(GPIO.BCM)
+
+for mcps in preferences['mcp']:
+    # set up the SPI interface pins
+    GPIO.setup(preferences['mcp'][mcps]['MOSI'], GPIO.OUT)
+    GPIO.setup(preferences['mcp'][mcps]['MISO'], GPIO.IN)
+    GPIO.setup(preferences['mcp'][mcps]['CLK'], GPIO.OUT)
+    GPIO.setup(preferences['mcp'][mcps]['CS'], GPIO.OUT)
+
+
+
 # PROJECT_PATH = os.path.expanduser('~/waldo_projects')
 
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
 
+# FIXME: use function just before servo usage
 SERVO_NAME = PWM(0x40)  # ServoHat no. 1 (Servo hat no. 2: PWM(0x41) & solder bridge A0)
 
 STEP = 0.0352  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 = 0.0352)
@@ -236,11 +230,13 @@ def record(project, channel, audiofile):
         baudrate = config['connection']['baudrate']
         print "USB port: %s @ %d baud" % (usb_port, baudrate)
     else:
-        CLK = config['connection']['CLK']
-        MOSI = config['connection']['MOSI']
-        MISO = config['connection']['MISO']
-        CS = config['connection']['CS']
         mcp_in = config['channels'][channel]['mcp_in']
+        mcp_connection = get_mcp_connection(mcp_in)
+        CLK = mcp_connection['CLK']
+        MOSI = mcp_connection['MOSI']
+        MISO = mcp_connection['MISO']
+        CS = mcp_connection['CS']
+        mcp_in %= 8
         SERVO_NAME.setPWMFreq(60)
         print "Connection via MCP3008 (%d %d %d %d)" % (CLK, MISO, MOSI, CS)
 
@@ -290,7 +286,7 @@ def record(project, channel, audiofile):
         time.sleep(STEP)
 
     record_file.close()
-    if config['connection']['type'] == "MCP":
+    if config['connection']['type'] == "mcp3008":
         GPIO.cleanup()
     print "Recording ended."
     heavyness = getfilesize(os.path.getsize(os.path.join(PROJECT_PATH, project, channel)), 2)
@@ -400,12 +396,8 @@ def set_connection(project):
                        }
                       )
     elif answer == "mcp":
-        print "Connection set: MCP3008 %s" % '-'.join(MCP_CONNECTION)
-        config.update({'connection': {'type': 'mcp3008',
-                                      'CLK': MCP_CONNECTION['CLK'],
-                                      'MISO': MCP_CONNECTION['MISO'],
-                                      'MOSI': MCP_CONNECTION['MOSI'],
-                                      'CS': MCP_CONNECTION['CS']
+        print "Connection set: MCP3008"
+        config.update({'connection': {'type': 'mcp3008'
                                       }
                        }
                       )
@@ -449,10 +441,10 @@ def set_servo(project, channel):
     servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin)) or default_servo_pin)
     map_min = raw_input("Set minimum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_min)) or default_map_min
     if map_min == 'm':
-        map_min = detect_dof(project, mcp_in, servo_pin)
+        map_min = detect_dof(mcp_in, servo_pin)
     map_max = raw_input("Set maximum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_max)) or default_map_max
     if map_max == 'm':
-        map_max = detect_dof(project, mcp_in, servo_pin)
+        map_max = detect_dof(mcp_in, servo_pin)
     if not default_start_pos:
         default_start_pos = map_min
     start_pos = int(raw_input("Set start position [150-500] (Default: %s; map_min: %s)\n" % (default_start_pos, map_min)) or default_start_pos)
@@ -470,7 +462,7 @@ def set_servo(project, channel):
     write_config(os.path.join(PROJECT_PATH, project), config)
 
 
-def detect_dof(project, mcp_in, servo_pin):
+def detect_dof(mcp_in, servo_pin):
     """
     playback live analog input -> servo_pin
     actually useful for direct replay?
@@ -478,21 +470,22 @@ def detect_dof(project, mcp_in, servo_pin):
     :param servo_pin:
     :return:
     """
-    config = read_config(os.path.join(PROJECT_PATH, project))
-    CLK = config['connection']['CLK']
-    MOSI = config['connection']['MOSI']
-    MISO = config['connection']['MISO']
-    CS = config['connection']['CS']
+    mcp_connection = get_mcp_connection(mcp_in)
+    CLK = mcp_connection['CLK']
+    MOSI = mcp_connection['MOSI']
+    MISO = mcp_connection['MISO']
+    CS = mcp_connection['CS']
+    mcp_in %= 8
 
     # FIXME: exit loop with return not ctrl+c
-
+    print "Press ctrl + c for returning value."
     try:
         while True:
             value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
-            print value,
+            # print value,
             SERVO_NAME.setPWM(servo_pin, 0, value)
             value = mapvalue(value, 0, 1024, 150, 500)
-            print value
+            print "\r%s " % value,
             time.sleep(0.01)
     except KeyboardInterrupt:
         print "\nDefined: %s" % value
@@ -513,7 +506,7 @@ def record_setup(arg):
         audio_file = False
 
     if not os.path.isdir(os.path.join(PROJECT_PATH, project)):
-        newproject(project)
+        new_project(project)
 
     # file exists?
     if os.path.isfile(os.path.join(PROJECT_PATH, project, channel)):
@@ -617,7 +610,7 @@ def play_all(project, play_from=0):
 
 
 
-def newproject(project_name):
+def new_project(project_name):
     path = os.path.join(PROJECT_PATH, project_name)
     if not os.path.exists(path):
         os.makedirs(path)
@@ -631,7 +624,7 @@ def newproject(project_name):
         print "Project already exists."
 
 
-def listprojects(project=False):
+def list_projects(project=False):
     """
     List every channel in every project and point out difficulties.
     :return:

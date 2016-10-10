@@ -1,5 +1,5 @@
 import os
-
+import time
 import yaml
 
 
@@ -67,7 +67,7 @@ def usbdetection():
         time.sleep(0.25)
 
 
-def set_servo_connection(servo_pin):
+def get_servo_connection(servo_pin):
     """
     returns servo pins as int and Servo hat board adress as hex
     :param servo:
@@ -82,3 +82,18 @@ def set_servo_connection(servo_pin):
                  }
 
     return connection
+
+# print set_servo_connection(66)
+
+
+def get_mcp_connection(mcp_pin):
+    """
+    returns connection pin numbers based on input pin
+    :param mcp_pin:
+    :return:
+    """
+    ic = mcp_pin / 8
+    preferences = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+    return preferences['mcp'][ic]
+
+# print get_mcp_connection(8)
