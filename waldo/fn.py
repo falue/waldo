@@ -247,6 +247,11 @@ def record(project, channel, audiofile):
     print "Go!"
     time.sleep(1)
 
+    filelist = os.listdir(os.path.join(PROJECT_PATH, project, 'audio'))
+    audiofiles = [a for a in filelist if a.lower().endswith(('.wav', '.mp3', '.aiff'))]
+    if len(audiofiles):
+        audiofile = audiofiles[0]
+
     # play audio file
     if audiofile:
         processThread0 = threading.Thread(
