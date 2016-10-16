@@ -1,12 +1,17 @@
 PROJECT_PATH: ~/waldo_projects
 mcp:
   0:
-    CLK: 18
-    CS: 25
-    MISO: 23
-    MOSI: 24
+    CLK: 4
+    CS: 17
+    MISO: 18
+    MOSI: 27
   1:
-    CLK: 1
-    CS: 1
-    MISO: 1
-    MOSI: 1
+    CLK: 22
+    CS: 23
+    MISO: 24
+    MOSI: 25
+  2:
+    CLK: 5
+    CS: 6
+    MISO: 12
+    MOSI: 13

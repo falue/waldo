@@ -27,6 +27,9 @@ for key in sorted(buttons):
 main_path = os.path.dirname(os.path.realpath(__file__))
 play = False
 
+# FIXME: on startup:
+# bash_commando = 'cd %s' % main_path
+# set volume to max
 
 while True:
     for key in buttons:
@@ -48,7 +51,6 @@ while True:
                 if play:
                     print "Stop before play; ",
                     os.killpg(os.getpgid(play.pid), signal.SIGTERM)
-                bash_commando = 'cd %s' % main_path
                 print "Start: 'python waldo/main.py %s'" % buttons[key]
                 play = sp.Popen(['python', 'waldo/main.py'] + buttons[key].split(" "), stdout=sp.PIPE,
                                preexec_fn=os.setsid)

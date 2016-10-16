@@ -49,7 +49,7 @@ STEP = 0.01  # pause in record, smoothest 0.02 orig 0.0570 (16 servos * 0.0022 =
 
 REC_REPL = False
 SERVO_READY = {}
-
+SERVO_FREQ = 60
 
 # ===========================================================================
 # FUNCTIONS: PLAYBACKS
@@ -131,7 +131,7 @@ def playback_servo(project, channel, play_from=0):
 
     print "Channelname:\t%s\tServopin:\t%s\tStart @\t%ss" % (channel, servo_pin, play_from)
 
-    servo_obj.setPWMFreq(60)  # Set frequency to 60 Hz
+    servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
     # fill list with file
 
@@ -157,7 +157,6 @@ def playback_servo(project, channel, play_from=0):
 
     print "Servo ready:\t%s\t%s frames\tstart @ %sth frame" % \
           (servo_pin, tot_pulse_size, tot_pulse_size - len(pulse_list))
-
 
     SERVO_READY.update({channel: True})
 
@@ -234,7 +233,7 @@ def record(project, channel, audiofile):
         MISO = mcp_connection['MISO']
         CS = mcp_connection['CS']
         mcp_in %= 8
-        servo_obj.setPWMFreq(60)
+        servo_obj.setPWMFreq(SERVO_FREQ)
         print "Connection via MCP3008 (%d %d %d %d)" % (CLK, MISO, MOSI, CS)
 
     # countdown for slow recordists
@@ -255,6 +254,7 @@ def record(project, channel, audiofile):
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile), ))
         # <- note extra ','
         processThread0.start()
+        REC_REPL = False
     else:
         REC_REPL = True
 
@@ -262,7 +262,7 @@ def record(project, channel, audiofile):
     record_file = open(os.path.join(PROJECT_PATH, project, channel), 'w+')
     start_time = time.time()
 
-    while REC_REPL == True:
+    while REC_REPL:
         # python: listen to usb port or MCP3008...
         if config['connection']['type'] == "usb":
             record = read_usb(usb_port, baudrate)
@@ -429,10 +429,10 @@ def set_servo(project, channel):
     mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7] (Default: %s)\n" % (channel, default_mcp_in)) or default_mcp_in)
     servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin)) or default_servo_pin)
     map_min = raw_input("Set minimum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_min)) or default_map_min
-    if map_min == 'm':
+    if map_min.lower() == 'm':
         map_min = get_dof(mcp_in, servo_pin)
     map_max = raw_input("Set maximum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_max)) or default_map_max
-    if map_max == 'm':
+    if map_max.lower() == 'm':
         map_max = get_dof(mcp_in, servo_pin)
     if not default_start_pos:
         default_start_pos = map_min
@@ -469,6 +469,7 @@ def get_dof(mcp_in, servo_pin):
     servo_connection = get_servo_connection(servo_pin)
     servo_pin = servo_connection['servo_pin']
     servo_obj = PWM(servo_connection['hat_adress'])
+    servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
     # FIXME: exit loop with return not ctrl+c
 
@@ -480,8 +481,10 @@ def get_dof(mcp_in, servo_pin):
             value = mapvalue(value, 0, 1024, 150, 500)
             # print value,
             servo_obj.setPWM(servo_pin, 0, value)
-            print "\r%s " % value,
-            time.sleep(0.01)
+            # print "servo_obj.setPWM(%s, 0, %s)" % (servo_pin, value)
+            # print "\r%s " % bar(value),
+            print "%s %s" % (value, bar(value))
+            time.sleep(0.05)
     except KeyboardInterrupt:
         print "\nDefined: %s" % value
         return value
@@ -604,7 +607,6 @@ def play_all(project, play_from=0):
         # REC_REPL = True
 
 
-
 def new_project(project_name):
     path = os.path.join(PROJECT_PATH, project_name)
     if not os.path.exists(path):
@@ -617,6 +619,45 @@ def new_project(project_name):
         set_connection(project_name)
     else:
         print "Project already exists."
+
+
+def copy_channel(project, channel_old, channel_new, preserve_pin="False"):
+    """
+    copies file channel_old to channel_new with matching config data. preserve pin copies servo pin 1:1 if true, if
+    false increments the total amount of servo channels.
+    :param project:
+    :param channel_old:
+    :param channel_new:
+    :param preserve_pin:
+    :return:
+    """
+    config = read_config(os.path.join(PROJECT_PATH, project))
+
+    if not os.path.isfile(os.path.join(PROJECT_PATH, project, channel_new)) and not channel_new in config['channels']:
+        copyfile(os.path.join(PROJECT_PATH, project, channel_old), os.path.join(PROJECT_PATH, project, channel_new))
+        if preserve_pin == "True":
+            preserve_pin = config['channels'][channel_old]['servo_pin']
+        else:
+            preserve_pin = len(config['channels'])
+
+        config['channels'].update(
+            {
+                channel_new: {
+                            'mcp_in': config['channels'][channel_old]['mcp_in'],
+                            'servo_pin': preserve_pin,
+                            'map_min': config['channels'][channel_old]['map_min'],
+                            'map_max': config['channels'][channel_old]['map_max'],
+                            'start_pos': config['channels'][channel_old]['start_pos']
+                             }
+            }
+        )
+        write_config(os.path.join(PROJECT_PATH, project), config)
+    else:
+        print "File or config data for '%s' already exists." % channel_new
+
+
+def bar(value):
+    return "█" * mapvalue(value, 100, 500, 0, 100)
 
 
 def list_projects(project=False):
@@ -636,14 +677,16 @@ def list_projects(project=False):
         print "List every channel in every project and point out difficulties.\n\n" \
               "------------------------------------------------------------"
 
-    for project in projects:
+    # FIXME: if channel 0 exists multiple times, no errors
+
+    for project in sorted(projects):
         ch = ""
         error = ""
         disturbence = []
         channelfiles_spec = []
         play_channels = read_config(os.path.join(PROJECT_PATH, project))
         # print play_channels
-        for channel, data in play_channels['channels'].iteritems():
+        for channel, data in sorted(play_channels['channels'].iteritems()):
             servo_dof_deg = 89
             if data['servo_pin'] in disturbence:
                 error += "\n╳  Multiple use of servo pin %s (%s)" % (data['servo_pin'], channel)
@@ -663,7 +706,7 @@ def list_projects(project=False):
                 dof_append_temp = dof_append
                 dof_prepend = servo_dof_deg-dof_append_temp
                 dof_append = servo_dof_deg-dof_prepend_temp
-            #ch += "\t%s + %s + %s = %s (%s)\n" % (dof_prepend, dof,
+            # ch += "\t%s + %s + %s = %s (%s)\n" % (dof_prepend, dof,
             # dof_append, dof_prepend+dof+dof_append, servo_dof_deg)
             ch += "\t" +\
                   "▒" * mapvalue(dof_prepend, 0, servo_dof_deg, 0, 53) +\

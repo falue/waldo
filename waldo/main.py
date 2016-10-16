@@ -10,7 +10,7 @@ import sys
 
 
 from fn import (helpfile, set_connection, set_servo, record_setup, singleplay,
-                play_all, new_project, list_projects, legal, GPIO)
+                play_all, new_project, copy_channel, list_projects, legal, GPIO)
 
 
 # path to main dir
@@ -55,6 +55,13 @@ if __name__ == '__main__':
         elif sys.argv[1] == "-n" or sys.argv[1] == "--new":
             # CREATE NEW FOLDER SYSTEM
             new_project(sys.argv[2])
+
+        elif sys.argv[1] == "-cp" or sys.argv[1] == "--copy":
+            # DUPLICATE CHANNEL
+            try:
+                copy_channel(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+            except IndexError:
+                copy_channel(sys.argv[2], sys.argv[3], sys.argv[4])
 
 
         elif sys.argv[1] == "-ls" or sys.argv[1] == "--list":
