@@ -694,7 +694,7 @@ def list_projects(project=False):
         play_channels = read_config(os.path.join(PROJECT_PATH, project))
         # print play_channels
         for channel, data in sorted(play_channels['channels'].iteritems()):
-            servo_dof_deg = 89
+            servo_dof_deg = 90
             if data['servo_pin'] in disturbence:
                 error += "\n╳  Multiple use of servo pin %s (%s)" % (data['servo_pin'], channel)
             disturbence = {data['servo_pin']}
@@ -704,22 +704,29 @@ def list_projects(project=False):
             dof_prepend = mapvalue(data['map_min'], 150, 500, 0, servo_dof_deg)
             dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 500, 0, servo_dof_deg)
             dof = servo_dof_deg-dof_append-dof_prepend
-            ch += "\t%s\t%s\t%s\t%s\t%s\t%s\t%s°\n" % (channel, data['servo_pin'], data['mcp_in'], data['map_min'],
+
+            if len(channel) < 8:
+                name_space = "\t"
+            else:
+                name_space = ""
+
+            ch += "%s\t%s%s\t%s\t%s\t%s\t%s\t%s°\n" % (channel, name_space, data['servo_pin'], data['mcp_in'], data['map_min'],
                                                 data['map_max'], data['start_pos'], dof)
             if dof < 0:
-                ch += "REVERSE"
+                ch += "     ⇆"  # ↩ REVERSED
                 dof *= -1
                 dof_prepend_temp = dof_prepend
                 dof_append_temp = dof_append
                 dof_prepend = servo_dof_deg-dof_append_temp
                 dof_append = servo_dof_deg-dof_prepend_temp
             # ch += "\t%s + %s + %s = %s (%s)\n" % (dof_prepend, dof,
-            # dof_append, dof_prepend+dof+dof_append, servo_dof_deg)
-            ch += "\t" +\
-                  "▒" * mapvalue(dof_prepend, 0, servo_dof_deg, 0, 53) +\
-                  "█" * mapvalue(dof, 0, servo_dof_deg, 0, 51) +\
-                  "▒" * mapvalue(dof_append, 0, servo_dof_deg, 0, 53) +\
-                  "\n"
+            #                                      dof_append, dof_prepend+dof+dof_append, servo_dof_deg)
+
+            bar = "▒" * mapvalue(dof_prepend, 0, servo_dof_deg, 0, 53) +\
+                  "█" * mapvalue(dof, 0, servo_dof_deg, 0, 52) +\
+                  "▒" * mapvalue(dof_append, 0, servo_dof_deg, 0, 53)
+
+            ch += "\t%s\n" % bar
 
         channel_list = os.listdir(os.path.join(PROJECT_PATH, project))
         channelfiles = [a for a in channel_list if not a.startswith(".") and
