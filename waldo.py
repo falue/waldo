@@ -12,7 +12,7 @@ from waldo.utils import (read_config, write_config, get_mcp_connection)
 from waldo.fn import (read_mcp)
 
 # FIXME: remove in production
-# GPIO.setwarnings(False)
+GPIO.setwarnings(False)
 
 GPIO.setmode(GPIO.BCM)  # verwende GPIO pinbezeichnung: BOARD, ...andere BCM
 

@@ -16,7 +16,7 @@ import RPi.GPIO as GPIO
 GPIO.VERBOSE = False
 
 # FIXME: remove in production
-# GPIO.setwarnings(False)
+GPIO.setwarnings(False)
 
 try:
     from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
@@ -483,7 +483,7 @@ def get_dof(mcp_in, servo_pin):
     try:
         while True:
             value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
-            value = mapvalue(value, 0, 1024, 150, 500)
+            value = mapvalue(value, 0, 1024, 500, 150)
             # print value,
             servo_obj.setPWM(servo_pin, 0, value)
             # print "servo_obj.setPWM(%s, 0, %s)" % (servo_pin, value)
