@@ -16,7 +16,7 @@ import RPi.GPIO as GPIO
 GPIO.VERBOSE = False
 
 # FIXME: remove in production
-GPIO.setwarnings(False)
+# GPIO.setwarnings(False)
 
 try:
     from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
@@ -221,7 +221,7 @@ def record(project, channel, audiofile):
     servo_obj = PWM(servo_connection['hat_adress'])
     # servo_obj = PWM(servo_connection['hat_adress'])
 
-    if(config['connection']['type'] == "usb"):
+    if config['connection']['type'] == "usb":
         usb_port = config['connection']['device']
         baudrate = config['connection']['baudrate']
         print "USB port: %s @ %d baud" % (usb_port, baudrate)
@@ -238,6 +238,7 @@ def record(project, channel, audiofile):
 
     # countdown for slow recordists
     print "Start recording in..."
+    time.sleep(1)
     print "3"
     time.sleep(1)
     print "2"
@@ -245,7 +246,7 @@ def record(project, channel, audiofile):
     print "1"
     time.sleep(1)
     print "Go!"
-    time.sleep(1)
+    time.sleep(0.1)
 
     filelist = os.listdir(os.path.join(PROJECT_PATH, project, 'audio'))
     audiofiles = [a for a in filelist if a.lower().endswith(('.wav', '.mp3', '.aiff'))]
@@ -259,9 +260,8 @@ def record(project, channel, audiofile):
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile), ))
         # <- note extra ','
         processThread0.start()
-        REC_REPL = False
-    else:
-        REC_REPL = True
+
+    REC_REPL = True
 
     # record!
     record_file = open(os.path.join(PROJECT_PATH, project, channel), 'w+')
@@ -311,7 +311,7 @@ def read_usb(usbport, baudrate):
 
 
 def read_mcp(adcnum, clockpin, mosipin, misopin, cspin):
-    if ((adcnum > 7) or (adcnum < 0)):
+    if (adcnum > 7) or (adcnum < 0):
         return -1
     GPIO.output(cspin, True)
 
@@ -434,10 +434,10 @@ def set_servo(project, channel):
     mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-7] (Default: %s)\n" % (channel, default_mcp_in)) or default_mcp_in)
     servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin)) or default_servo_pin)
     map_min = raw_input("Set minimum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_min)) or default_map_min
-    if map_min.lower() == 'm':
+    if map_min == 'm':
         map_min = get_dof(mcp_in, servo_pin)
     map_max = raw_input("Set maximum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_max)) or default_map_max
-    if map_max.lower() == 'm':
+    if map_max == 'm':
         map_max = get_dof(mcp_in, servo_pin)
     if not default_start_pos:
         default_start_pos = map_min
@@ -626,7 +626,7 @@ def new_project(project_name):
         print "Project already exists."
 
 
-def copy_channel(project, channel_old, channel_new, preserve_pin="False"):
+def copy_channel(project, channel_old, channel_new, preserve_pin="True"):
     """
     copies file channel_old to channel_new with matching config data. preserve pin copies servo pin 1:1 if true, if
     false increments the total amount of servo channels.
@@ -642,8 +642,10 @@ def copy_channel(project, channel_old, channel_new, preserve_pin="False"):
         copyfile(os.path.join(PROJECT_PATH, project, channel_old), os.path.join(PROJECT_PATH, project, channel_new))
         if preserve_pin == "True":
             preserve_pin = config['channels'][channel_old]['servo_pin']
-        else:
+        elif preserve_pin == "False":
             preserve_pin = len(config['channels'])
+        else:
+            preserve_pin = int(preserve_pin)
 
         config['channels'].update(
             {

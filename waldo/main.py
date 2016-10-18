@@ -63,7 +63,6 @@ if __name__ == '__main__':
             except IndexError:
                 copy_channel(sys.argv[2], sys.argv[3], sys.argv[4])
 
-
         elif sys.argv[1] == "-ls" or sys.argv[1] == "--list":
             # LIST PROJECTS AND CHANNELS
             try:
@@ -71,7 +70,7 @@ if __name__ == '__main__':
             except IndexError:
                 list_projects()
 
-        elif sys.argv[1] == "-cc" or sys.argv[1] == "--copy":
+        elif sys.argv[1] == "-cc" or sys.argv[1] == "--copyright":
             # COPYRIGHT
             legal()
 

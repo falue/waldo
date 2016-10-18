@@ -1,4 +1,17 @@
 PROJECT_PATH: ~/waldo_projects
+button_value:
+  0: 110
+  1: 319
+  2: 589
+  3: 666
+  4: 763
+  5: 910
+buttons:
+  1: -p dummy
+  2: -p count
+  3: -p dummy
+  4: -p song
+  5: cancel
 mcp:
   0:
     CLK: 4

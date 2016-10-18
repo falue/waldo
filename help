@@ -1,23 +1,46 @@
-Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
+Usage: main.py [OPTIONS] COMMAND [ARGS]...
 
   Puppeteering tool for animatronics.
 
 Options:
   -p  --play projectname [start_from]
-                         Playback of every servo in projectname and,
-                         if existent, audio, from startpoint [start_from]
+                        Playback of every servo in projectname and,
+                        if existent, audio, from startpoint [start_from]
+
   -sp --singleplay projectname channelfilename [audiofilename]
-                         Playback of one specific servo though a specific
-                         servo. Optional audioplayback.
+                        Playback of one specific servo though a specific servo. Optional audioplayback.
+
   -r  --record projectname channelfilename [audiofilename]
-                         Record channelfilename. Optional audioplayback.
-  -ss --setservo projectname channelname
-			 Set config file for project - MCPin, servo_pin,
-			 map_min, map_max, start_pos
+                        Record channelfilename. Optional specific audio playback with [audiofilename] (if none is entered, first in folder
+                        will play if existent).
+
+  -ss --setservo projectname channelfilename
+			            Set config file for channelfilename in project - MCPin, servo_pin, map_min, map_max, start_pos
+
   -c  --connection projectname
-                         Set connection type (USB/MCP3008).
-  -n  --new projectname	 Create new project structure.
-  -ls --list             List evey project and every channel with their
-                         ServoHAT-pin-associations.
-  -cc --copy             Show copyright infos.
-  -h  --help             Show this message and exit.
+                        Set connection type (USB/MCP3008).
+
+  -n  --new projectname	Create new project structure.
+
+  -cp  --copy projectname channelfilename_old channelfilename_new [True|False|servo_pin_new]
+                        Duplicate channel_old to channel_new and copy config data associated with channel_old.
+                        Servo_pin gets either copied [True/empty], gets incremented by total channels +1 [False] or gets
+                        user defined by integer value [servo_pin_new].
+
+  -ls --list [projectname]
+                        List evey project (or a specific one with [projectname]) and every channel with their
+                        servo-hat-pin-associations. Point out difficulties like multiple use of servo_pin or missing
+                        files or config data.
+
+  -cc --copyright       Show copyright infos.
+
+  -h  --help            Show this message and exit.
+
+
+Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
+  -cal  --calibrate	reset and recalibrate buttons
+
+
+GENERAL:
+	Connect ethernet cable with "keyboard" attached before running waldo.py (e.g., startup). If you changed the length of the cable,
+	run command "python waldo.py -cal". Restart.
