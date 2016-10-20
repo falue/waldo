@@ -1,22 +1,36 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import os
 import time
 import yaml
+from RPi import GPIO as GPIO
 
 
 def read_config(path):
+    """
+    Read and convert config files.
+    :param path:
+    :return:
+    """
     with open(os.path.join(path, 'config'), 'r') as c:
         config = yaml.load(c.read())
     return config
 
 
 def write_config(path, config):
+    """
+    Write in config file.
+    :param path:
+    :param config:
+    :return:
+    """
     with open(os.path.join(path, 'config'), 'w') as t:
         t.write(yaml.dump(config, default_flow_style=False))
 
 
 def mapvalue(x, in_min, in_max, out_min, out_max):
     """
-    map values fom one range into another
+    Map values from one range to another.
     :param x:
     :param in_min:
     :param in_max:
@@ -24,13 +38,17 @@ def mapvalue(x, in_min, in_max, out_min, out_max):
     :param out_max:
     :return:
     """
-    # FIXME: + 1?
-    return (x - in_min) * (out_max + 1 - out_min) / (in_max - in_min) + out_min
+    # FIXME: ... * (out_max + 1 - out_min ...
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
 def getfilesize(size, precision=2):
-    # human readable filesizes
-    # http://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python
+    """
+    Get human readable filesizes of file.
+    :param size:
+    :param precision:
+    :return:
+    """
     suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
     suffixIndex = 0
     if size < 1024:
@@ -43,7 +61,10 @@ def getfilesize(size, precision=2):
 
 
 def usbdetection():
-    # detect and write usb connection in file 'config'
+    """
+    Detect and write usb connection in file 'config'
+    :return:
+    """
     print "Please unplug and replug desired usb device."
     print "Listening to USB ports..."
     usb_detected = False
@@ -51,14 +72,15 @@ def usbdetection():
     # print "start: ",
     # print len(usbdevices)
 
-    while usb_detected == False:
+    while not usb_detected:
         if len(usbdevices) + 1 == len(
                 os.popen("ls /dev/tty*").read().strip().split("\n")):
             usbdevice = "".join(
                 set(os.popen("ls /dev/tty*").read().strip().split("\n"))
-                .symmetric_difference(usbdevices))
+                    .symmetric_difference(usbdevices))
             print "USB device detected; yours is @ %s." % usbdevice
-            baudrate = raw_input("Set baudrate:\n[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & [return] ")
+            baudrate = raw_input(
+                "Set baudrate:\n[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & [return] ")
             usb_detected = True
             return "%s %s" % (usbdevice, baudrate)
         else:
@@ -69,7 +91,7 @@ def usbdetection():
 
 def get_servo_connection(servo_pin):
     """
-    returns servo pins as int and Servo hat board adress as hex
+    Returns servo pins as int and servo hat board adress as hex.
     :param servo:
     """
     hat_adress = servo_pin / 16
@@ -83,12 +105,10 @@ def get_servo_connection(servo_pin):
 
     return connection
 
-# print set_servo_connection(66)
-
 
 def get_mcp_connection(mcp_pin):
     """
-    returns connection pin numbers based on input pin
+    Returns connection pin numbers based on input pin.
     :param mcp_pin:
     :return:
     """
@@ -96,4 +116,30 @@ def get_mcp_connection(mcp_pin):
     preferences = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
     return preferences['mcp'][ic]
 
-# print get_mcp_connection(8)
+
+def set_gpio_pins(preferences):
+    """
+    Set GPIO pins as used by mcp read/write pins.
+    :param preferences:
+    :return:
+    """
+    # set GPIO
+    GPIO.VERBOSE = False
+    GPIO.setmode(GPIO.BCM)
+
+    for mcps in preferences['mcp']:
+        # set up the SPI interface pins
+        GPIO.setup(preferences['mcp'][mcps]['MOSI'], GPIO.OUT)
+        GPIO.setup(preferences['mcp'][mcps]['MISO'], GPIO.IN)
+        GPIO.setup(preferences['mcp'][mcps]['CLK'], GPIO.OUT)
+        GPIO.setup(preferences['mcp'][mcps]['CS'], GPIO.OUT)
+
+
+def bar(value, max_bar=100):
+    """
+    Visual representation for analog values.
+    :param value:
+    :param max_bar:
+    :return:
+    """
+    return "█" * mapvalue(value, 100, 500, 0, max_bar)

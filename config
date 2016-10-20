@@ -1,30 +1,55 @@
 PROJECT_PATH: ~/waldo_projects
 button_value:
-  0: 110
-  1: 319
-  2: 589
-  3: 666
-  4: 763
-  5: 910
+  0: 111
+  1: 911
+  2: 765
+  3: 665
+  4: 589
+  5: 317
 buttons:
   1: -p dummy
   2: -p count
   3: -p dummy
-  4: -p song
-  5: cancel
+  4: -p dummy
+  5: -p dummy
+  6: -p dummy
+  7: -p dummy
+  8: -p dummy
+  9: -p dummy
+  10: -p dummy
+  11: -p dummy
+  12: -p dummy
+  13: -p dummy
+  14: -p dummy
+  15: -p dummy
+  16: -p dummy
+  17: -p dummy
+  18: -p dummy
+  19: -p dummy
+  20: -p dummy
+  21: -p dummy
+  22: -p dummy
+  23: -p dummy
+  24: -p dummy
+  25: -p dummy
+  26: -p dummy
+  27: -p dummy
+  28: -p dummy
+  29: -p song
+  30: cancel
 mcp:
   0:
     CLK: 4
-    CS: 17
-    MISO: 18
-    MOSI: 27
+    CS: 27
+    MISO: 17
+    MOSI: 18
   1:
     CLK: 22
-    CS: 23
-    MISO: 24
-    MOSI: 25
+    CS: 25
+    MISO: 23
+    MOSI: 24
   2:
     CLK: 5
-    CS: 6
-    MISO: 12
-    MOSI: 13
+    CS: 13
+    MISO: 6
+    MOSI: 12

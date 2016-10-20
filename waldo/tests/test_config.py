@@ -22,5 +22,5 @@ def test_read_write_config():
                             'min': 1024},
               }
 
-    write_config(project_name='test', config=config, path=TEST_PATH)
-    assert config == read_config(project_name='test', path=TEST_PATH)
+    write_config(config=config, path=TEST_PATH)
+    assert config == read_config(path=TEST_PATH)

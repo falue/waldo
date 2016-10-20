@@ -1,27 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-# ===========================================================================
-# WALDO
-# ===========================================================================
-
-import os
 import sys
-
 
 from fn import (helpfile, set_connection, set_servo, record_setup, singleplay,
                 play_all, new_project, copy_channel, list_projects, legal, GPIO)
 
 
-# path to main dir
-
-
-
-# ===========================================================================
-# MAIN
-# ===========================================================================
-
-# if primay/first executed file from bash is waldo.py
+# If primay/first executed file from bash is waldo.py
 if __name__ == '__main__':
     # keyboard interrupt fallback
     try:
@@ -78,9 +63,7 @@ if __name__ == '__main__':
             helpfile()
 
     except IndexError:
-       helpfile()
+        helpfile()
 
     except KeyboardInterrupt:
         print "\nExit by user."
-        # Set GPIO to default
-        GPIO.cleanup()
