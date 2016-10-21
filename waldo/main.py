@@ -66,4 +66,5 @@ if __name__ == '__main__':
         helpfile()
 
     except KeyboardInterrupt:
+        GPIO.cleanup()
         print "\nExit by user."

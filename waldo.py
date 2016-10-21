@@ -10,6 +10,7 @@ import subprocess as sp
 from waldo.utils import read_config, write_config, get_mcp_connection, set_gpio_pins
 from waldo.fn import read_mcp
 
+
 # FIXME: remove in production
 # GPIO.setwarnings(False)
 
@@ -44,7 +45,7 @@ def calibrate():
     :return:
     """
     # Define "zero"-button (eg., nothing is pressed)
-    null_average = average()
+    null_average = average(20)
     last_average = null_average
     print "Button 0: set @ %s [%s ... %s]" % (null_average,
                                               null_average - LIVE_ZONE,
@@ -63,13 +64,13 @@ def calibrate():
     for position in sorted(button):
         if position != 0:
             while not button[position]:
-                curr_average = average()
+                curr_average = average(10)
 
                 # Check if button is pressed
                 if curr_average > null_average + LIVE_ZONE:
 
                     # Measure again to hit correct start of measuring
-                    curr_average = average()
+                    curr_average = average(10)
 
                     # Check of new button not the same as last time
                     if curr_average not in range(last_average - LIVE_ZONE,
@@ -83,7 +84,7 @@ def calibrate():
                                                                    button[position] + LIVE_ZONE)
 
                         # Important - user lets go off button -> new reading!
-                        time.sleep(1)
+                        time.sleep(0.75)
 
     # Finished calibrating
     system_sound("buttons_cal")
@@ -102,16 +103,16 @@ def system_sound(audiofile):
     os.system(bashcommando)  # invoke 'sox' in quiet mode
 
 
-def average():
+def average(count):
     """
     Leveling out 10 MCP3008 readings of analog values.
     :return:
     """
     value = 0
-    for i in range(10):
+    for i in range(count):
         value += read_mcp(0, CLK, MOSI, MISO, CS)
         time.sleep(0.05)
-    return value / 10
+    return value / count
 
 
 def play(args):
@@ -136,88 +137,107 @@ def cancel():
         print "Cancel PLAY"
         os.killpg(os.getpgid(PLAY.pid), signal.SIGTERM)
         PLAY = False
-        time.sleep(1)
+        time.sleep(0.5)
+        print "Waiting for input via control panel 'rygby'..."
     else:
-        # print "nothing to cancel"
+        # print "Nothing to cancel"
+        time.sleep(0.5)
         pass
 
 
 # Main loop
 if __name__ == '__main__':
+    try:
+        # Set GPIO pins as used by mcp read/write pins
+        set_gpio_pins(config)
 
-    # Set GPIO pins as used by mcp read/write pins
-    set_gpio_pins(config)
+        print "==============================="
+        print " _ _ _ _____ __    ____  _____ "
+        print "| | | |  [] |  |  |    \|     | analog"
+        print "| | | |     |  |__|  [] |  [] | digital"
+        print "|_____|__||_|_____|____/|_____| pupeteering"
+        print "_______________________________"
 
-    print "==============================="
-    print " _ _ _ _____ __    ____  _____ "
-    print "| | | |  [] |  |  |    \|     | analog"
-    print "| | | |     |  |__|  [] |  [] | digital"
-    print "|_____|__||_|_____|____/|_____| pupeteering"
-    print "_______________________________"
+        # If arg is submitted
+        if len(sys.argv) > 1:
+            arg = sys.argv[1]
+        else:
+            arg = False
 
-    # Buttons not yet calibrated
-    if 'button_value' not in config or len(sys.argv) > 1:
-        print "Calibrate wire controls: Press first 5 buttons for approx. 1 sec each."
-        ranges = calibrate()
+        # Print helpfile
+        if arg == "-h" or arg == "--help":
+            with open(os.path.join(os.path.dirname(__file__), 'help'), 'r') as f:
+                print f.read()
+            GPIO.cleanup()
+            raise SystemExit
 
-        # Update congig list
-        config.update({'button_value': {
-            0: ranges[0],
-            1: ranges[1],
-            2: ranges[2],
-            3: ranges[3],
-            4: ranges[4],
-            5: ranges[5]
-        }})
+        # Start calibration
+        elif arg == "-cal" or arg == "--calibrate" or 'button_value' not in config:
+            print "Calibrate wire controls: Press first 5 buttons for approx. 1 sec each. Wait for 'beep' to release."
+            ranges = calibrate()
 
-        # Write data to main config
-        write_config(os.path.dirname(os.path.realpath(__file__)), config)
-        print "Buttons calibrated."
+            # Update congig list
+            config.update({'button_value': {
+                0: ranges[0],
+                1: ranges[1],
+                2: ranges[2],
+                3: ranges[3],
+                4: ranges[4],
+                5: ranges[5]
+            }})
 
-    button_value = config['button_value'].copy()
+            # Write data to main config
+            write_config(os.path.dirname(os.path.realpath(__file__)), config)
+            print "Buttons calibrated."
 
-    print "Waiting for input via control panel'rygby'..."
 
-    # Change to home directory
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        button_value = config['button_value'].copy()
 
-    # Set max volume
-    bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'
-    os.system(bashcommando)
+        print "Waiting for input via control panel 'rygby'..."
 
-    # Wait for button presses...
-    while True:
-        for mcp_in in range(len(BUTTONS) / 5):
-            # Read analog value for first 5 buttons
-            value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
-            button = mcp_in * 5
-            # print "mcp_in %s: %s %s\t|\t" % (mcp_in, button / 5, value)
+        # Change to home directory
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-            # If nothing is pressed ("zero"-button)
-            if value <= button_value[0] + LIVE_ZONE:
-                continue
+        # Set max volume
+        bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'
+        os.system(bashcommando)
 
-            # Cycle all 5 buttons
-            for i in range(1, 6):
-                if button_value[i] - LIVE_ZONE <= value <= button_value[i] + LIVE_ZONE:
-                    # Cancel any ongoing 'play' instances
-                    cancel()
-                    button_number = button + i
+        # Wait for button presses...
+        while True:
+            for mcp_in in range(len(BUTTONS) / 5):
+                # Read analog value for first 5 buttons
+                value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
+                button = mcp_in * 5
+                # print "mcp_in %s: %s %s\t|\t" % (mcp_in, button / 5, value)
 
-                    # Check if special 'Cancel' button
-                    if button_number == 30:
-                        # print "Button '30'!"
-                        continue
+                # If nothing is pressed ("zero"-button)
+                if value <= button_value[0] + LIVE_ZONE:
+                    continue
 
-                    # Set commands as defined in main config file
-                    command = BUTTONS[button_number].split(" ")
+                # Cycle all 5 buttons
+                for i in range(1, 6):
+                    if button_value[i] - LIVE_ZONE <= value <= button_value[i] + LIVE_ZONE:
+                        # Cancel any ongoing 'play' instances
+                        cancel()
+                        button_number = button + i
 
-                    play(command)
+                        # Check if special 'Cancel' button
+                        if button_number == 30:
+                            # print "Button '30'!"
+                            continue
 
-                    print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
-                    time.sleep(1)
+                        # Set commands as defined in main config file
+                        command = BUTTONS[button_number].split(" ")
 
-        time.sleep(0.05)
+                        play(command)
 
-    # Set back GPIO pins
-    GPIO.cleanup()
+                        print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
+                        time.sleep(0.75)
+
+            time.sleep(0.05)
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+        print "\nExit by user."
+
+

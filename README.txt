@@ -8,3 +8,14 @@ who builds a robot to amplify his limited abilities².
 
 ¹) http://www.youtube.com/watch?v=dP6TUB7KQc4
 ²) http://muppet.wikia.com/wiki/Waldo_(remote_manipulator)
+
+===============================
+ _ _ _ _____ __    ____  _____ 
+| | | |  [] |  |  |    \|     | analog
+| | | |     |  |__|  [] |  [] | digital
+|_____|__||_|_____|____/|_____| pupeteering
+_______________________________
+
+Startup
+	On startup of the raspberryPi, file "waldo.py" gets executed.
+	Defined @ /etc/rc.local

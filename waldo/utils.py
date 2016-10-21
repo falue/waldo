@@ -80,7 +80,8 @@ def usbdetection():
                     .symmetric_difference(usbdevices))
             print "USB device detected; yours is @ %s." % usbdevice
             baudrate = raw_input(
-                "Set baudrate:\n[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & [return] ")
+                "Set baudrate:\n[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & "
+                "[return] (Default: 9600)\n") or 9600
             usb_detected = True
             return "%s %s" % (usbdevice, baudrate)
         else:
@@ -135,11 +136,25 @@ def set_gpio_pins(preferences):
         GPIO.setup(preferences['mcp'][mcps]['CS'], GPIO.OUT)
 
 
-def bar(value, max_bar=100):
+def bar(value, max_bar=30):
     """
     Visual representation for analog values.
     :param value:
     :param max_bar:
     :return:
     """
-    return "█" * mapvalue(value, 100, 500, 0, max_bar)
+    if value > 0:
+        return "█" * (mapvalue(value, 100, 500, 0, max_bar)-1) + "░"
+    else:
+        return "░"
+
+
+def get_first_file(path, suffix=False):
+    if not suffix:
+        suffix = ''
+    filelist = os.listdir(path)
+    audiofiles = [a for a in filelist if a.lower().endswith(suffix) and not a.startswith('.')]
+    if len(audiofiles):
+        return audiofiles[0]
+    else:
+        return False

@@ -1,46 +1,11 @@
-Usage: main.py [OPTIONS] COMMAND [ARGS]...
-
-  Puppeteering tool for animatronics.
-
-Options:
-  -p  --play projectname [start_from]
-                        Playback of every servo in projectname and,
-                        if existent, audio, from startpoint [start_from]
-
-  -sp --singleplay projectname channelfilename [audiofilename]
-                        Playback of one specific servo though a specific servo. Optional audioplayback.
-
-  -r  --record projectname channelfilename [audiofilename]
-                        Record channelfilename. Optional specific audio playback with [audiofilename] (if none is entered, first in folder
-                        will play if existent).
-
-  -ss --setservo projectname channelfilename
-			            Set config file for channelfilename in project - MCPin, servo_pin, map_min, map_max, start_pos
-
-  -c  --connection projectname
-                        Set connection type (USB/MCP3008).
-
-  -n  --new projectname	Create new project structure.
-
-  -cp  --copy projectname channelfilename_old channelfilename_new [True|False|servo_pin_new]
-                        Duplicate channel_old to channel_new and copy config data associated with channel_old.
-                        Servo_pin gets either copied [True/empty], gets incremented by total channels +1 [False] or gets
-                        user defined by integer value [servo_pin_new].
-
-  -ls --list [projectname]
-                        List evey project (or a specific one with [projectname]) and every channel with their
-                        servo-hat-pin-associations. Point out difficulties like multiple use of servo_pin or missing
-                        files or config data.
-
-  -cc --copyright       Show copyright infos.
-
-  -h  --help            Show this message and exit.
-
-
 Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
-  -cal  --calibrate	reset and recalibrate buttons
+Options:
+  -cal  --calibrate     reset and recalibrate buttons
 
+  -h  --help            Args: None
+                        Show this message and exit.
 
-GENERAL:
-	Connect ethernet cable with "keyboard" attached before running waldo.py (e.g., startup). If you changed the length of the cable,
-	run command "python waldo.py -cal". Restart.
+General:
+  Connect raspberryPi with "keyboard" RYGBY before starting the raspberryPi; before running waldo.py.
+  If you changed the length of the cable, run command "python waldo.py -cal". Restart raspberryPi or waldo.py.
+  Buttons get their commands from the main config file (list "buttons").
