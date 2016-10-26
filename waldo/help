@@ -1,0 +1,36 @@
+Usage: main.py COMMAND [ARGS]...
+Commands:
+  -h  --help            Args: None
+                        Show this message and exit.
+
+  -c  --connection      Args: project
+                        Interactive dialog to set the type of connection for recording (either USB or MCP3008).
+
+  -r  --record          Args: project channel [audio_file]
+                        Start recording a channel within a project. If provided, play the audio_file, otherwise, play the first audio file in the project folder.
+
+  -ss --setservo        Args: project channel 
+                        Interactive dialog to configure the settings of the servo on a channel within a project. The settings will be stored in the config file of the project.
+
+  -sp --singeplay       Args: project channel [audio_file]
+                        Play only a single channel of a project. If the audio_file is provided, it will be played. Otherwise, the first audio file in the project folder is played.
+
+  -p  --play            Args: project [play_from]
+                        Play all channels of a project, and the first audio file in the project folder. Play_from specifies the offset in seconds with which the servos and the audio are started.
+
+  -n  --new             Args: project
+                        Create a new project.
+
+  -cp --copy            Args: project channel_old channel_new [preserve_pin]
+                        Copy the channel_old of project, and store it in channel_new. preserve_pin is either 'pin_inc', to use a new channel (default), 'pin_copy' to use the same pin as channel_old, or an integer to specify the servo pin directly.
+
+  -ls --list            Args: [project]
+                        List all channels in all projects. If project is provided, only list channels of that project.
+
+  -cc --copyright       Args: None
+                        Show copyright information.
+
+Arguments:
+  project               This the name of a project folder.
+  channel               This is a channel within a project.
+
