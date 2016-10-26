@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 import subprocess as sp
 
 from waldo.utils import read_config, write_config, get_mcp_connection, set_gpio_pins
-from waldo.fn import read_mcp
+from waldo.fn import read_mcp, servo_start_pos
 
 
 # FIXME: remove in production
@@ -33,7 +33,8 @@ MOSI = mcp_connection['MOSI']
 MISO = mcp_connection['MISO']
 CS = mcp_connection['CS']
 
-PLAY = False
+PLAY = [False, False]  # thread, projectname
+activity = 0
 
 # read all buttons from config file
 BUTTONS = config['buttons'].copy()
@@ -44,6 +45,7 @@ def calibrate():
     (Re-) Calibrate buttons. Necessary because different lengths of ethernet cables have different resistances.
     :return:
     """
+    print "Calibrate wire controls: Press first 5 buttons for approx. 1 sec each. Wait for 'beep' to release."
     # Define "zero"-button (eg., nothing is pressed)
     null_average = average(20)
     last_average = null_average
@@ -72,7 +74,7 @@ def calibrate():
                     # Measure again to hit correct start of measuring
                     curr_average = average(10)
 
-                    # Check of new button not the same as last time
+                    # Check if new button not the same as last time
                     if curr_average not in range(last_average - LIVE_ZONE,
                                                  last_average + LIVE_ZONE):
                         # Define new button setup
@@ -120,10 +122,13 @@ def play(args):
     Run waldo/main.py with args in the background, hidden.
     """
     global PLAY
-    PLAY = sp.Popen(['python', 'waldo/main.py'] + args,
+    # set to thread
+    PLAY[0] = sp.Popen(['python', 'waldo/main.py'] + args,
                     stdout=sp.PIPE,  # hide prints from function
                     preexec_fn=os.setsid
                     )
+    # set to project name
+    PLAY[1] = args[1]
 
 
 def cancel():
@@ -133,15 +138,17 @@ def cancel():
     """
     global PLAY
 
-    if PLAY:
-        print "Cancel PLAY"
-        os.killpg(os.getpgid(PLAY.pid), signal.SIGTERM)
-        PLAY = False
-        time.sleep(0.5)
-        print "Waiting for input via control panel 'rygby'..."
+    if PLAY[0]:
+        print "\nCancel PLAY '%s'" % PLAY[1]
+        os.killpg(os.getpgid(PLAY[0].pid), signal.SIGTERM)
+        servo_start_pos(PLAY[1])
+        PLAY[0] = False
+        PLAY[1] = False
+        time.sleep(0.25)
+        print "Waiting for input via control panel 'rigby'..."
     else:
         # print "Nothing to cancel"
-        time.sleep(0.5)
+        time.sleep(0.25)
         pass
 
 
@@ -173,7 +180,6 @@ if __name__ == '__main__':
 
         # Start calibration
         elif arg == "-cal" or arg == "--calibrate" or 'button_value' not in config:
-            print "Calibrate wire controls: Press first 5 buttons for approx. 1 sec each. Wait for 'beep' to release."
             ranges = calibrate()
 
             # Update congig list
@@ -192,7 +198,7 @@ if __name__ == '__main__':
 
         button_value = config['button_value'].copy()
 
-        print "Waiting for input via control panel 'rygby'..."
+        print "Waiting for input via control panel 'rigby'..."
 
         # Change to home directory
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -232,6 +238,16 @@ if __name__ == '__main__':
 
                         print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
                         time.sleep(0.75)
+
+            # show activity
+            if PLAY[0]:
+                if activity <= 40:
+                    sys.stdout.write('.')
+                    activity += 1
+                else:
+                    sys.stdout.write('\x1b[2K\r')  # delete line (\x1b[2K)and go to beginning of line (\r)
+                    activity = 0
+                sys.stdout.flush()
 
             time.sleep(0.05)
 
