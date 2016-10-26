@@ -190,7 +190,6 @@ if __name__ == '__main__':
             write_config(os.path.dirname(os.path.realpath(__file__)), config)
             print "Buttons calibrated."
 
-
         button_value = config['button_value'].copy()
 
         print "Waiting for input via control panel 'rygby'..."

@@ -1,19 +1,19 @@
 PROJECT_PATH: ~/waldo_projects
 button_value:
-  0: 111
-  1: 911
-  2: 766
-  3: 664
-  4: 589
-  5: 317
+  0: 4
+  1: 1018
+  2: 833
+  3: 706
+  4: 612
+  5: 265
 buttons:
-  1: -p dummy1
-  2: -p dummy2
-  3: -p dummy3
-  4: -p dummy4
-  5: -p dummy5
+  1: -p count
+  2: -p husten
+  3: -p open_door
+  4: -p hatters
+  5: -p hatters 60
   6: -p dummy
-  7: -p count
+  7: -p dummy
   8: -p dummy
   9: -p dummy
   10: -p dummy
@@ -35,7 +35,7 @@ buttons:
   26: -p dummy
   27: -p dummy
   28: -p dummy
-  29: -p dummy 10
+  29: -p start
   30: cancel
 mcp:
   0:

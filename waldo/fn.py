@@ -395,8 +395,8 @@ def set_servo(project, channel):
     if channel not in config['channels']:
         default_mcp_in = 8
         default_servo_pin = 0
-        default_map_min = 150
-        default_map_max = 500
+        default_map_min = 100
+        default_map_max = 600
         default_start_pos = False
     else:
         default_mcp_in = config['channels'][channel]["mcp_in"]
@@ -412,23 +412,23 @@ def set_servo(project, channel):
     servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin))
                     or default_servo_pin)
 
-    map_min = raw_input("Set minimum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_min))\
+    map_min = raw_input("Set minimum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_min))\
               or default_map_min
     if map_min == 'm':
         map_min = get_dof(mcp_in, servo_pin)
-        # Catch pressing enter and prevent next raw_input to get executed
+        # FIXME: Catch pressing enter and prevent next raw_input to get executed
         raw_input("")
 
-    map_max = raw_input("Set maximum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_max))\
+    map_max = raw_input("Set maximum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_max))\
               or default_map_max
     if map_max == 'm':
         map_max = get_dof(mcp_in, servo_pin)
-        # Catch pressing enter and prevent next raw_input to get executed
+        # FIXME: Catch pressing enter and prevent next raw_input to get executed
         raw_input("")
     if not default_start_pos:
         default_start_pos = map_min
 
-    start_pos = int(raw_input("Set start position [150-500] (Default: %s; map_min: %s)\n"
+    start_pos = int(raw_input("Set start position [100-600] (Default: %s; map_min: %s)\n"
                               % (default_start_pos, map_min)) or default_start_pos)
 
     # Update config list
@@ -449,7 +449,7 @@ def set_servo(project, channel):
 def get_dof(mcp_in, servo_pin):
     """
     Move servo, directly controlled via user input. Standard boundaries comply.
-    On ctrl & c return of current value.
+    On enter return of current value.
     :param mcp_in:
     :param servo_pin:
     :return:
@@ -476,7 +476,7 @@ def get_dof(mcp_in, servo_pin):
 
     while True:
         value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
-        value = mapvalue(value, 0, 1024, 150, 500)
+        value = mapvalue(value, 0, 1024, 600, 100)
         # print value,
         servo_obj.setPWM(servo_pin, 0, value)
         # print "servo_obj.setPWM(%s, 0, %s)" % (servo_pin, value)
@@ -746,8 +746,8 @@ def list_projects(project=False):
                 channelfiles_spec.append(channel)
 
                 # Calculate visual representation for max degrees of angular freedom
-                dof_prepend = mapvalue(data['map_min'], 150, 500, 0, servo_dof_deg)
-                dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 500, 0, servo_dof_deg)
+                dof_prepend = mapvalue(data['map_min'], 100, 600, 0, servo_dof_deg)
+                dof_append =  servo_dof_deg-mapvalue(data['map_max'], 100, 600, 0, servo_dof_deg)
                 dof = servo_dof_deg-dof_append-dof_prepend
 
                 # Check if channel was reversed, change visual representation
