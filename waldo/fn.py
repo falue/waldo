@@ -20,6 +20,10 @@ FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.WARNING)  # DEBUG / INFO / WARNING
 logger = logging.getLogger()
 
+
+
+
+
 # Import fake library if not @ RaspberryPi
 try:
     from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
@@ -77,6 +81,7 @@ def wait_for_servos():
         sys.stdout.flush()
         if all(value == True for value in SERVO_READY.values()):
             print "\nAll servos ready."
+            change_glob_rec_repl(True)
             REC_REPL = True
             return
         time.sleep(0.05)
@@ -207,7 +212,7 @@ def servo_start_pos(project, channels=False):
         # print 'Servo playback to start: %s\tStart position: %d' % (channel, start_pos)
     print "All servos moved to start_pos."
 
-    time.sleep(0.25)
+    time.sleep(0.35)
 
     # stop channels
     for channel in channels:
@@ -224,6 +229,14 @@ def servo_start_pos(project, channels=False):
         logger.info('Servo playback to start: %s' % (channel))
         # print 'Servo playback to die: %s' % (channel)
     print "All servos cut off."
+
+    change_glob_rec_repl(False)
+
+
+def change_glob_rec_repl(on_off):
+    # set general global var to false
+    PREFERENCES.update({'REC_REPL': on_off})
+    write_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."), PREFERENCES)
 
 def record(project, channel, audiofile):
     """

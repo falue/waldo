@@ -138,7 +138,11 @@ def cancel():
     """
     global PLAY
 
-    if PLAY[0]:
+    # is actual playing?
+    config = read_config(os.path.dirname(os.path.realpath(__file__)))
+    is_replaying = config["REC_REPL"]
+
+    if is_replaying or PLAY[0]:  # if PLAY[0]
         print "\nCancel PLAY '%s'" % PLAY[1]
         os.killpg(os.getpgid(PLAY[0].pid), signal.SIGTERM)
         servo_start_pos(PLAY[1])
@@ -209,6 +213,7 @@ if __name__ == '__main__':
 
         # Wait for button presses...
         while True:
+
             for mcp_in in range(len(BUTTONS) / 5):
                 # Read analog value for first 5 buttons
                 value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
@@ -239,8 +244,12 @@ if __name__ == '__main__':
                         print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
                         time.sleep(0.75)
 
+            # Read if project is ongoing
+            config = read_config(os.path.dirname(os.path.realpath(__file__)))
+            REC_REPL = config["REC_REPL"]
+
             # show activity
-            if PLAY[0]:
+            if REC_REPL:
                 if activity <= 40:
                     sys.stdout.write('.')
                     activity += 1
