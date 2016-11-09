@@ -20,6 +20,10 @@ FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.WARNING)  # DEBUG / INFO / WARNING
 logger = logging.getLogger()
 
+
+
+
+
 # Import fake library if not @ RaspberryPi
 try:
     from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
@@ -33,7 +37,6 @@ PROJECT_PATH = os.path.expanduser(PREFERENCES["PROJECT_PATH"])
 # Make project folder if inexistent
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
-
 
 # Globals
 REC_REPL = False
@@ -50,8 +53,6 @@ def playback_audio(audiofile, play_from=0):
     """
     global REC_REPL
 
-    wait_for_servos()
-
     print "Audio start:\t%s" % audiofile
 
     # Play from beginning or play_from
@@ -63,7 +64,7 @@ def playback_audio(audiofile, play_from=0):
     os.system(bashcommando)  # invoke 'sox' in quiet mode
 
     REC_REPL = False
-    print "Audio stopp:\t%s" % audiofile
+    print "Audio stop:\t%s" % audiofile
 
 
 def wait_for_servos():
@@ -72,14 +73,18 @@ def wait_for_servos():
     :return:
     """
     global REC_REPL
+    print 'Wait for all servos to be ready',
 
     # Wait for every servo to catch up
     while not REC_REPL:
-        print "Wait for all servos to be ready..."
+        sys.stdout.write('.')
+        sys.stdout.flush()
         if all(value == True for value in SERVO_READY.values()):
-            print "All servos ready."
+            print "\nAll servos ready."
+            change_glob_rec_repl(True)
             REC_REPL = True
-        time.sleep(0.1)
+            return
+        time.sleep(0.05)
 
 
 def playback_servo(project, channel, play_from=0):
@@ -93,6 +98,9 @@ def playback_servo(project, channel, play_from=0):
 
     global SERVO_READY
     play_from = float(play_from)
+
+    # TODO: function servo init?
+    # servo_init(project, channel)
 
     # Read config data for channel
     config = read_config(os.path.join(PROJECT_PATH, project))
@@ -121,7 +129,7 @@ def playback_servo(project, channel, play_from=0):
     #     play_from = float(play_from)
     #     del_before = bisect.bisect_left(pulse_list, (play_from, None))
     #     pulse_list = pulse_list[del_before:]
-    #
+
     logger.info("Servo ready:\t%s\t%s frames" %
                 (servo_pin, len(pulse_list)))
 
@@ -153,13 +161,82 @@ def playback_servo(project, channel, play_from=0):
             pass
 
     # Finisehd playing, go to startpositions and cut connection to servo
-    servo_obj.setPWM(servo_pin, 0, start_pos)  # Go to start position
-    # Time for moving servo
-    time.sleep(0.75)
-    servo_obj.setPWM(servo_pin, 4096, 0)  # completly off
-    logger.info('Servo playback stopped: %s\tStart position: %d' % (channel,
-                                                                    start_pos))
+    servo_start_pos(project, {channel})
 
+
+def servo_init():
+    # # Read config data for channel
+    # config = read_config(os.path.join(PROJECT_PATH, project))
+    # servo_pin = config['channels'][channel]['servo_pin']
+    # map_min = config['channels'][channel]['map_min']
+    # map_max = config['channels'][channel]['map_max']
+    # start_pos = config['channels'][channel]['start_pos']
+    #
+    # # Get servo pin and set servo hat adress
+    # servo_connection = get_servo_connection(servo_pin)
+    # servo_pin = servo_connection['servo_pin']
+    # servo_obj = PWM(servo_connection['hat_adress'])
+    # servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
+    pass
+
+
+def servo_start_pos(project, channels=False):
+    """
+    Go to startpositions and cut connection to servo
+    :param project:
+    :param channels:
+    :return:
+    """
+
+    # Read config data for channel
+    config = read_config(os.path.join(PROJECT_PATH, project))
+
+    # If channel is not submitted
+    if not channels:
+        channels = config['channels']
+
+    # go to start and stop channels split because time.sleep is needed just once
+    # go to start position
+    for channel in channels:
+        servo_pin = config['channels'][channel]['servo_pin']
+        start_pos = config['channels'][channel]['start_pos']
+
+        # Get servo pin and set servo hat adress
+        servo_connection = get_servo_connection(servo_pin)
+        servo_pin = servo_connection['servo_pin']
+        servo_obj = PWM(servo_connection['hat_adress'])
+        # servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
+
+        servo_obj.setPWM(servo_pin, 0, start_pos)  # Go to start position
+        logger.info('Servo playback to start: %s\tStart position: %d' % (channel, start_pos))
+        # print 'Servo playback to start: %s\tStart position: %d' % (channel, start_pos)
+    print "All servos moved to start_pos."
+
+    time.sleep(0.35)
+
+    # stop channels
+    for channel in channels:
+        servo_pin = config['channels'][channel]['servo_pin']
+
+        # Get servo pin and set servo hat adress
+        servo_connection = get_servo_connection(servo_pin)
+        servo_pin = servo_connection['servo_pin']
+        servo_obj = PWM(servo_connection['hat_adress'])
+        # servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
+
+        # Time for moving servo
+        servo_obj.setPWM(servo_pin, 4096, 0)  # completly off
+        logger.info('Servo playback to start: %s' % (channel))
+        # print 'Servo playback to die: %s' % (channel)
+    print "All servos cut off."
+
+    change_glob_rec_repl(False)
+
+
+def change_glob_rec_repl(on_off):
+    # set general global var to false
+    PREFERENCES.update({'REC_REPL': on_off})
+    write_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."), PREFERENCES)
 
 def record(project, channel, audiofile):
     """
@@ -395,8 +472,8 @@ def set_servo(project, channel):
     if channel not in config['channels']:
         default_mcp_in = 8
         default_servo_pin = 0
-        default_map_min = 150
-        default_map_max = 500
+        default_map_min = 100
+        default_map_max = 600
         default_start_pos = False
     else:
         default_mcp_in = config['channels'][channel]["mcp_in"]
@@ -412,23 +489,23 @@ def set_servo(project, channel):
     servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin))
                     or default_servo_pin)
 
-    map_min = raw_input("Set minimum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_min))\
+    map_min = raw_input("Set minimum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_min))\
               or default_map_min
     if map_min == 'm':
         map_min = get_dof(mcp_in, servo_pin)
-        # Catch pressing enter and prevent next raw_input to get executed
+        # FIXME: Catch pressing enter and prevent next raw_input to get executed
         raw_input("")
 
-    map_max = raw_input("Set maximum position [150-500] (Default: %s; 'm' for manual detection)\n" % (default_map_max))\
+    map_max = raw_input("Set maximum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_max))\
               or default_map_max
     if map_max == 'm':
         map_max = get_dof(mcp_in, servo_pin)
-        # Catch pressing enter and prevent next raw_input to get executed
+        # FIXME: Catch pressing enter and prevent next raw_input to get executed
         raw_input("")
     if not default_start_pos:
         default_start_pos = map_min
 
-    start_pos = int(raw_input("Set start position [150-500] (Default: %s; map_min: %s)\n"
+    start_pos = int(raw_input("Set start position [100-600] (Default: %s; map_min: %s)\n"
                               % (default_start_pos, map_min)) or default_start_pos)
 
     # Update config list
@@ -449,7 +526,7 @@ def set_servo(project, channel):
 def get_dof(mcp_in, servo_pin):
     """
     Move servo, directly controlled via user input. Standard boundaries comply.
-    On ctrl & c return of current value.
+    On enter return of current value.
     :param mcp_in:
     :param servo_pin:
     :return:
@@ -476,7 +553,7 @@ def get_dof(mcp_in, servo_pin):
 
     while True:
         value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
-        value = mapvalue(value, 0, 1024, 150, 500)
+        value = mapvalue(value, 0, 1024, 600, 100)
         # print value,
         servo_obj.setPWM(servo_pin, 0, value)
         # print "servo_obj.setPWM(%s, 0, %s)" % (servo_pin, value)
@@ -566,8 +643,7 @@ def singleplay(arg):
     wait_for_servos()
 
     if not audiofile:
-        suffix = ('.wav', '.mp3', '.aiff')
-        audiofile = get_first_file(os.path.join(PROJECT_PATH, project, 'audio'), suffix)
+        audiofile = get_first_file(os.path.join(PROJECT_PATH, project, 'audio'), ('.wav', '.mp3', '.aiff'))
 
     # Play audiofile
     if audiofile:
@@ -610,8 +686,7 @@ def play_all(project, play_from=0):
     wait_for_servos()
 
     # Get audiofile
-    suffix = ('.wav', '.mp3', '.aiff')
-    audiofile = get_first_file(os.path.join(PROJECT_PATH, project, 'audio'), suffix)
+    audiofile = get_first_file(os.path.join(PROJECT_PATH, project, 'audio'), ('.wav', '.mp3', '.aiff'))
 
     # Play audio thread when set:
     if audiofile:
@@ -746,8 +821,8 @@ def list_projects(project=False):
                 channelfiles_spec.append(channel)
 
                 # Calculate visual representation for max degrees of angular freedom
-                dof_prepend = mapvalue(data['map_min'], 150, 500, 0, servo_dof_deg)
-                dof_append =  servo_dof_deg-mapvalue(data['map_max'], 150, 500, 0, servo_dof_deg)
+                dof_prepend = mapvalue(data['map_min'], 100, 600, 0, servo_dof_deg)
+                dof_append =  servo_dof_deg-mapvalue(data['map_max'], 100, 600, 0, servo_dof_deg)
                 dof = servo_dof_deg-dof_append-dof_prepend
 
                 # Check if channel was reversed, change visual representation

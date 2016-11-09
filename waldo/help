@@ -1,36 +1,48 @@
-Usage: main.py COMMAND [ARGS]...
-Commands:
+Usage: main.py [OPTIONS] COMMAND [ARGS]...
+
+  Puppeteering tool for animatronics.
+
+Options:
+  -c  --connection      Args: projectname
+                        Set new connection type (USB/MCP3008) for projectname.
+
+  -cc --copyright       Args: None
+                        Show copyright infos.
+
+  -cp  --copy           Args: projectname channelfilename_old channelfilename_new [pin_inc|pin_copy|pin_new]
+                        Duplicate channel_old to channel_new in projectname and copy config data associated with
+                        channel_old.
+                        Servo_pin gets either incremented by total channels + 1 [pin_inc] (default), copied from old
+                        [pin_copy], or gets user defined by integer value [pin_new].
+
   -h  --help            Args: None
                         Show this message and exit.
 
-  -c  --connection      Args: project
-                        Interactive dialog to set the type of connection for recording (either USB or MCP3008).
+  -ls --list            Args: [projectname]
+                        List evey project (or a specific one with [projectname]) and every channel with their
+                        servo-hat-pin-associations. Point out difficulties like multiple use of servo_pin or missing
+                        files or config data.
 
-  -r  --record          Args: project channel [audio_file]
-                        Start recording a channel within a project. If provided, play the audio_file, otherwise, play the first audio file in the project folder.
+  -n  --new             Args: projectname
+                        Create new project with the necessary structure.
 
-  -ss --setservo        Args: project channel 
-                        Interactive dialog to configure the settings of the servo on a channel within a project. The settings will be stored in the config file of the project.
+  -p  --play            Args: projectname [start_from]
+                        Playback of every servo channel in projectname and, if existent, audiofile (alphabetical first
+                        in folder), optional from startpoint [start_from] in seconds.
 
-  -sp --singeplay       Args: project channel [audio_file]
-                        Play only a single channel of a project. If the audio_file is provided, it will be played. Otherwise, the first audio file in the project folder is played.
+  -r  --record          Args: projectname channelfilename [audiofilename]
+                        Record channelfilename in projectname. Optional specific audio playback with [audiofilename]
+                        (if none is entered, alphabetical first in folder will play if existent).
 
-  -p  --play            Args: project [play_from]
-                        Play all channels of a project, and the first audio file in the project folder. Play_from specifies the offset in seconds with which the servos and the audio are started.
+  -sp --singleplay      Args: projectname channelfilename [audiofilename]
+                        Playback of one specific servo in projectname though a specific servo. Optional specific audio
+                        playback with [audiofilename] (if none is entered, alphabetical first in folder will play if
+                        existent).
 
-  -n  --new             Args: project
-                        Create a new project.
+  -ss --setservo        Args: projectname channelfilename
+                        Set config data for channelfilename in project - MCPin, servo_pin, map_min, map_max, start_pos.
+                        Get values for map_min and map_max with answering 'm'. Move potentiometer, return values with
+                        pressing enter.
 
-  -cp --copy            Args: project channel_old channel_new [preserve_pin]
-                        Copy the channel_old of project, and store it in channel_new. preserve_pin is either 'pin_inc', to use a new channel (default), 'pin_copy' to use the same pin as channel_old, or an integer to specify the servo pin directly.
-
-  -ls --list            Args: [project]
-                        List all channels in all projects. If project is provided, only list channels of that project.
-
-  -cc --copyright       Args: None
-                        Show copyright information.
-
-Arguments:
-  project               This the name of a project folder.
-  channel               This is a channel within a project.
-
+General:
+  Audiofiles in folder 'audio' of each project can be of type wav, mp3, aiff.
