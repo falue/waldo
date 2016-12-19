@@ -86,6 +86,15 @@ def wait_for_servos():
             return
         time.sleep(0.05)
 
+def getValue(l, t):
+    x = bisect.bisect(l, (t, None))
+    if x < len(l) and l[x][0] == t:
+        pass
+    elif x > 0:
+        x -= 1
+
+    return x
+
 
 def playback_servo(project, channel, play_from=0):
     """
@@ -146,7 +155,9 @@ def playback_servo(project, channel, play_from=0):
     while REC_REPL:
         try:
             now = time.time()
-            timestamp, pulse = pulse_list[bisect.bisect_right(pulse_list, (now - start_time + play_from, None))]
+            # XXX
+            #timestamp, pulse = pulse_list[bisect.bisect_right(pulse_list, (now - start_time + play_from, None))]
+            timestamp, pulse = getValue(pulse_list, now - start_time + play_from)
             pulse_map = mapvalue(pulse, 0, 1024, map_min, map_max)
             servo_obj.setPWM(servo_pin, 0, pulse_map)
             logger.debug("{}\t{}\t{}\t{}\t{}{}".format(timestamp,

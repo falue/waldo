@@ -102,18 +102,38 @@ class MyWindow(QtGui.QWidget):
         self.saveButton.setText("save")
         self.saveButton.clicked.connect(self.saveButton_clicked)
 
-        figure = mpl.figure.Figure(figsize=(5, 5))
+        self.sameHeightButton = QtGui.QPushButton(self)
+        self.sameHeightButton.setText("set same height")
+        self.sameHeightButton.clicked.connect(self.sameHeightButton_clicked)
+
+        self.mergeButton = QtGui.QPushButton(self)
+        self.mergeButton.setText("merge")
+        self.mergeButton.clicked.connect(self.mergeButton_clicked)
+
+        figure = mpl.figure.Figure()
         self.matplotlibWidget = MatplotlibWidget(figure)
 
         self.layoutVertical = QtGui.QVBoxLayout(self)
         self.layoutVertical.addWidget(self.pushButtonPlot)
-        self.layoutVertical.addWidget(self.matplotlibWidget)
+
+
+        self.scroll = QtGui.QScrollArea(self)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scroll.setWidget(self.matplotlibWidget)
+
+        self.layoutVertical.addWidget(self.scroll)
+
+
         self.layoutVertical.addWidget(self.removerButton)
         self.layoutVertical.addWidget(self.adderButton)
         self.layoutVertical.addWidget(self.zeroButton)
         self.layoutVertical.addWidget(self.startEndButton)
         self.layoutVertical.addWidget(self.le)
         self.layoutVertical.addWidget(self.saveButton)
+        self.layoutVertical.addWidget(self.sameHeightButton)
+        self.layoutVertical.addWidget(self.mergeButton)
 
     def removerButton_clicked(self):
         global mode
@@ -162,6 +182,88 @@ class MyWindow(QtGui.QWidget):
 
         self.matplotlibWidget.initialize()
 
+    def sameHeightButton_clicked(self):
+        print "set same height button pressed, filename:", self.le.text()
+
+        if len(dots) < 1:
+            return
+
+        global dots
+
+        if self.le.text() and len(self.le.text()) > 0:
+
+            try:
+
+                if int(self.le.text()) not in self.matplotlibWidget.data:
+                    print self.le.text(), "not found in data!"
+                    return
+
+                d = self.matplotlibWidget.data[int(self.le.text())]
+
+            except ValueError:
+                print "text not int"
+
+            xs = [float(item[0]) for item in d]
+            ys = [float(item[1]) for item in d]
+
+            idx = takeClosest(xs, dots[0][0])
+            dots[0] = [xs[idx], ys[idx]]
+
+            idx = takeClosest(xs, dots[len(dots)-1][0])
+            dots[len(dots)-1] = [xs[idx], ys[idx]]
+
+            self.matplotlibWidget.waldoupdate()
+
+    def mergeButton_clicked(self):
+        global dots, plotdots
+        print "merge button clicked"
+
+        if len(dots) < 1:
+            return
+
+
+        if self.le.text() and len(self.le.text()) > 0:
+
+            try:
+
+                if int(self.le.text()) not in self.matplotlibWidget.data:
+                    print self.le.text(), "not found in data!"
+                    return
+
+                d = self.matplotlibWidget.data[int(self.le.text())]
+
+            except ValueError:
+                print "text not int"
+
+            xs = [float(item[0]) for item in d]
+            ys = [float(item[1]) for item in d]
+
+            nxs = [float(item[0]) for item in plotdots]
+            nys = [float(item[1]) for item in plotdots]
+
+            newdots = []
+
+            x = 0.0
+            i = 0
+
+            while x < nxs[0]:
+                newdots.append(d[i])
+                x = xs[i]
+                i += 1
+
+            newdots.extend(plotdots)
+
+            while x <= newdots[-1][0]:
+                x = xs[i]
+                i += 1
+
+            newdots.extend(d[i:]) 
+
+            plotdots = newdots
+
+            self.matplotlibWidget.waldoupdate(interpolation=False)
+
+
 
     #@QtCore.pyqtSlot()
     def on_pushButtonPlot_clicked(self):
@@ -201,6 +303,8 @@ class MatplotlibWidget(FigureCanvasQTAgg):
         self.figure = fig
         self.initialize()
 
+        self.setFixedSize(self.maxX*200, 750)
+
         #---- setup event ----          
 
         self.mpl_connect('button_press_event', self.onclick)
@@ -219,12 +323,12 @@ class MatplotlibWidget(FigureCanvasQTAgg):
         self.waldoupdate()
 
 
-    def waldoupdate(self):
-        self.waldodraw()
+    def waldoupdate(self, interpolation=True):
+        self.waldodraw(interpolation)
 
         self.draw()
 
-    def waldodraw(self):
+    def waldodraw(self, interpolation):
         if len(self.figure.axes) >= 1:
             ax = self.figure.axes[0]
             ax.cla()
@@ -236,7 +340,8 @@ class MatplotlibWidget(FigureCanvasQTAgg):
             y = [int(item[1]) for item in self.data[k]]
             ax.plot(x,y,label=str(k))
 
-        interpol()
+        if interpolation:
+            interpol()
 
         if len(plotdots) >= 1:
             x = [float(item[0]) for item in plotdots]
@@ -247,7 +352,10 @@ class MatplotlibWidget(FigureCanvasQTAgg):
             y = [int(item[1]) for item in dots]
             ax.plot(x,y, 'ko')
 
-        ax.legend(loc=2, ncol=8, mode="expand", borderaxespad=0.)
+        leg = ax.legend(loc=2, ncol=8, mode="expand", borderaxespad=0.)
+        for legobj in leg.legendHandles:
+            legobj.set_linewidth(3.0)
+        
 
 
     def onclick(self, event):
@@ -263,7 +371,7 @@ class MatplotlibWidget(FigureCanvasQTAgg):
         if x != None and y != None:
             ydata = min(event.ydata, 1023)
             mode(event.xdata, ydata)
-            self.waldodraw()
+            self.waldodraw(interpolation=True)
             #ax.plot(event.xdata, event.ydata, 'ro')
             self.draw()
 
