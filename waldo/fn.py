@@ -225,7 +225,7 @@ def servo_start_pos(project, channels=False):
         # servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
         # Time for moving servo
-        servo_obj.setPWM(servo_pin, 4096, 0)  # completly off
+        #servo_obj.setPWM(servo_pin, 4096, 0)  # completly off
         logger.info('Servo playback to start: %s' % (channel))
         # print 'Servo playback to die: %s' % (channel)
     print "All servos cut off."

@@ -1,42 +1,42 @@
 PROJECT_PATH: ~/waldo_projects
 REC_REPL: false
 button_value:
-  0: 108
-  1: 913
-  2: 766
-  3: 664
-  4: 590
-  5: 315
+  0: 89
+  1: 932
+  2: 778
+  3: 670
+  4: 594
+  5: 306
 buttons:
-  1: -p count
-  2: -p husten
-  3: -p open_door
-  4: -p hatters
-  5: -p hatters 60
-  6: -p dummy
-  7: -p dummy
-  8: -p dummy
-  9: -p dummy
-  10: -p dummy
-  11: -p dummy
-  12: -p dummy
-  13: -p dummy
-  14: -p dummy
-  15: -p dummy
-  16: -p dummy
-  17: -p dummy
-  18: -p dummy
-  19: -p dummy
-  20: -p dummy
-  21: -p dummy
-  22: -p dummy
-  23: -p dummy
-  24: -p dummy
-  25: -p dummy
-  26: -p dummy
-  27: -p dummy
-  28: -p dummy
-  29: -p dummy
+  1: -p s1_tonleiter_einzaehlen
+  2: -p s23_teaser_variante_tonleiter
+  3: -p s12_refrain_piano
+  4: -p s4_variante_solostimmen
+  5: -p s9_variante_lalala
+  6: -p reset
+  7: -p reset
+  8: -p reset
+  9: -p reset
+  10: -p reset
+  11: -p s14_komm_additional_1
+  12: -p s14_komm_additional_4
+  13: -p s14_komm_hatschi_1
+  14: -p s14_komm_hey_1
+  15: -p s14_komm_hohoho
+  16: -p s14_komm_nanana_2
+  17: -p s14_komm_ohlalaa
+  18: -p s14_komm_ohyea_1
+  19: -p s14_komm_raeuspern
+  20: -p s14_komm_wow_1
+  21: -p s15_teasing
+  22: -p s16_falsches_lied
+  23: -p s20_outtake_tonlage
+  24: -p s21_outtake_durcheinandersingen
+  25: -p s21_outtake_meditation
+  26: -p s21_outtake_schnarchen
+  27: -p s21_outtake_silent_night
+  28: -p s21_text_vergessen
+  29: -p s22_falsch_singen
   30: cancel
 mcp:
   0:
