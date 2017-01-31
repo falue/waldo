@@ -16,6 +16,7 @@ who builds a robot to amplify his limited abilities².
 |_____|__||_|_____|____/|_____| pupeteering
 _______________________________
 
-Startup
-	On startup of the raspberryPi, file "waldo.py" gets executed.
-	Defined @ /etc/rc.local
+Use:
+	execute "waldo/main.py -h" to get started on recording and command-line playback.
+	execute "waldo.py" to start and use rigby, the ethernet-control-panel.
+	execute "waldo.py -cal" to calibrate rigby.
