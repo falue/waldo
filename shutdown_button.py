@@ -34,5 +34,5 @@ while True:
     signalValues.append(input_state)
     if signalValues.count(False) >= 3:
         print('Shutdown button pressed')
-        os.system("sudo -u pi shutdown now -h")
+        os.system("sudo shutdown now -h")
     time.sleep(waitingTime)
