@@ -1,4 +1,5 @@
 *.pyc
-projects
 .cache
 .idea
+*.DS_Store
+*.AppleDouble
