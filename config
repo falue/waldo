@@ -11,7 +11,7 @@ buttons:
   1: -p count
   2: -p husten
   3: -p open_door
-  4: -p hatters
+  4: -p hatters_archive
   5: -p hatters 60
   6: -p dummy
   7: -p dummy
