@@ -1,22 +1,23 @@
 # Waldo and Rigby
-1. General Setup (using pi and waldo per SSH)          
-1. Set fixed IP for raspberry pi          
-1. Set fixed IP for Laptop          
-1. Mount remote file system          
-1. Raspberry Pi credentials          
-1. Waldo commands          
-1. set\_servo (recalibrate a servo)          
-1. Requirements:          
-1. Steps          
-1. play (play an entire project)          
-1. Editor          
-1. remover / adder          
-1. Convenience functions          
-1. Rigby (remote keyboard)          
-1. Setup          
-1. (Re-)calibrate          
-1. Configure buttons          
-1. Photos          
+1. [General Setup (using pi and waldo per SSH)](#general-setup-using-pi-and-waldo-per-ssh)
+    - [Set fixed IP for raspberry pi](#set-fixed-ip-for-raspberry-pi)
+    - [Set fixed IP for Laptop](#set-fixed-ip-for-laptop)
+    - [Mount remote file system](#mount-remote-file-system)
+    - [Raspberry Pi credentials](#easpberry-pi-credentials)
+2. [Waldo commands](#waldo-commands)
+    - [set_servo (recalibrate a servo)](#set_servo-recalibrate-a-servo)
+        - [Requirements](#requirements)
+        - [Steps](#steps)
+    - [play (play an entire project)](#play-play-an-entire-project)
+3. [Editor](#editor)
+    - [remover / adder](#remover-adder)
+    - [Convenience functions](#convenience-functions)
+4. [Rigby (remote keyboard)](#rigby-remote-keyboard)
+    - [Setup](#setup)
+    - [(Re-)calibrate](#re-calibrate)
+    - [Configure buttons](#configure-buttons)
+5. [Setup as independent unit](#setup-as-independent-unit)
+6. [Photos](#photos)
 
 
 # General Setup (using pi and waldo per SSH)
@@ -33,7 +34,7 @@
 
 ## Set fixed IP for Laptop
 ```
-# ifconfig enp0s25 192.168.0.5 netmask 255.255.255.0 up
+ifconfig enp0s25 192.168.0.5 netmask 255.255.255.0 up
 ```
 
 ## Mount remote file system
@@ -159,6 +160,9 @@ mcp:
     MISO: 6
     MOSI: 12
 ```
+
+# Setup as independent unit
+Add NumPad listener and shutdown script to startup cycle of RasPi.
 
 # Photos
 ![](images/poti.jpg)  
