@@ -8,37 +8,6 @@ button_value:
   4: 594
   5: 306
 buttons:
-<<<<<<< HEAD
-  1: -p count
-  2: -p husten
-  3: -p open_door
-  4: -p hatters_archive
-  5: -p hatters 60
-  6: -p dummy
-  7: -p dummy
-  8: -p dummy
-  9: -p dummy
-  10: -p dummy
-  11: -p dummy
-  12: -p dummy
-  13: -p dummy
-  14: -p dummy
-  15: -p dummy
-  16: -p dummy
-  17: -p dummy
-  18: -p dummy
-  19: -p dummy
-  20: -p dummy
-  21: -p dummy
-  22: -p dummy
-  23: -p dummy
-  24: -p dummy
-  25: -p dummy
-  26: -p dummy
-  27: -p dummy
-  28: -p dummy
-  29: -p dummy
-=======
   1: -p s1_tonleiter_einzaehlen
   2: -p s23_teaser_variante_tonleiter
   3: -p s12_refrain_piano
@@ -68,7 +37,6 @@ buttons:
   27: -p s21_outtake_silent_night
   28: -p s21_text_vergessen
   29: -p s22_falsch_singen
->>>>>>> b9015e85d4df14da10eb186553d6b79f9790e026
   30: cancel
 mcp:
   0:
