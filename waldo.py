@@ -39,6 +39,16 @@ activity = 0
 # read all buttons from config file
 BUTTONS = config['buttons'].copy()
 
+# If primay/first executed file from bash is waldo.py
+# keyboard interrupt fallback
+try:
+    if sys.argv[1] == "-ap" or sys.argv[1] == "--autoplay":
+        print 'autoplay active!'
+    pass
+
+except IndexError:
+    pass
+
 
 def calibrate():
     """

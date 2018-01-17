@@ -163,7 +163,20 @@ mcp:
 ```
 
 # Setup as independent unit
-Add NumPad listener and shutdown script to startup cycle of RasPi.
+Add the following scripts to the startup cycle of RasPi:
+- waldo.py (sets up all is needed for replay, record and analog buttons with MCP/Mortekai analog keyboard. Autoplay track '0')
+- shutdown_button.py (displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
+- numpad_listener.py
+```
+sudo nano /etc/rc.local
+```
+```
+# Run WALDO
+sudo -u pi cp /home/pi/Scripts/waldo/config_backup /home/pi/Scripts/waldo/config
+sudo -u pi /home/pi/Scripts/waldo/waldo.py -ap 0
+sudo -u pi /home/pi/Scripts/waldo/shutdown_button.py
+sudo -u pi /home/pi/Scripts/waldo/numpad_listener.py
+```
 
 # Photos
 ![](images/poti.jpg)  

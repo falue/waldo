@@ -16,7 +16,8 @@ _______________________________
 ```
 
 **Startup**  
-On startup of the raspberryPi, file "waldo.py" gets executed. Defined @ /etc/rc.local
+If handled as independet unit, on startup of the raspberryPi, file "waldo.py" (and others) get executed.  
+Defined @ /etc/rc.local.
 
 
 **Docs**  
