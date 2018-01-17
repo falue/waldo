@@ -20,7 +20,7 @@ On startup of the raspberryPi, file "waldo.py" gets executed. Defined @ /etc/rc.
 
 
 **Docs**  
-See [docs.md](docs/docs.md)
+See [docs/docs.md](docs/docs.md)
 
 
 **Bash commands**  
