@@ -118,7 +118,8 @@ Needs to be done when the cable connecting rigby and the pi has changed.
     ```
 
 ## Configure buttons
-Button commands are stored in config file, the following config for example defines the first 10 buttons (note the PROJECT_PATH on top):
+Button commands are stored in config file, the following config for example defines the first 10 buttons.  
+Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root exists - it will take 'projects' as Project path.
 
 **Hint:** cancel must be button 30, due to special logic in the code,
 

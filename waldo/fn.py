@@ -32,7 +32,7 @@ except ImportError:
 
 # Read preferences and set project folder path
 PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-PROJECT_PATH = os.path.expanduser(PREFERENCES["PROJECT_PATH"])
+PROJECT_PATH = os.path.expanduser(PREFERENCES["PROJECT_PATH"]) if not os.path.isdir('projects') else 'projects'
 
 # Make project folder if inexistent
 if not os.path.isdir(PROJECT_PATH):
@@ -793,15 +793,21 @@ def list_projects(project=False):
     # Read every folder or define specific
     if project:
         projects = [project]
-        print "List every channel in project '%s' and point out difficulties.\n\n" \
+        print "List every channel in project '%s' and point out difficulties.\n" \
               "-------------------------------------------------------------" % project
     else:
         filelist = os.listdir(PROJECT_PATH)
         projects = [a for a in filelist if not a.startswith(".")]
-        print "List every channel in every project and point out difficulties.\n\n" \
+        print "List every channel in every project and point out difficulties.\n" \
               "-------------------------------------------------------------"
+        print "There are no project folders in '%s'." % PROJECT_PATH
 
     # TODO: md5 hashing content of channels, find and mark duplicates
+
+    # ignore archive
+    if '_archive' in projects:
+        projects.remove('_archive')
+    pass
 
     # For each project to analyze
     for project in sorted(projects):
