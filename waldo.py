@@ -67,6 +67,7 @@ def calibrate():
         if position != 0:
             while not button[position]:
                 curr_average = average(10)
+		print curr_average
 
                 # Check if button is pressed
                 if curr_average > null_average + LIVE_ZONE:
@@ -245,7 +246,10 @@ if __name__ == '__main__':
                         time.sleep(0.75)
 
             # Read if project is ongoing
-            config = read_config(os.path.dirname(os.path.realpath(__file__)))
+            config = None
+            while config == None:
+                config = read_config(os.path.dirname(os.path.realpath(__file__)))
+                time.sleep(0.05)
             REC_REPL = config["REC_REPL"]
 
             # show activity

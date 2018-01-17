@@ -1,0 +1,16 @@
+CLK: 18
+CS: 25
+MISO: 23
+MOSI: 24
+baudrate: '960011'
+channel_1:
+  in: 1
+  max: 0
+  min: 1024
+  out: 2
+channel_2:
+  in: 1
+  max: 0
+  min: 1024
+  out: 2
+connection: ''
