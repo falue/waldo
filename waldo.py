@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 import subprocess as sp
 
 from waldo.utils import read_config, write_config, get_mcp_connection, set_gpio_pins
-from waldo.fn import read_mcp, servo_start_pos
+from waldo.fn import read_mcp, servo_start_pos, change_glob_rec_repl
 
 
 # FIXME: remove in production
@@ -35,6 +35,9 @@ CS = mcp_connection['CS']
 
 PLAY = [False, False]  # thread, projectname
 activity = 0
+
+# reset config file value recrepl (in case waldo is shut off unexpected):
+change_glob_rec_repl(False)
 
 # read all buttons from config file
 BUTTONS = config['buttons'].copy()
