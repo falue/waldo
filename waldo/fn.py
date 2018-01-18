@@ -249,6 +249,7 @@ def change_glob_rec_repl(on_off):
     PREFERENCES.update({'REC_REPL': on_off})
     write_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."), PREFERENCES)
 
+
 def record(project, channel, audiofile):
     """
     Listen to USB port or analog input via MCP3008, follow with single servo and store data in file.
@@ -267,6 +268,7 @@ def record(project, channel, audiofile):
     servo_pin = config['channels'][channel]['servo_pin']
     map_min = config['channels'][channel]['map_min']
     map_max = config['channels'][channel]['map_max']
+    start_pos = config['channels'][channel]["start_pos"]
 
     # Get servo pin and set servo hat adress
     servo_connection = get_servo_connection(servo_pin)
@@ -306,7 +308,6 @@ def record(project, channel, audiofile):
         suffix = ('.wav', '.mp3', '.aiff')
         audiofile = get_first_file(os.path.join(PROJECT_PATH, project, 'audio'), suffix)
 
-
     # Play audio file
     if audiofile:
         processThread0 = threading.Thread(
@@ -320,6 +321,10 @@ def record(project, channel, audiofile):
     record_file = open(os.path.join(PROJECT_PATH, project, channel), 'w+')
     start_time = time.time()
 
+    # Set up
+    servo_last_position = start_pos
+    record_file.write("%s: %s\n" % (0.0, start_pos))  # write at beginning of file
+
     # Record!
     while REC_REPL:
         # Listen to usb port or MCP3008
@@ -328,17 +333,22 @@ def record(project, channel, audiofile):
         else:
             record = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
 
-        # Playback on servo
-        servo_value = mapvalue(int(record), 0, 1024, map_min,
-                          map_max)  # map value to servo values
-        servo_obj.setPWM(int(servo_pin), 0, servo_value)  # move servo
-        # setServoPulse(int(servo_pin), record)
-
         # Recording to file
-        record_file.write("%s: %s\n" % (time.time()-start_time, record))  # write timecode and 0-1024 in file...
-        print "Servo %s:\t%s\t%s" % (servo_pin, record, bar(record))  # 0-1024
+        if record > servo_last_position + 3 or record < servo_last_position - 3:
+            # Playback on servo
+            servo_value = mapvalue(int(record), 0, 1024, map_min, map_max)  # map value to servo values
+            servo_obj.setPWM(int(servo_pin), 0, servo_value)  # move servo
+            # setServoPulse(int(servo_pin), record)
 
-        # time.sleep(STEP)
+            timecode = round(time.time()-start_time, 3)
+            record_file.write("%s: %s\n" % (timecode, record))  # write timecode and 0-1024 in file...
+            servo_last_position = record
+            print "Servo %s:\t%s\t%s" % (servo_pin, record, bar(record))  # 0-1024
+        else:
+            print "----- %s:\t%s\t%s" % (servo_pin, servo_last_position, bar(servo_last_position))  # 0-1024
+        pass
+
+        time.sleep(0.001)
 
     record_file.close()
 
