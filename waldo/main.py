@@ -3,7 +3,12 @@
 import sys
 
 from fn import (helpfile, set_connection, set_servo, record_setup, singleplay,
-                play_all, new_project, copy_channel, list_projects, legal, GPIO)
+                play_all, new_project, copy_channel, list_projects, legal, GPIO,
+                change_glob_rec_repl)
+
+
+# reset config file value recrepl (in case waldo is shut off unexpected):
+change_glob_rec_repl(False)
 
 
 # If primay/first executed file from bash is waldo.py
