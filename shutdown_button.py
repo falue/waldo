@@ -28,11 +28,19 @@ GPIO.output(led_primary_pin, True)
 
 signalValues = [True for i in range(numberOfMeasurements)]
 
+shutdownStarted = False  # has the shutdown already been initiated? To prevent multiple shutdown commands
+
 while True:
     input_state = GPIO.input(button_pin)
     signalValues.pop(0)
     signalValues.append(input_state)
-    if signalValues.count(False) >= 3:
+    if signalValues.count(False) >= 3 and not shutdownStarted:
         print('Shutdown button pressed')
         os.system("sudo shutdown now -h")
+        shutdownStarted = True
+        while True:
+            GPIO.output(led_primary_pin, False)
+            time.sleep(0.25)
+            GPIO.output(led_primary_pin, True)
+            time.sleep(0.25)
     time.sleep(waitingTime)
