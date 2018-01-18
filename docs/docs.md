@@ -3,7 +3,7 @@
     - [Set fixed IP for raspberry pi](#set-fixed-ip-for-raspberry-pi)
     - [Set fixed IP for Laptop](#set-fixed-ip-for-laptop)
     - [Mount remote file system](#mount-remote-file-system)
-    - [Raspberry Pi credentials](#easpberry-pi-credentials)
+    - [Raspberry Pi credentials](#raspberry-pi-credentials)
 2. [Waldo commands](#waldo-commands)
     - [set_servo (recalibrate a servo)](#set_servo-recalibrate-a-servo)
         - [Requirements](#requirements)
