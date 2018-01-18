@@ -609,7 +609,8 @@ def record_setup(arg):
             # backup file in 'trash'
             copyfile(os.path.join(PROJECT_PATH, project, channel),
                      os.path.join(PROJECT_PATH, project, "trash",
-                     time.strftime("%y-%m-%d_%H-%M-%S") + "_" + channel))
+                     channel + "_" + time.strftime("%Y-%m-%d_%H_%M_%S"))
+                     )
         elif answer == "n":
             print "Abort."
             return

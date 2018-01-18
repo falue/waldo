@@ -169,7 +169,7 @@ class MyWindow(QtGui.QWidget):
             # check if file exists already
             fname = folderName + '/' + self.le.text()
             if os.path.isfile(fname):
-                backupname = fname + '_' + strftime("%Y-%m-%d_%H_%M_%S", gmtime())
+                backupname = folderName + '/trash/' + self.le.text() + '_' + strftime("%Y-%m-%d_%H_%M_%S")
                 print 'file', fname, 'exists already, moving to', backupname
                 shutil.move(fname, backupname)
             with open(fname, 'w') as f:
@@ -388,11 +388,7 @@ def loadFolder(name):
 
     ids = []
     for filename in os.listdir(name): 
-        try:
-            i = int(filename)
-            ids.append(i)
-        except ValueError:
-            pass
+        ids.append(filename)
 
     datas = {}
     for i in ids:
