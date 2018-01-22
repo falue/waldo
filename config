@@ -26,3 +26,4 @@ mcp:
     CS: 13
     MISO: 6
     MOSI: 12
+numpad: true

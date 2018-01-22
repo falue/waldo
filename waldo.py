@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 import subprocess as sp
 
 from waldo.utils import read_config, write_config, get_mcp_connection, set_gpio_pins
-from waldo.fn import read_mcp, servo_start_pos
+from waldo.fn import read_mcp, servo_start_pos, change_glob_rec_repl
 
 
 # FIXME: remove in production
@@ -39,6 +39,9 @@ activity = 0
 # read all buttons from config file
 BUTTONS = config['buttons'].copy()
 button_number = False
+
+# reset config file value recrepl (in case waldo is shut off unexpected):
+change_glob_rec_repl(False)
 
 # If primay/first executed file from bash is waldo.py
 # keyboard interrupt fallback
@@ -190,7 +193,8 @@ def cancel():
         PLAY[0] = False
         PLAY[1] = False
         time.sleep(0.25)
-        print "Waiting for input via control panel 'rigby'..."
+        if not config['numpad']:
+            print "Waiting for input via control panel 'rigby'..."
     else:
         # print "Nothing to cancel"
         time.sleep(0.25)
@@ -233,7 +237,8 @@ if __name__ == '__main__':
 
         button_value = config['button_value'].copy()
 
-        print "Waiting for input via control panel 'rigby'..."
+        if not config['numpad']:
+            print "Waiting for input via control panel 'rigby'..."
 
         # Change to home directory
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -244,12 +249,17 @@ if __name__ == '__main__':
 
         # Wait for button presses...
         while True:
-            # If MCP is used, get button_number via mcp:
+            # If USB is used, get button_number via Keyboard input:
             if config['numpad']:
-                print 'numpad!'
-                time.sleep(0.75)
+                answer = raw_input("Awaiting keyboard input (Press 1-30 & enter)...\n").lower()
+                try:
+                    button_number = int(answer)
+                except ValueError:
+                    # Handle the exception
+                    print 'Not an integer value.'
 
             else:
+                # If MCP is used, get button_number via mcp:
                 for mcp_in in range(30):
                     # Read analog value for first 5 buttons
                     value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
@@ -263,14 +273,13 @@ if __name__ == '__main__':
                     # Cycle all 5 buttons
                     for i in range(1, 6):
                         if button_value[i] - LIVE_ZONE <= value <= button_value[i] + LIVE_ZONE:
-                            # Cancel any ongoing 'play' instances
-                            cancel()
                             button_number = button + i
-
                             time.sleep(0.75)
 
             # Get button_number from MCP or USB numpad
             if button_number:
+                # Cancel any ongoing 'play' instances
+                cancel()
                 if button_number in BUTTONS:
                     # Check if special 'Cancel' button
                     if BUTTONS[button_number] == 'cancel':
@@ -278,7 +287,7 @@ if __name__ == '__main__':
 
                     # Set commands as defined in main config file
                     play(BUTTONS[button_number].split(" "))
-                    print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
+                    print "Button %s: waldo/main.py %s" % (button_number, BUTTONS[button_number])
                 else:
                     print "The button '%s' is not defined in main config file." % (button_number)
                 button_number = False
