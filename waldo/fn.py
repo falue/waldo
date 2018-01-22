@@ -811,7 +811,6 @@ def list_projects(project=False):
         projects = [a for a in filelist if not a.startswith(".")]
         print "List every channel in every project and point out difficulties.\n" \
               "-------------------------------------------------------------"
-        print "There are no project folders in '%s'." % PROJECT_PATH
 
     # TODO: md5 hashing content of channels, find and mark duplicates
 
@@ -819,6 +818,9 @@ def list_projects(project=False):
     if '_archive' in projects:
         projects.remove('_archive')
     pass
+
+    if not projects:
+        print "There are no project folders in '%s'." % PROJECT_PATH
 
     # For each project to analyze
     for project in sorted(projects):
@@ -878,7 +880,7 @@ def list_projects(project=False):
                     name_space = ""
 
                 # Sum up channel content
-                ch += "%s\t%s%s\t%s\t%s\t%s\t%s\t%s°\n%s%s\n" % (channel, name_space, data['servo_pin'],
+                ch += "\t%s\t%s%s\t%s\t%s\t%s\t%s\t%s°\n\t%s%s\n" % (channel, name_space, data['servo_pin'],
                                                                  data['mcp_in'], data['map_min'],
                                                                  data['map_max'], data['start_pos'], dof,
                                                                  graph_rep, reversed_channel)
@@ -895,8 +897,8 @@ def list_projects(project=False):
                 error += "╳  No specs in config for file '%s'\n" % no_specs
 
             # Print table header
-            thead = "channel\t\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF"
-            print "%s:\n%s\n%s\n%s" % (project, error, thead, ch)
+            thead = "\tchannel\t\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF"
+            print "%s:\n%s%s\n%s" % (project, error, thead, ch)
 
         else:
             print "%s\n╳  No channels in config file.\n" % project
