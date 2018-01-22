@@ -219,7 +219,7 @@ if __name__ == '__main__':
 
         # If primay/first executed file from bash is waldo.py
         # keyboard interrupt fallback
-        elif sys.argv[1] == "-ap" or sys.argv[1] == "--autoplay":
+        elif arg == "-ap" or arg == "--autoplay":
             print 'Autoplay activated: Play button %s.' % sys.argv[2]
             button_number = int(sys.argv[2])
 
