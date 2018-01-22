@@ -8,6 +8,7 @@
     - [set_servo (recalibrate a servo)](#set_servo-recalibrate-a-servo)
         - [Requirements](#requirements)
         - [Steps](#steps)
+    - [create new project](#create_new_project)
     - [play (play an entire project)](#play-play-an-entire-project)
 3. [Editor](#editor)
     - [remover / adder](#remover-adder)
@@ -39,8 +40,8 @@ ifconfig enp0s25 192.168.0.5 netmask 255.255.255.0 up
 
 ## Mount remote file system
 ```
-$ mkdir  remote_waldo
-$ sshfs pi@192.168.0.4:/home/pi/tmp_waldo_projects remote_waldo/
+mkdir  remote_waldo
+sshfs pi@192.168.0.4:/home/pi/tmp_waldo_projects remote_waldo/
 ```
 
 ## Raspberry Pi credentials
@@ -60,7 +61,7 @@ This functionality is used to store the settings of a certain servo (e.g., of a 
 (Servo on Pin 2, Potentiometer on Pin 8)
 
 ```
-$ python main.py -ss /path/to/project channelName
+python main.py -ss /path/to/project channelName
 Set MCP3008 Pin [default 8] # this is the potentiometer, you can just hit enter
 Set Servo Pin [default 0] # this is the servo pin, here use 2
 Set minimum position: # hit &#39;m&#39; to set the value with the potentiometer
@@ -68,9 +69,15 @@ Set maximum position: # hit &#39;m&#39; to set the value with the potentiometer
 Set start position: # usually use the minimum position to start closed
 ```
 
+## create new project
+```
+python waldo/main.py -n projectname
+```
+Name your project what you want except 'cancel' - this cannot be replayed with Rigby keyboard.
+
 ## play (play an entire project)
 ```
-$ python main.py -p /path/to/project [start_offset_in_seconds]
+python main.py -p /path/to/project [start_offset_in_seconds]
 ```
 
 Create a new project
@@ -81,13 +88,13 @@ Create a new project
 5. Call set_servo for all channels if the servos are not calibrated
 6. Record channels
     ```
-    $ python main.py -r /path/to/project channelName
+    python main.py -r /path/to/project channelName
     ```
 
 
 # Editor
 ```
-$ python editor.py /path/to/project
+python editor.py /path/to/project
 ```
 
 ## remover / adder
@@ -114,14 +121,14 @@ Needs to be done when the cable connecting rigby and the pi has changed.
 1. Kill running waldo.py process
 2. Calibrate:
     ```
-    $ python waldo.py -cal
+    python waldo.py -cal
     ```
 
 ## Configure buttons
 Button commands are stored in config file, the following config for example defines the first 10 buttons.  
 Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root exists - it will take 'projects' as Project path.
 
-**Hint:** cancel must be button 30, due to special logic in the code,
+**Hint:** Any button can have the value 'cancel' to stop any ongoing track. Standard is 30.
 
 ```json
 PROJECT_PATH: ~/waldo_projects

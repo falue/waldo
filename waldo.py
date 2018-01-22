@@ -225,7 +225,7 @@ if __name__ == '__main__':
         # Wait for button presses...
         while True:
 
-            for mcp_in in range(len(BUTTONS) / 5):
+            for mcp_in in range(30):
                 # Read analog value for first 5 buttons
                 value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
                 button = mcp_in * 5
@@ -242,17 +242,17 @@ if __name__ == '__main__':
                         cancel()
                         button_number = button + i
 
-                        # Check if special 'Cancel' button
-                        if button_number == 30:
-                            # print "Button '30'!"
-                            continue
+                        if button_number in BUTTONS:
+                            # Check if special 'Cancel' button
+                            if BUTTONS[button_number] == 'cancel':
+                                continue
 
-                        # Set commands as defined in main config file
-                        command = BUTTONS[button_number].split(" ")
+                            # Set commands as defined in main config file
+                            play(BUTTONS[button_number].split(" "))
+                            print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
+                        else:
+                            print "The button '%s' is not defined in main config file." % (button_number)
 
-                        play(command)
-
-                        print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
                         time.sleep(0.75)
 
             # Read if project is ongoing
