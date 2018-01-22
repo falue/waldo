@@ -47,7 +47,8 @@ change_glob_rec_repl(False)
 # keyboard interrupt fallback
 try:
     if sys.argv[1] == "-ap" or sys.argv[1] == "--autoplay":
-        print 'autoplay active: Play/Preload track %s.' % sys.argv[2]
+        print 'autoplay active: Play/Preload button %s.' % sys.argv[2]
+        button_number = int(sys.argv[2])
     pass
 
 except IndexError:
@@ -250,31 +251,32 @@ if __name__ == '__main__':
         # Wait for button presses...
         while True:
             # If USB is used, get button_number via Keyboard input:
-            if config['numpad']:
-                answer = raw_input("Awaiting keyboard input (Press 1-30 & enter)...\n").lower()
-                try:
-                    button_number = int(answer)
-                except ValueError:
-                    # Handle the exception
-                    print 'Not an integer value.'
+            if not button_number:
+                if config['numpad']:
+                    answer = raw_input("Awaiting keyboard input (Press 1-30 & enter)...\n").lower()
+                    try:
+                        button_number = int(answer)
+                    except ValueError:
+                        # Handle the exception
+                        print 'Not an integer value.'
 
-            else:
-                # If MCP is used, get button_number via mcp:
-                for mcp_in in range(30):
-                    # Read analog value for first 5 buttons
-                    value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
-                    button = mcp_in * 5
-                    # print "mcp_in %s: %s %s\t|\t" % (mcp_in, button / 5, value)
+                else:
+                    # If MCP is used, get button_number via mcp:
+                    for mcp_in in range(30):
+                        # Read analog value for first 5 buttons
+                        value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
+                        button = mcp_in * 5
+                        # print "mcp_in %s: %s %s\t|\t" % (mcp_in, button / 5, value)
 
-                    # If nothing is pressed ("zero"-button)
-                    if value <= button_value[0] + LIVE_ZONE:
-                        continue
+                        # If nothing is pressed ("zero"-button)
+                        if value <= button_value[0] + LIVE_ZONE:
+                            continue
 
-                    # Cycle all 5 buttons
-                    for i in range(1, 6):
-                        if button_value[i] - LIVE_ZONE <= value <= button_value[i] + LIVE_ZONE:
-                            button_number = button + i
-                            time.sleep(0.75)
+                        # Cycle all 5 buttons
+                        for i in range(1, 6):
+                            if button_value[i] - LIVE_ZONE <= value <= button_value[i] + LIVE_ZONE:
+                                button_number = button + i
+                                time.sleep(0.75)
 
             # Get button_number from MCP or USB numpad
             if button_number:
