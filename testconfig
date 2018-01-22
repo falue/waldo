@@ -1,8 +1,0 @@
-{
-    "CLK": 18, 
-    "CS": 25, 
-    "MISO": 23, 
-    "MOSI": 24, 
-    "baudrate": "9600", 
-    "connection": ""
-}
