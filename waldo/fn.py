@@ -86,8 +86,9 @@ def wait_for_servos():
             return
         time.sleep(0.05)
 
+
 def getValue(l, t):
-    x = bisect.bisect(l, (t, None))
+    x = bisect.bisect_left(l, (t, None))
     if x < len(l) and l[x][0] == t:
         pass
     elif x > 0:
