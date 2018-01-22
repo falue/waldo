@@ -454,7 +454,7 @@ def set_connection(project):
     if not config:
         config = {}
 
-    answer = raw_input("Set up connection with USB or analog input via MCP3008? [USB/MCP]\n").lower()
+    answer = raw_input("Set up potentiometer connection with USB or analog input via MCP3008? [USB/MCP]\n").lower()
     if answer == "usb":
         print "Connection set: USB"
         connection = usbdetection().split()

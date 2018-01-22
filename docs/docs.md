@@ -10,6 +10,7 @@
         - [Steps](#steps)
     - [create new project](#create_new_project)
     - [play (play an entire project)](#play-play-an-entire-project)
+    - [Set record connection type](#Set_record_connection_type)
 3. [Editor](#editor)
     - [remover / adder](#remover-adder)
     - [Convenience functions](#convenience-functions)
@@ -90,6 +91,15 @@ Create a new project
     ```
     python main.py -r /path/to/project channelName
     ```
+
+## Set record connection type
+```
+python waldo/main.py -c projectname
+```
+Set potentiometer input type:  
+Either via MCP chip (analog-digital translation to GPIO pins of RasPi) or
+eg. an Arduino on a USB port which does the translation and can do other, more sophisticated calculations than a 
+linear potentiometer could ever do.
 
 
 # Editor

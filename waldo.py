@@ -38,16 +38,46 @@ activity = 0
 
 # read all buttons from config file
 BUTTONS = config['buttons'].copy()
+button_number = False
 
 # If primay/first executed file from bash is waldo.py
 # keyboard interrupt fallback
 try:
     if sys.argv[1] == "-ap" or sys.argv[1] == "--autoplay":
-        print 'autoplay active!'
+        print 'autoplay active: Play/Preload track %s.' % sys.argv[2]
     pass
 
 except IndexError:
     pass
+
+
+def set_button_connection(new_config):
+    answer = raw_input("Set up play button connection with USB (numpad) or analog input via MCP3008? [USB/MCP]\n").lower()
+    if answer == "usb":
+        print "Connect your USB keyboard. Number keys equal button key defined in main config."
+        new_config.update({'numpad': True})
+        return new_config
+
+    elif answer == "mcp":
+        ranges = calibrate()
+
+        # Update config list
+        # TODO: Change button_value to play_button_value so don't get confused
+        new_config.update({'numpad': False})
+        new_config.update({'button_value': {
+            0: ranges[0],
+            1: ranges[1],
+            2: ranges[2],
+            3: ranges[3],
+            4: ranges[4],
+            5: ranges[5]
+        }})
+
+        return new_config
+
+    else:
+        print "Either enter USB or MCP, pretty please."
+        set_button_connection(new_config)
 
 
 def calibrate():
@@ -195,20 +225,10 @@ if __name__ == '__main__':
 
         # Start calibration
         elif arg == "-cal" or arg == "--calibrate" or 'button_value' not in config:
-            ranges = calibrate()
-
-            # Update congig list
-            config.update({'button_value': {
-                0: ranges[0],
-                1: ranges[1],
-                2: ranges[2],
-                3: ranges[3],
-                4: ranges[4],
-                5: ranges[5]
-            }})
+            new_config = set_button_connection(config)
 
             # Write data to main config
-            write_config(os.path.dirname(os.path.realpath(__file__)), config)
+            write_config(os.path.dirname(os.path.realpath(__file__)), new_config)
             print "Buttons calibrated."
 
         button_value = config['button_value'].copy()
@@ -224,36 +244,44 @@ if __name__ == '__main__':
 
         # Wait for button presses...
         while True:
+            # If MCP is used, get button_number via mcp:
+            if config['numpad']:
+                print 'numpad!'
+                time.sleep(0.75)
 
-            for mcp_in in range(30):
-                # Read analog value for first 5 buttons
-                value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
-                button = mcp_in * 5
-                # print "mcp_in %s: %s %s\t|\t" % (mcp_in, button / 5, value)
+            else:
+                for mcp_in in range(30):
+                    # Read analog value for first 5 buttons
+                    value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
+                    button = mcp_in * 5
+                    # print "mcp_in %s: %s %s\t|\t" % (mcp_in, button / 5, value)
 
-                # If nothing is pressed ("zero"-button)
-                if value <= button_value[0] + LIVE_ZONE:
-                    continue
+                    # If nothing is pressed ("zero"-button)
+                    if value <= button_value[0] + LIVE_ZONE:
+                        continue
 
-                # Cycle all 5 buttons
-                for i in range(1, 6):
-                    if button_value[i] - LIVE_ZONE <= value <= button_value[i] + LIVE_ZONE:
-                        # Cancel any ongoing 'play' instances
-                        cancel()
-                        button_number = button + i
+                    # Cycle all 5 buttons
+                    for i in range(1, 6):
+                        if button_value[i] - LIVE_ZONE <= value <= button_value[i] + LIVE_ZONE:
+                            # Cancel any ongoing 'play' instances
+                            cancel()
+                            button_number = button + i
 
-                        if button_number in BUTTONS:
-                            # Check if special 'Cancel' button
-                            if BUTTONS[button_number] == 'cancel':
-                                continue
+                            time.sleep(0.75)
 
-                            # Set commands as defined in main config file
-                            play(BUTTONS[button_number].split(" "))
-                            print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
-                        else:
-                            print "The button '%s' is not defined in main config file." % (button_number)
+            # Get button_number from MCP or USB numpad
+            if button_number:
+                if button_number in BUTTONS:
+                    # Check if special 'Cancel' button
+                    if BUTTONS[button_number] == 'cancel':
+                        continue
 
-                        time.sleep(0.75)
+                    # Set commands as defined in main config file
+                    play(BUTTONS[button_number].split(" "))
+                    print "Button %s: waldo/main.py %s %s" % (button_number, BUTTONS[button_number], value)
+                else:
+                    print "The button '%s' is not defined in main config file." % (button_number)
+                button_number = False
 
             # Read if project is ongoing
             config = None

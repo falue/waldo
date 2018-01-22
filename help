@@ -1,6 +1,6 @@
 Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
 Options:
-  -cal  --calibrate     reset and recalibrate buttons
+  -cal  --calibrate     Set USB numpad or MCP analog reader as button input - reset and recalibrate buttons
 
   -h  --help            Args: None
                         Show this message and exit.

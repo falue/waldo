@@ -7,7 +7,7 @@ Options:
                         Preload first or 'track number' song
 
   -c  --connection      Args: projectname
-                        Set new connection type (USB/MCP3008) for projectname.
+                        Set new potentiometer connection type (USB/MCP3008) for projectname.
 
   -cc --copyright       Args: None
                         Show copyright infos.
