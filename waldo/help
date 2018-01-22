@@ -3,9 +3,6 @@ Usage: main.py [OPTIONS] COMMAND [ARGS]...
   Puppeteering tool for animatronics.
 
 Options:
-  -ap --autoplay        Args: Track number
-                        Preload first or 'track number' song
-
   -c  --connection      Args: projectname
                         Set new potentiometer connection type (USB/MCP3008) for projectname.
 

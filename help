@@ -1,6 +1,10 @@
 Usage: waldo.py [OPTIONS] COMMAND [ARGS]...
 Options:
-  -cal  --calibrate     Set USB numpad or MCP analog reader as button input - reset and recalibrate buttons
+  -ap  --autoplay       Args: Button number
+                        Autoplay track with button number according to config list 'buttons'.
+
+  -cal --calibrate      Args: None
+                        Set USB numpad or MCP analog reader as button input - reset and recalibrate buttons.
 
   -h  --help            Args: None
                         Show this message and exit.

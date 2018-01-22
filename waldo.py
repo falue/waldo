@@ -43,17 +43,6 @@ button_number = False
 # reset config file value recrepl (in case waldo is shut off unexpected):
 change_glob_rec_repl(False)
 
-# If primay/first executed file from bash is waldo.py
-# keyboard interrupt fallback
-try:
-    if sys.argv[1] == "-ap" or sys.argv[1] == "--autoplay":
-        print 'autoplay active: Play/Preload button %s.' % sys.argv[2]
-        button_number = int(sys.argv[2])
-    pass
-
-except IndexError:
-    pass
-
 
 def set_button_connection(new_config):
     answer = raw_input("Set up play button connection with USB (numpad) or analog input via MCP3008? [USB/MCP]\n").lower()
@@ -227,6 +216,12 @@ if __name__ == '__main__':
                 print f.read()
             GPIO.cleanup()
             raise SystemExit
+
+        # If primay/first executed file from bash is waldo.py
+        # keyboard interrupt fallback
+        elif sys.argv[1] == "-ap" or sys.argv[1] == "--autoplay":
+            print 'Autoplay activated: Play button %s.' % sys.argv[2]
+            button_number = int(sys.argv[2])
 
         # Start calibration
         elif arg == "-cal" or arg == "--calibrate" or 'button_value' not in config:
