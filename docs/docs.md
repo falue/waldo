@@ -9,6 +9,7 @@
         - [Requirements](#requirements)
         - [Steps](#steps)
     - [create new project](#create_new_project)
+    - [Record channel](#record_channel)
     - [play (play an entire project)](#play-play-an-entire-project)
     - [Set record connection type](#Set_record_connection_type)
 3. [Editor](#editor)
@@ -72,25 +73,27 @@ Set start position: # usually use the minimum position to start closed
 
 ## create new project
 ```
-python waldo/main.py -n projectname
+python waldo/main.py -n projectName
 ```
-Name your project what you want except 'cancel' - this cannot be replayed with Rigby keyboard.
+Name your project what you want except 'cancel' - this cannot be replayed with Rigby keyboard.  
+You can choose to duplicate an existing config file.  
+Things you may want to do:
+- Add audio file in path/to/project/audio (`.mp3`, `.wave`, `.aiff`)
+- Delete channels that are not needed anymore from the config file
+- Call set_servo for all channels if the servos are not calibrated
 
+
+## Record channel
+```
+python main.py -r projectName channelName
+```
+    
+    
 ## play (play an entire project)
 ```
-python main.py -p /path/to/project [start_offset_in_seconds]
+python main.py -p projectName [start_offset_in_seconds]
 ```
 
-Create a new project
-1. Copy the folder from an existing project
-2. Remove all channel files
-3. Replace audio file in path/to/project/audio
-4. Delete channels that are not needed anymore from the config file
-5. Call set_servo for all channels if the servos are not calibrated
-6. Record channels
-    ```
-    python main.py -r /path/to/project channelName
-    ```
 
 ## Set record connection type
 ```
@@ -182,10 +185,15 @@ mcp:
 # Setup as independent unit
 Add the following script to the startup cycle of RasPi:
 - autostart.py
+
 It executes the following scripts:
-- waldo.py (sets up all is needed for replay, record and analog buttons with MCP/Mortekai analog keyboard. Autoplay track '0')
-- shutdown_button.py (displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
+- waldo.py
+    - Listens to numpad or analog play buttons
+    - Use modifier '(...)waldo/waldo.py -ap tracknumber &' to autoplay when startup RasPi
+- shutdown_button.py
+    - displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
 - numpad_listener.py
+    - should globally match keystrokes from keyboard to the specific waldo-window, no matter whats in the forgeground
 ```
 sudo nano /etc/rc.local
 ```

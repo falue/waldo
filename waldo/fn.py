@@ -742,10 +742,44 @@ def new_project(project_name):
         os.makedirs(path)
         os.makedirs(os.path.join(path, 'audio'))
         os.makedirs(os.path.join(path, 'trash'))
-        os.mknod(os.path.join(path, 'config'))
+
+        answer = raw_input("Copy config file from existing project? [Y/N] (For servo settings & recording connection type)\n").lower()
+        if answer == "y":
+
+            filelist = os.listdir(PROJECT_PATH)
+            projects = sorted([a for a in filelist if not a.startswith(".")])
+            if '_archive' in projects:
+                projects.remove('_archive')
+            if project_name in projects:
+                projects.remove(project_name)
+
+
+            if not projects:
+                print "There are no project folders in '%s'." % PROJECT_PATH
+            else:
+                project_list = list()
+                print 'Copy from where?'
+                print 'ID:\tProject:'
+                # For each project to analyze
+                for i, project in enumerate(projects):
+                    print '%s\t%s' % (i, project)
+                    project_list.append(i)
+
+                answer = int(raw_input("Type your ID:\n").lower())
+
+                if answer in project_list:
+                    copy_from = os.path.join(PROJECT_PATH, projects[answer], 'config')
+                    copy_to = os.path.join(path, 'config')
+                    copyfile(copy_from, copy_to)
+                    pass
+                else:
+                    print 'By god, this is not an acceptable answer.'
+
+        else:
+            os.mknod(os.path.join(path, 'config'))
+            set_connection(project_name)
 
         print "Created new project structure."
-        set_connection(project_name)
     else:
         print "╳  Project already exists."
 
