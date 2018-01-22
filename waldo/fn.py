@@ -322,14 +322,19 @@ def record(project, channel, audiofile):
     record_file = open(os.path.join(PROJECT_PATH, project, channel), 'w+')
     start_time = time.time()
 
-    # Set up
-    servo_last_position = start_pos
-    record_file.write("%s: %s\n" % (0.0, start_pos))  # write at beginning of file
+    # Set up: first reading
+    connection_type = 'usb' if config['connection']['type'] == 'usb' else False
+    if connection_type == 'usb':
+        record = read_usb(usb_port, baudrate)
+    else:
+        record = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
+    servo_last_position = record
+    record_file.write("%s: %s\n" % (0.0, record))  # write at beginning of file
 
     # Record!
     while REC_REPL:
         # Listen to usb port or MCP3008
-        if config['connection']['type'] == "usb":
+        if connection_type == 'usb':
             record = read_usb(usb_port, baudrate)
         else:
             record = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
