@@ -1,14 +1,15 @@
 PROJECT_PATH: ~/waldo_projects
 REC_REPL: false
 button_value:
-  0: 60
-  1: 963
-  2: 799
+  0: 58
+  1: 962
+  2: 798
   3: 685
-  4: 601
-  5: 292
+  4: 600
+  5: 290
 buttons:
   1: -p test
+  2: -p test2
   30: cancel
 mcp:
   0:
