@@ -141,19 +141,20 @@ Needs to be done when the cable connecting rigby and the pi has changed.
 Button commands are stored in config file, the following config for example defines the first 10 buttons.  
 Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root exists - it will take 'projects' as Project path.
 
-**Hint:** Any button can have the value 'cancel' to stop any ongoing track. Standard is 30.
+**Hint:** Any button can have the value 'cancel' to stop any ongoing track. Standard is 30.  
+Erase invalid comments in json file below when copy-pasting.
 
 ```json
-PROJECT_PATH: ~/waldo_projects
-REC_REPL: false
-button_value:
+PROJECT_PATH: ~/waldo_projects  # define where your project folder is. if folder 'waldo/projects' exists, this gets ignored
+REC_REPL: false   # Always false; just true if a track is being played. 
+button_value:     # Calibrated values for analog keyboard Rigby (changes depending on the length of ethernet cable)
   0: 89
   1: 932
   2: 778
   3: 670
   4: 594
   5: 306
-buttons:
+buttons:          # define buttons: key-number on USB numpad or button-number on Rigby, followed by bash commands to play songs
   1: -p s1_tonleiter_einzaehlen
   2: -p s23_teaser_variante_tonleiter
   3: -p s12_refrain_piano
@@ -165,7 +166,7 @@ buttons:
   9: -p reset
   10: -p reset
   30: cancel
-mcp:
+mcp:              # Leave alone if you use Mortekay as analog-digital transformer
   0:
     CLK: 4
     CS: 27
@@ -181,6 +182,9 @@ mcp:
     CS: 13
     MISO: 6
     MOSI: 12
+numpad: true      # Set to true if you use USB keyboard to play tracks instead of Rigby
+autostart: true   # Set to true if you want to start remote.py, shutdown_button.py and numpad_listener.py to start on RasPi startup
+
 ```
 
 # Setup as independent unit
