@@ -1,6 +1,7 @@
 # listening to numpad keystrokes and send matching commands
 
 # pseudocode
-#  keystroke '2': play track 2 according to config
+#  keystroke 'integer': send commend & enter to waldo window
+#  keystroke 'q': quit this script (so one can debug on Pi)
 
 print 'listening to keystrokes now!'

@@ -164,6 +164,7 @@ buttons:
   8: -p reset
   9: -p reset
   10: -p reset
+  30: cancel
 mcp:
   0:
     CLK: 4
@@ -183,8 +184,16 @@ mcp:
 ```
 
 # Setup as independent unit
-Add the following script to the startup cycle of RasPi:
-- scripts/autostart.py
+<<<<<<< HEAD
+Add the script `scripts/autostart.py` to the startup cycle of RasPi:
+```
+sudo nano /etc/rc.local
+```
+At the bottom (just before `exit 0`), note the following:
+```
+# Run WALDO
+sudo -u pi bash /home/pi/Scripts/waldo/autostart.sh
+```
 
 It executes the following scripts:
 - scripts/remote.py
@@ -194,14 +203,7 @@ It executes the following scripts:
     - displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
 - scripts/numpad_listener.py
     - should globally match keystrokes from keyboard to the specific waldo-window, no matter whats in the forgeground
-```
-sudo nano /etc/rc.local
-```
-At the bottom, note the following:
-```
-# Run WALDO
-sudo -u pi /home/pi/Scripts/waldo/scripts/autostart.sh
-```
+
 
 # Photos
 ![](images/poti.jpg)  
