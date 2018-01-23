@@ -191,7 +191,7 @@ sudo nano /etc/rc.local
 At the bottom (just before `exit 0`), note the following:
 ```
 # Run WALDO
-sudo -u pi bash /home/pi/Scripts/waldo/autostart.sh
+sudo -u pi bash /home/pi/Scripts/waldo/autostart.py
 ```
 
 It executes the following scripts:

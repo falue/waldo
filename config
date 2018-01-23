@@ -28,3 +28,4 @@ mcp:
     MISO: 6
     MOSI: 12
 numpad: true
+autostart: true
