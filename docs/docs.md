@@ -184,7 +184,6 @@ mcp:
 ```
 
 # Setup as independent unit
-<<<<<<< HEAD
 Add the script `scripts/autostart.py` to the startup cycle of RasPi:
 ```
 sudo nano /etc/rc.local
