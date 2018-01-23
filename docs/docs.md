@@ -131,10 +131,10 @@ Switch between 'remover' and 'adder' mode.
 
 ## (Re-)calibrate
 Needs to be done when the cable connecting rigby and the pi has changed.
-1. Kill running waldo.py process
+1. Kill running scripts/remote.py process
 2. Calibrate:
     ```
-    python waldo.py -cal
+    python scripts/remote.py -cal
     ```
 
 ## Configure buttons
@@ -197,7 +197,7 @@ sudo -u pi bash /home/pi/Scripts/waldo/autostart.sh
 It executes the following scripts:
 - scripts/remote.py
     - Listens to numpad or analog play buttons
-    - Use modifier '(...)waldo/waldo.py -ap tracknumber &' to autoplay when startup RasPi
+    - Use modifier '(...)scripts/remote.py -ap tracknumber &' to autoplay when startup RasPi
 - scripts/shutdown_button.py
     - displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
 - scripts/numpad_listener.py

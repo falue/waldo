@@ -10,6 +10,6 @@ Options:
                         Show this message and exit.
 
 General:
-  Connect raspberryPi with "keyboard" RYGBY before starting the raspberryPi; before running waldo.py.
-  If you changed the length of the cable, run command "python waldo.py -cal". Restart raspberryPi or waldo.py.
+  Connect raspberryPi with "analog keyboard" Rigby before starting the raspberryPi; before running scripts/remote.py.
+  If you changed the length of the cable, run command "python scripts/remote.py -cal". Restart raspberryPi or scripts/remote.py.
   Buttons get their commands from the main config file (list "buttons").

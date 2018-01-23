@@ -11,7 +11,7 @@ from fn import (helpfile, set_connection, set_servo, record_setup, singleplay,
 change_glob_rec_repl(False)
 
 
-# If primay/first executed file from bash is waldo.py
+# If primay/first executed file from bash is scripts/remote.py
 if __name__ == '__main__':
     # keyboard interrupt fallback
     try:

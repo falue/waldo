@@ -16,8 +16,8 @@ _______________________________
 ```
 
 **Startup**  
-If handled as independet unit, on startup of the raspberryPi, file "waldo.py" (and others) get executed.  
-Defined @ /etc/rc.local.
+If handled as independet unit, on startup of the raspberryPi, file "scripts/remote.py" (and others) get executed.  
+Defined @ /etc/rc.local. See the docs.
 
 
 **Docs**  

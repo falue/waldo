@@ -217,7 +217,7 @@ if __name__ == '__main__':
             GPIO.cleanup()
             raise SystemExit
 
-        # If primay/first executed file from bash is waldo.py
+        # If primay/first executed file from bash is scripts/remote.py
         # keyboard interrupt fallback
         elif arg == "-ap" or arg == "--autoplay":
             print 'Autoplay activated: Play button %s.' % sys.argv[2]

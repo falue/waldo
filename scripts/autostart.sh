@@ -1,6 +1,5 @@
 #!/bin/bash
-# TODO: if autoplay is defined in main config start these scripts
-# TODO: get autoplay button number from main config
-python /home/pi/Scripts/waldo/waldo.py -ap 2 &
-python /home/pi/Scripts/waldo/shutdown_button.py &
-python /home/pi/Scripts/waldo/numpad_listener.py &
+# use modifier '(...)scripts/remote.py -ap tracknumber &' to autoplay when startup RasPi
+python /home/pi/Scripts/waldo/scripts/remote.py -ap 1 &
+python /home/pi/Scripts/waldo/scripts/shutdown_button.py &
+python /home/pi/Scripts/waldo/scripts/numpad_listener.py &
