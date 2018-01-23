@@ -164,6 +164,7 @@ buttons:
   8: -p reset
   9: -p reset
   10: -p reset
+  30: cancel
 mcp:
   0:
     CLK: 4
