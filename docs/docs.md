@@ -1,5 +1,5 @@
 # Waldo and Rigby
-1. [General Setup (using pi and waldo per SSH)](#general-setup-using-pi-and-waldo-per-ssh)
+1. [General Setup (using pi and waldo via SSH)](#general-setup-using-pi-and-waldo-via-ssh)
     - [Set fixed IP for raspberry pi](#set-fixed-ip-for-raspberry-pi)
     - [Set fixed IP for Laptop](#set-fixed-ip-for-laptop)
     - [Mount remote file system](#mount-remote-file-system)
@@ -23,7 +23,7 @@
 6. [Photos](#photos)
 
 
-# General Setup (using pi and waldo per SSH)
+# General Setup (using pi and waldo via SSH)
 
 ## Set fixed IP for raspberry pi
 1. Edit **/etc/dhcpcd.conf** , enable static ip config:
@@ -63,7 +63,7 @@ This functionality is used to store the settings of a certain servo (e.g., of a 
 (Servo on Pin 2, Potentiometer on Pin 8)
 
 ```
-python main.py -ss /path/to/project channelName
+python waldo/main.py -ss /path/to/project channelName
 Set MCP3008 Pin [default 8] # this is the potentiometer, you can just hit enter
 Set Servo Pin [default 0] # this is the servo pin, here use 2
 Set minimum position: # hit &#39;m&#39; to set the value with the potentiometer
@@ -85,13 +85,13 @@ Things you may want to do:
 
 ## Record channel
 ```
-python main.py -r projectName channelName
+python waldo/main.py -r projectName channelName
 ```
     
     
 ## play (play an entire project)
 ```
-python main.py -p projectName [start_offset_in_seconds]
+python waldo/main.py -p projectName [start_offset_in_seconds]
 ```
 
 
@@ -107,7 +107,7 @@ linear potentiometer could ever do.
 
 # Editor
 ```
-python editor.py /path/to/project
+python scripts/editor.py /path/to/project
 ```
 
 ## remover / adder
@@ -184,15 +184,15 @@ mcp:
 
 # Setup as independent unit
 Add the following script to the startup cycle of RasPi:
-- autostart.py
+- scripts/autostart.py
 
 It executes the following scripts:
-- waldo.py
+- scripts/remote.py
     - Listens to numpad or analog play buttons
     - Use modifier '(...)waldo/waldo.py -ap tracknumber &' to autoplay when startup RasPi
-- shutdown_button.py
+- scripts/shutdown_button.py
     - displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
-- numpad_listener.py
+- scripts/numpad_listener.py
     - should globally match keystrokes from keyboard to the specific waldo-window, no matter whats in the forgeground
 ```
 sudo nano /etc/rc.local
@@ -200,7 +200,7 @@ sudo nano /etc/rc.local
 At the bottom, note the following:
 ```
 # Run WALDO
-sudo -u pi /home/pi/Scripts/waldo/autostart.sh
+sudo -u pi /home/pi/Scripts/waldo/scripts/autostart.sh
 ```
 
 # Photos
