@@ -1,0 +1,28 @@
+PROJECT_PATH: ~/waldo_projects
+REC_REPL: false
+button_value:
+  0: 60
+  1: 963
+  2: 799
+  3: 685
+  4: 601
+  5: 292
+buttons:
+  1: -p test
+  30: cancel
+mcp:
+  0:
+    CLK: 4
+    CS: 27
+    MISO: 17
+    MOSI: 18
+  1:
+    CLK: 22
+    CS: 25
+    MISO: 23
+    MOSI: 24
+  2:
+    CLK: 5
+    CS: 13
+    MISO: 6
+    MOSI: 12
