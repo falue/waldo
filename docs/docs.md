@@ -183,7 +183,9 @@ mcp:              # Leave alone if you use Mortekay as analog-digital transforme
     MISO: 6
     MOSI: 12
 numpad: true      # Set to true if you use USB keyboard to play tracks instead of Rigby
-autostart: true   # Set to true if you want to start remote.py, shutdown_button.py and numpad_listener.py to start on RasPi startup
+autostart: true   # Set to false if you dont want anything to on startup.
+                  # ^Set to true if you want to start remote.py, shutdown_button.py and numpad_listener.py to start on RasPi startup
+                  # ^Set to integer number of defined button to start any track on startup
 
 ```
 
