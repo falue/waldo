@@ -18,8 +18,6 @@ if autostart:
         modifier = '-ap %s' % int(autostart)
     else:
         modifier = ''
-
-    print 'python /home/pi/Scripts/waldo/waldo/helpers/remote.py %s' % modifier
-    # os.system('python /home/pi/Scripts/waldo/waldo/helpers/remote.py %s' % modifier)
-    # os.system('/home/pi/Scripts/waldo/waldo/helpers/shutdown_button.py')
-    # os.system('python /home/pi/Scripts/waldo/waldo/helpers/numpad_listener.py')
+    os.system('python /home/pi/Scripts/waldo/waldo/helpers/remote.py %s' % modifier)
+    os.system('/home/pi/Scripts/waldo/waldo/helpers/shutdown_button.py')
+    os.system('python /home/pi/Scripts/waldo/waldo/helpers/numpad_listener.py')
