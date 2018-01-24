@@ -16,6 +16,6 @@ if autostart:
         modifier = '-ap %s' % autostart
     else:
         modifier = ''
-    os.system('python /home/pi/Scripts/waldo/waldo/helpers/remote.py %s' % modifier)
-    os.system('python /home/pi/Scripts/waldo/waldo/helpers/shutdown_button.py')
-    os.system('python /home/pi/Scripts/waldo/waldo/helpers/numpad_listener.py')
+    os.system('python /home/pi/Scripts/waldo/helpers/remote.py %s' % modifier)
+    os.system('python /home/pi/Scripts/waldo/helpers/shutdown_button.py')
+    os.system('python /home/pi/Scripts/waldo/helpers/numpad_listener.py')
