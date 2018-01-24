@@ -4,23 +4,24 @@
     - [Set fixed IP for Laptop](#set-fixed-ip-for-laptop)
     - [Mount remote file system](#mount-remote-file-system)
     - [Raspberry Pi credentials](#raspberry-pi-credentials)
-2. [Waldo commands](#waldo-commands)
-    - [set_servo (recalibrate a servo)](#set_servo-recalibrate-a-servo)
-        - [Requirements](#requirements)
-        - [Steps](#steps)
+4. [Main commands](#main-commands)
+    - [set_servo (recalibrate a servo)](#set_servo-recalibrate-a-servo) ([Requirements](#requirements)|[Steps](#steps))
     - [create new project](#create_new_project)
     - [Record channel](#record_channel)
     - [play (play an entire project)](#play-play-an-entire-project)
     - [Set record connection type](#Set_record_connection_type)
-3. [Editor](#editor)
-    - [remover / adder](#remover-adder)
-    - [Convenience functions](#convenience-functions)
-4. [Rigby (remote keyboard)](#rigby-remote-keyboard)
+3. [Helpers](#helpers)
+    2. [remote.py: Remote commands](#remotepy-remote-commands)
+        - [Use keyboard remote control](#use-keyboard-remote-control)
+    5. [editor.py: Editor](#editorpy-editor)
+        - [remover / adder](#remover-adder)
+        - [Convenience functions](#convenience-functions)
+6. [Rigby (remote keyboard)](#rigby-remote-keyboard)
     - [Setup](#setup)
     - [(Re-)calibrate](#re-calibrate)
     - [Configure buttons](#configure-buttons)
-5. [Setup as independent unit](#setup-as-independent-unit)
-6. [Photos](#photos)
+7. [Setup as independent unit](#setup-as-independent-unit)
+8. [Photos](#photos)
 
 
 # General Setup (using pi and waldo via SSH)
@@ -50,7 +51,11 @@ sshfs pi@192.168.0.4:/home/pi/tmp_waldo_projects remote_waldo/
 pi / 1234
 
 
-# Waldo commands
+# Main commands
+Use the file `waldo/main.py` for recording, playing, analyzing a track, song or project.  
+ 
+**Hint:** Some functionality may be broken if you don't `cd` in the main folder `waldo/`.
+Honestly, i don't know exactly. Never tried.
 
 ## set_servo (recalibrate a servo)
 This functionality is used to store the settings of a certain servo (e.g., of a box) for a certain channel within a certain project.
@@ -65,10 +70,10 @@ This functionality is used to store the settings of a certain servo (e.g., of a 
 ```
 python waldo/main.py -ss /path/to/project channelName
 Set MCP3008 Pin [default 8] # this is the potentiometer, you can just hit enter
-Set Servo Pin [default 0] # this is the servo pin, here use 2
-Set minimum position: # hit &#39;m&#39; to set the value with the potentiometer
-Set maximum position: # hit &#39;m&#39; to set the value with the potentiometer
-Set start position: # usually use the minimum position to start closed
+Set Servo Pin [default 0]   # this is the servo pin, here use 2
+Set minimum position:       # hit &#39;m&#39; to set the value with the potentiometer
+Set maximum position:       # hit &#39;m&#39; to set the value with the potentiometer
+Set start position:         # usually use the minimum position to start closed
 ```
 
 ## create new project
@@ -87,13 +92,15 @@ Things you may want to do:
 ```
 python waldo/main.py -r projectName channelName
 ```
-    
+If you record channelName with a not existing projectName, you will be guided to [create a new project](#create-new-project).
+
     
 ## play (play an entire project)
+Play every channel of projectName
 ```
 python waldo/main.py -p projectName [start_offset_in_seconds]
 ```
-
+Optional argument: Start after n seconds.
 
 ## Set record connection type
 ```
@@ -105,17 +112,33 @@ eg. an Arduino on a USB port which does the translation and can do other, more s
 linear potentiometer could ever do.
 
 
-# Editor
-```
-python scripts/editor.py /path/to/project
-```
+# Helpers
+Use any of these helpers for your convenience.  
 
-## remover / adder
+**Hint:** Some functionality may be broken if you don't `cd` in the main folder `waldo/`.
+Honestly, i don't know exactly. Never tried.
+
+## remoty.py: Remote commands
+### Use keyboard remote control
+To start using the analog keyboard Rigby or an USB (numpad) keyboard as a remote for playing or stopping any track, type
+```
+python helpers/remote.py
+```
+If you defined `numpad: true` in the main config file, you can use any regular computer keyboard
+whereas the key numbers represent the button numbers defined in the main config file.
+
+**Hint:** See [Rigby (remote keyboard)](#rigby-remote-keyboard) for setup analog keyboard Rigby.
+
+
+## editor.py: Editor
+```
+python helpers/editor.py /path/to/project
+```
+### remover / adder
 Switch between 'remover' and 'adder' mode.
 * Adder (default after start of editor): clicking adds a point
 * Remover: clicking removes the closest point
-
-## Convenience functions
+### Convenience functions
 * Erase all: remove all added points from the editor.
 * First/last to y = zero: changes the first and last point added by clicking to y = 0.
 * add start/end: add a value at t = 0, and t = end_of_recording with y = 0 for both values.
@@ -123,8 +146,8 @@ Switch between 'remover' and 'adder' mode.
 * set same height (needs to have channelName set in input field): set last / first added point y value such, that they match the previously existing y value at that time.
 * Merge (needs to have channelName set in input field): Merge the currently drawn line with the existing line (useful, if only a certain part of the curve needs to be changed).
 
-# Rigby (remote keyboard)
 
+# Rigby (remote keyboard)
 ## Setup
 1. Connect rigby with RJ-45 cable to special port on pi ('pin 0-5')
 2. Boot pi
@@ -134,14 +157,14 @@ Needs to be done when the cable connecting rigby and the pi has changed.
 1. Kill running scripts/remote.py process
 2. Calibrate:
     ```
-    python scripts/remote.py -cal
+    python helpers/remote.py -cal
     ```
 
 ## Configure buttons
 Button commands are stored in config file, the following config for example defines the first 10 buttons.  
 Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root exists - it will take 'projects' as Project path.
 
-**Hint:** Any button can have the value 'cancel' to stop any ongoing track. Standard is 30.  
+**Hint:** Any button can have the value 'cancel' to stop every ongoing track. Standard may be 30.  
 Erase invalid comments in json file below when copy-pasting.
 
 ```json
@@ -183,7 +206,7 @@ mcp:              # Leave alone if you use Mortekay as analog-digital transforme
     MISO: 6
     MOSI: 12
 numpad: true      # Set to true if you use USB keyboard to play tracks instead of Rigby
-autostart: true   # Set to false if you dont want anything to on startup.
+autostart: true   # Set to false if you dont want anything to start on startup.
                   # ^Set to true if you want to start remote.py, shutdown_button.py and numpad_listener.py to start on RasPi startup
                   # ^Set to integer number of defined button to start any track on startup
 
