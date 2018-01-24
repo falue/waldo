@@ -5,20 +5,27 @@
     - [Mount remote file system](#mount-remote-file-system)
     - [Raspberry Pi credentials](#raspberry-pi-credentials)
 4. [Main commands](#main-commands)
-    - [set_servo (recalibrate a servo)](#set_servo-recalibrate-a-servo) ([Requirements](#requirements)|[Steps](#steps))
-    - [create new project](#create_new_project)
-    - [Record channel](#record_channel)
-    - [play (play an entire project)](#play-play-an-entire-project)
-    - [Set record connection type](#Set_record_connection_type)
+    - [Set record connection type](#set-record-connection-type)
+    - [Copyright](#copyright)
+    - [Copy project folder](#copy-project-folder)
+    - [Help for main.py](#help-for-main.py)
+    - [Listing of project folders](#listing-of-project-folders)
+    - [Create new project](#create-new-project)
+    - [Play an entire project](#play-an-entire-project)
+    - [Record channel](#record-channel)
+    - [Singleplay channel](#singleplay-channel)
+    - [Recalibrate a servo](#recalibrate-a-servo) ([Requirements](#requirements)|[Steps](#steps))
 3. [Helpers](#helpers)
     2. [remote.py: Remote commands](#remotepy-remote-commands)
         - [Use keyboard remote control](#use-keyboard-remote-control)
+        - [Autostart](#autostart)
+        - [(Re-)calibrate](#re-calibrate)
+        - [Help for remote.py](#help-for-remotepy)
     5. [editor.py: Editor](#editorpy-editor)
         - [remover / adder](#remover-adder)
         - [Convenience functions](#convenience-functions)
 6. [Rigby (remote keyboard)](#rigby-remote-keyboard)
     - [Setup](#setup)
-    - [(Re-)calibrate](#re-calibrate)
     - [Configure buttons](#configure-buttons)
 7. [Setup as independent unit](#setup-as-independent-unit)
 8. [Photos](#photos)
@@ -57,7 +64,58 @@ Use the file `waldo/main.py` for recording, playing, analyzing a track, song or 
 **Hint:** Some functionality may be broken if you don't `cd` in the main folder `waldo/`.
 Honestly, i don't know exactly. Never tried.
 
-## set_servo (recalibrate a servo)
+
+## Set record connection type
+```
+python waldo/main.py -c projectname
+```
+Set potentiometer input type:  
+Either via MCP chip (analog-digital translation to GPIO pins of RasPi) or
+eg. an Arduino on a USB port which does the translation and can do other, more sophisticated calculations than a 
+linear potentiometer could ever do.
+
+## Copyright
+Well, get copyright info.
+
+## Copy project folder
+*instructions follow*
+   
+## Help for main.py
+```
+python waldo/main.py -h
+```
+
+## Listing of project folders
+*instructions follow*
+
+## Create new project
+```
+python waldo/main.py -n projectName
+```
+Name your project what you want except 'cancel' - this cannot be replayed with Rigby keyboard.  
+You can choose to duplicate an existing config file.  
+Things you may want to do:
+- Add audio file in path/to/project/audio (`.mp3`, `.wave`, `.aiff`)
+- Delete channels that are not needed anymore from the config file
+- Call setservo for all channels if the servos are not calibrated
+
+## Play an entire project
+Play every channel of projectName
+```
+python waldo/main.py -p projectName [start_offset_in_seconds]
+```
+Optional argument: Start after n seconds.
+
+## Record channel
+```
+python waldo/main.py -r projectName channelName
+```
+If you record channelName with a not existing projectName, you will be guided to [create a new project](#create-new-project).
+
+## Singleplay channel
+*instructions follow*
+
+## Recalibrate a servo
 This functionality is used to store the settings of a certain servo (e.g., of a box) for a certain channel within a certain project.
 
 ### Requirements:
@@ -76,41 +134,6 @@ Set maximum position:       # hit &#39;m&#39; to set the value with the potentio
 Set start position:         # usually use the minimum position to start closed
 ```
 
-## create new project
-```
-python waldo/main.py -n projectName
-```
-Name your project what you want except 'cancel' - this cannot be replayed with Rigby keyboard.  
-You can choose to duplicate an existing config file.  
-Things you may want to do:
-- Add audio file in path/to/project/audio (`.mp3`, `.wave`, `.aiff`)
-- Delete channels that are not needed anymore from the config file
-- Call set_servo for all channels if the servos are not calibrated
-
-
-## Record channel
-```
-python waldo/main.py -r projectName channelName
-```
-If you record channelName with a not existing projectName, you will be guided to [create a new project](#create-new-project).
-
-    
-## play (play an entire project)
-Play every channel of projectName
-```
-python waldo/main.py -p projectName [start_offset_in_seconds]
-```
-Optional argument: Start after n seconds.
-
-## Set record connection type
-```
-python waldo/main.py -c projectname
-```
-Set potentiometer input type:  
-Either via MCP chip (analog-digital translation to GPIO pins of RasPi) or
-eg. an Arduino on a USB port which does the translation and can do other, more sophisticated calculations than a 
-linear potentiometer could ever do.
-
 
 # Helpers
 Use any of these helpers for your convenience.  
@@ -128,7 +151,23 @@ If you defined `numpad: true` in the main config file, you can use any regular c
 whereas the key numbers represent the button numbers defined in the main config file.
 
 **Hint:** See [Rigby (remote keyboard)](#rigby-remote-keyboard) for setup analog keyboard Rigby.
+### Autostart
+```
+python helpers/remote.py -ap buttonNumber
+```
+buttonNumber represents the button definition integer from the main config file.
 
+### (Re-)calibrate
+Needs to be done when the cable connecting rigby and the pi has changed.
+1. Kill running scripts/remote.py process
+2. Calibrate:
+```
+python helpers/remote.py -cal
+```
+### Help for remote.py
+```
+python helpers/remote.py -h
+```
 
 ## editor.py: Editor
 ```
@@ -152,13 +191,6 @@ Switch between 'remover' and 'adder' mode.
 1. Connect rigby with RJ-45 cable to special port on pi ('pin 0-5')
 2. Boot pi
 
-## (Re-)calibrate
-Needs to be done when the cable connecting rigby and the pi has changed.
-1. Kill running scripts/remote.py process
-2. Calibrate:
-    ```
-    python helpers/remote.py -cal
-    ```
 
 ## Configure buttons
 Button commands are stored in config file, the following config for example defines the first 10 buttons.  
