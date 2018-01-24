@@ -7,6 +7,9 @@ import time
 import RPi.GPIO as GPIO
 import subprocess as sp
 
+from os import path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
 from waldo.utils import read_config, write_config, get_mcp_connection, set_gpio_pins
 from waldo.fn import read_mcp, servo_start_pos, change_glob_rec_repl
 
@@ -17,7 +20,8 @@ from waldo.fn import read_mcp, servo_start_pos, change_glob_rec_repl
 GPIO.setmode(GPIO.BCM)  # verwende GPIO pinbezeichnung: BOARD, ...andere BCM
 
 # Set project folder path
-config = read_config(os.path.dirname(os.path.realpath(__file__)))
+config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+config = read_config(config_path)
 PROJECT_PATH = os.path.expanduser(config["PROJECT_PATH"])
 
 # Make project folder if inexistent
@@ -100,27 +104,27 @@ def calibrate():
         if position != 0:
             while not button[position]:
                 curr_average = average(10)
-		print curr_average
+        print curr_average
 
-                # Check if button is pressed
-                if curr_average > null_average + LIVE_ZONE:
+        # Check if button is pressed
+        if curr_average > null_average + LIVE_ZONE:
 
-                    # Measure again to hit correct start of measuring
-                    curr_average = average(10)
+            # Measure again to hit correct start of measuring
+            curr_average = average(10)
 
-                    # Check if new button not the same as last time
-                    if curr_average not in range(last_average - LIVE_ZONE,
-                                                 last_average + LIVE_ZONE):
-                        # Define new button setup
-                        button[position] = curr_average
-                        last_average = curr_average
-                        system_sound("beep")
-                        print "Button %s: set @ %s [%s ... %s]" % (position, button[position],
-                                                                   button[position] - LIVE_ZONE,
-                                                                   button[position] + LIVE_ZONE)
+            # Check if new button not the same as last time
+            if curr_average not in range(last_average - LIVE_ZONE,
+                                         last_average + LIVE_ZONE):
+                # Define new button setup
+                button[position] = curr_average
+                last_average = curr_average
+                system_sound("beep")
+                print "Button %s: set @ %s [%s ... %s]" % (position, button[position],
+                                                           button[position] - LIVE_ZONE,
+                                                           button[position] + LIVE_ZONE)
 
-                        # Important - user lets go off button -> new reading!
-                        time.sleep(0.75)
+                # Important - user lets go off button -> new reading!
+                time.sleep(0.75)
 
     # Finished calibrating
     system_sound("buttons_cal")
@@ -157,7 +161,7 @@ def play(args):
     """
     global PLAY
     # set to thread
-    PLAY[0] = sp.Popen(['python', 'waldo/main.py'] + args,
+    PLAY[0] = sp.Popen(['python', '../waldo/main.py'] + args,
                     stdout=sp.PIPE,  # hide prints from function
                     preexec_fn=os.setsid
                     )
@@ -173,7 +177,7 @@ def cancel():
     global PLAY
 
     # is actual playing?
-    config = read_config(os.path.dirname(os.path.realpath(__file__)))
+    config = read_config(config_path)
     is_replaying = config["REC_REPL"]
 
     if is_replaying or PLAY[0]:  # if PLAY[0]
@@ -284,7 +288,7 @@ if __name__ == '__main__':
 
                     # Set commands as defined in main config file
                     play(BUTTONS[button_number].split(" "))
-                    print "Button %s: waldo/main.py %s" % (button_number, BUTTONS[button_number])
+                    print "Button %s: ../waldo/main.py %s" % (button_number, BUTTONS[button_number])
                 else:
                     print "The button '%s' is not defined in main config file." % (button_number)
                 button_number = False
@@ -292,7 +296,7 @@ if __name__ == '__main__':
             # Read if project is ongoing
             config = None
             while config == None:
-                config = read_config(os.path.dirname(os.path.realpath(__file__)))
+                config = read_config(config_path)
                 time.sleep(0.05)
             REC_REPL = config["REC_REPL"]
 
