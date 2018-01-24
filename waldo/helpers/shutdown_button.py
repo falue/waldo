@@ -44,5 +44,5 @@ while True:
         GPIO.output(led_pin_red, True)
         shutdown_started = True
         print('Shutdown button pressed')
-        # os.system("sudo shutdown now -h")
+        os.system("sudo shutdown now -h")
     time.sleep(waiting_time)
