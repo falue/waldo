@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import RPi.GPIO as GPIO
-import time
+import time, os
 
 #######################
 #    Configuration    #
@@ -43,6 +43,6 @@ while True:
         GPIO.output(led_pin_green, False)
         GPIO.output(led_pin_red, True)
         shutdown_started = True
-        print('Shutdown button pressed')
+        print('Shutdown button pressed. Shutdown: Now.')
         os.system("sudo shutdown now -h")
     time.sleep(waiting_time)
