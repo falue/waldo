@@ -4,7 +4,7 @@
     - [Set fixed IP for Laptop](#set-fixed-ip-for-laptop)
     - [Mount remote file system](#mount-remote-file-system)
     - [Raspberry Pi credentials](#raspberry-pi-credentials)
-4. [Main commands](#main-commands)
+2. [Main commands](#main-commands)
     - [Set record connection type](#set-record-connection-type)
     - [Copyright](#copyright)
     - [Copy project folder](#copy-project-folder)
@@ -16,19 +16,20 @@
     - [Singleplay channel](#singleplay-channel)
     - [Recalibrate a servo](#recalibrate-a-servo) ([Requirements](#requirements)|[Steps](#steps))
 3. [Helpers](#helpers)
-    2. [remote.py: Remote commands](#remotepy-remote-commands)
+    1. [remote.py: Remote commands](#remotepy-remote-commands)
         - [Use keyboard remote control](#use-keyboard-remote-control)
         - [Autostart](#autostart)
         - [(Re-)calibrate](#re-calibrate)
         - [Help for remote.py](#help-for-remotepy)
-    5. [editor.py: Editor](#editorpy-editor)
+    2. [editor.py: Editor](#editorpy-editor)
         - [remover / adder](#remover-adder)
         - [Convenience functions](#convenience-functions)
-6. [Rigby (remote keyboard)](#rigby-remote-keyboard)
+    3. [killall.py: Exit every python script](#killallpy-exit-every-python-script)
+4. [Rigby (remote keyboard)](#rigby-remote-keyboard)
     - [Setup](#setup)
     - [Configure buttons](#configure-buttons)
-7. [Setup as independent unit](#setup-as-independent-unit)
-8. [Photos](#photos)
+5. [Setup as independent unit](#setup-as-independent-unit)
+6. [Photos](#photos)
 
 
 # General Setup (using pi and waldo via SSH)
@@ -185,6 +186,8 @@ Switch between 'remover' and 'adder' mode.
 * set same height (needs to have channelName set in input field): set last / first added point y value such, that they match the previously existing y value at that time.
 * Merge (needs to have channelName set in input field): Merge the currently drawn line with the existing line (useful, if only a certain part of the curve needs to be changed).
 
+## killall.py: Exit every python script
+Handy after `autostart.py` startet some scripts and you want to kill them all.
 
 # Rigby (remote keyboard)
 ## Setup
