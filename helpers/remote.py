@@ -186,6 +186,7 @@ def cancel():
         servo_start_pos(PLAY[1])
         PLAY[0] = False
         PLAY[1] = False
+        change_glob_rec_repl(False)
         time.sleep(0.25)
         if not config['numpad']:
             print "Waiting for input via control panel 'rigby'..."
@@ -195,6 +196,7 @@ def cancel():
         pass
 
 
+# Numpad keys
 keys = {79: 1, 80: 2, 81: 3, 75: 4, 76: 5, 77: 6, 71: 7, 72: 8, 73: 9, 82: 0,  # numpad
       2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 10: 9, 11: 0,  # regular number keys
       16: 'q', 28: 'enter', 98: '/', 55: '*', 14: 'backspace', 74: '-', 78: '+', 96: 'enter', 83: '.'
@@ -257,12 +259,12 @@ if __name__ == '__main__':
         # keyboard interrupt fallback
         elif arg == "-ap" or arg == "--autoplay":
             print 'Autoplay activated.'
-            system_sound('startup_complete')
+            system_sound('chime')
             try:
                 print 'Play button %s.' % sys.argv[2]
                 button_number = int(sys.argv[2])
             except IndexError:
-                print 'No autoplay startup track defined in config.'
+                print 'No autoplay startup track defined in config (use integer of button instead of "True").'
 
         # Start calibration
         elif arg == "-cal" or arg == "--calibrate" or 'button_value' not in config:
@@ -330,6 +332,7 @@ if __name__ == '__main__':
                 if button_number in BUTTONS:
                     # Check if special 'Cancel' button
                     if BUTTONS[button_number] == 'cancel':
+                        button_number = False
                         continue
 
                     # Set commands as defined in main config file
