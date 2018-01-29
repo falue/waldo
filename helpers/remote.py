@@ -140,7 +140,7 @@ def system_sound(audiofile):
     :param audiofile:
     :return:
     """
-    bashcommando = 'play waldo/sounds/%s.mp3 -q' % audiofile
+    bashcommando = 'play %s/%s.mp3 -q' % (os.path.expanduser('~/Scripts/waldo/waldo/sounds'), audiofile)
     os.system(bashcommando)  # invoke 'sox' in quiet mode
 
 
@@ -162,7 +162,7 @@ def play(args):
     """
     global PLAY
     # set to thread
-    PLAY[0] = sp.Popen(['python', '../waldo/main.py'] + args,
+    PLAY[0] = sp.Popen(['python', os.path.expanduser('~/Scripts/waldo/waldo/main.py')] + args,
                     stdout=sp.PIPE,  # hide prints from function
                     preexec_fn=os.setsid
                     )
@@ -283,7 +283,7 @@ if __name__ == '__main__':
             keyboard.hook(foo)
 
         # Change to home directory
-        os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        # os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
         # Set max volume
         bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'
@@ -335,7 +335,7 @@ if __name__ == '__main__':
 
                     # Set commands as defined in main config file
                     play(BUTTONS[button_number].split(" "))
-                    print "Button %s: ../waldo/main.py %s" % (button_number, BUTTONS[button_number])
+                    print "Button %s: waldo/main.py %s" % (button_number, BUTTONS[button_number])
                 else:
                     print "The button '%s' is not defined in main config file." % (button_number)
                 button_number = False
