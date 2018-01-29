@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+'''
+Start scripts if startup is true in main config file.
+Play defined track
+'''
 import os
 import sys
 from os import path
@@ -16,6 +20,6 @@ if autostart:
         modifier = '-ap %s' % autostart
     else:
         modifier = ''
-    os.system('python /home/pi/Scripts/waldo/helpers/remote.py %s' % modifier)
+    os.system('sudo python /home/pi/Scripts/waldo/helpers/remote.py %s' % modifier)
     os.system('python /home/pi/Scripts/waldo/helpers/shutdown_button.py')
-    os.system('python /home/pi/Scripts/waldo/helpers/numpad_listener.py')
+    # os.system('python /home/pi/Scripts/waldo/helpers/numpad_listener.py')

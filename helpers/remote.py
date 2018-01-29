@@ -6,6 +6,7 @@ import sys
 import time
 import RPi.GPIO as GPIO
 import subprocess as sp
+import keyboard
 
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -195,6 +196,38 @@ def cancel():
         pass
 
 
+keys = {79: 1, 80: 2, 81: 3, 75: 4, 76: 5, 77: 6, 71: 7, 72: 8, 73: 9, 82: 0,  # numpad
+      2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 10: 9, 11: 0,  # regular number keys
+      16: 'q', 28: 'enter', 98: '/', 55: '*', 14: 'backspace', 74: '-', 78: '+', 96: 'enter', 83: '.'
+      }
+
+def get_pressed_keys(e):
+    # KeyboardEvent.scan_code
+    # KeyboardEvent.name
+    # event_type
+    # print keyboard._pressed_events
+
+    # keycode = False
+    # for code in e:
+    #     keycode = code, keycode
+    keycode = list([x for x in e])
+    if len(keycode):
+        keycode = int('\n'.join(str(p) for p in keycode))
+        # exclude num lock
+        try:
+            return keys[keycode] if keycode != 69 else False
+            time.sleep(0.25)
+        except KeyError:
+            print 'This button is not programmed to do a damn thing.'
+
+
+def foo(e):
+    # if e.event_type == 'down' and e.name != 'num lock':
+    #     # print e.scan_code, e.name, e.event_type
+    #     print e.name
+    pass
+
+
 # Main loop
 if __name__ == '__main__':
     try:
@@ -239,6 +272,10 @@ if __name__ == '__main__':
 
         if not config['numpad']:
             print "Waiting for input via control panel 'rigby'..."
+        else:
+            print 'Awaiting keyboard input (Press 1-30 & enter) with directly connected USB keyboard'
+            # hook global keyboard presses to function
+            keyboard.hook(foo)
 
         # Change to home directory
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -252,12 +289,17 @@ if __name__ == '__main__':
             # If USB is used, get button_number via Keyboard input:
             if not button_number:
                 if config['numpad']:
-                    answer = raw_input("Awaiting keyboard input (Press 1-30 & enter)...\n").lower()
-                    try:
-                        button_number = int(answer)
-                    except ValueError:
-                        # Handle the exception
-                        print 'Not an integer value.'
+                    # TODO: also raw input, but read keypress from library
+                    # answer = raw_input("Awaiting keyboard input (Press 1-30 & enter)...\n").lower()
+                    # try:
+                    #     button_number = int(answer)
+                    # except ValueError:
+                    #     # Handle the exception
+                    #     print 'Not an integer value.'
+
+                    keystroke = get_pressed_keys(keyboard._pressed_events)
+                    if keystroke is not None and keystroke is not False:
+                        button_number = keystroke
 
                 else:
                     # If MCP is used, get button_number via mcp:

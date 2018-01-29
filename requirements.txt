@@ -4,3 +4,4 @@ pyserial
 pytest
 pyyaml
 RPi.GPIO
+keyboard
