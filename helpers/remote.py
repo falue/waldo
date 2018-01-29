@@ -259,7 +259,6 @@ if __name__ == '__main__':
         # keyboard interrupt fallback
         elif arg == "-ap" or arg == "--autoplay":
             print 'Autoplay activated.'
-            system_sound('chime')
             try:
                 print 'Play button %s.' % sys.argv[2]
                 button_number = int(sys.argv[2])
@@ -289,6 +288,9 @@ if __name__ == '__main__':
         # Set max volume
         bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'
         os.system(bashcommando)
+
+        if config['autostart']:
+            system_sound('chime')
 
         # Wait for button presses...
         while True:
