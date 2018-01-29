@@ -257,8 +257,13 @@ if __name__ == '__main__':
         # If primay/first executed file from bash is scripts/remote.py
         # keyboard interrupt fallback
         elif arg == "-ap" or arg == "--autoplay":
-            print 'Autoplay activated: Play button %s.' % sys.argv[2]
-            button_number = int(sys.argv[2])
+            print 'Autoplay activated.'
+            system_sound('startup_complete')
+            try:
+                print 'Play button %s.' % sys.argv[2]
+                button_number = int(sys.argv[2])
+            except IndexError:
+                print 'No autoplay startup track defined in config.'
 
         # Start calibration
         elif arg == "-cal" or arg == "--calibrate" or 'button_value' not in config:
