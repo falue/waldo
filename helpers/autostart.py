@@ -17,9 +17,9 @@ autostart = PREFERENCES['autostart']
 if autostart:
     # modifier = '-ap %s' % autostart if int(autostart) else ''
     if autostart is not True:
-        modifier = '-ap %s' % autostart
+        modifier = autostart
     else:
         modifier = ''
-    os.system('sudo python /home/pi/Scripts/waldo/helpers/remote.py %s' % modifier)
+    os.system('sudo python /home/pi/Scripts/waldo/helpers/remote.py -ap %s' % modifier)
     os.system('python /home/pi/Scripts/waldo/helpers/shutdown_button.py')
     # os.system('python /home/pi/Scripts/waldo/helpers/numpad_listener.py')
