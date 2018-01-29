@@ -14,7 +14,6 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from waldo.utils import read_config, write_config, get_mcp_connection, set_gpio_pins
 from waldo.fn import read_mcp, servo_start_pos, change_glob_rec_repl
 
-
 # FIXME: remove in production
 # GPIO.setwarnings(False)
 
@@ -140,7 +139,7 @@ def system_sound(audiofile):
     :param audiofile:
     :return:
     """
-    bashcommando = 'play %s/%s.mp3 -q' % (os.path.expanduser('~/Scripts/waldo/waldo/sounds'), audiofile)
+    bashcommando = 'play /home/pi/Scripts/waldo/waldo/sounds/%s.mp3 -q' % audiofile
     os.system(bashcommando)  # invoke 'sox' in quiet mode
 
 
@@ -162,7 +161,7 @@ def play(args):
     """
     global PLAY
     # set to thread
-    PLAY[0] = sp.Popen(['python', os.path.expanduser('~/Scripts/waldo/waldo/main.py')] + args,
+    PLAY[0] = sp.Popen(['python', '/home/pi/Scripts/waldo/waldo/main.py'] + args,
                     stdout=sp.PIPE,  # hide prints from function
                     preexec_fn=os.setsid
                     )
@@ -283,7 +282,7 @@ if __name__ == '__main__':
             keyboard.hook(foo)
 
         # Change to home directory
-        # os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
         # Set max volume
         bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'

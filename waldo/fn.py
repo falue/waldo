@@ -32,7 +32,8 @@ except ImportError:
 
 # Read preferences and set project folder path
 PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-PROJECT_PATH = os.path.expanduser(PREFERENCES["PROJECT_PATH"]) if not os.path.isdir('projects') else 'projects'
+# do not expand user due to autostart user is 'root' not 'pi'
+PROJECT_PATH = PREFERENCES["PROJECT_PATH"] if not os.path.isdir('projects') else 'projects'
 
 # Make project folder if inexistent
 if not os.path.isdir(PROJECT_PATH):
