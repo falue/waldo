@@ -203,7 +203,9 @@ Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root
 Erase invalid comments in json file below when copy-pasting.
 
 ```json
-PROJECT_PATH: ~/waldo_projects  # define where your project folder is. if folder 'waldo/projects' exists, this gets ignored
+PROJECT_PATH: ~/waldo_projects  # define where your project folder is.
+                                # if folder 'waldo/projects' exists, this gets ignored.
+                                # DO NOT use '~' for user expanding; does not work when autostarting
 REC_REPL: false   # Always false; just true if a track is being played. 
 button_value:     # Calibrated values for analog keyboard Rigby (changes depending on the length of ethernet cable)
   0: 89

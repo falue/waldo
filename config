@@ -1,4 +1,4 @@
-PROJECT_PATH: ~/waldo_projects
+PROJECT_PATH: /home/pi/waldo_projects
 REC_REPL: false
 autostart: true
 button_value:
