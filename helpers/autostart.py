@@ -6,6 +6,7 @@ Play defined track
 '''
 import os
 import sys
+import subprocess as sp
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from waldo.utils import read_config
@@ -20,7 +21,7 @@ if autostart:
         modifier = autostart
     else:
         modifier = ''
-    main_path = os.path.expanduser('~/Scripts/waldo')
-    os.system('sudo python %s/helpers/remote.py -ap %s' % (main_path, modifier))
-    os.system('sudo python %s/helpers/shutdown_button.py' % main_path)
+    # main_path = os.path.expanduser('~/Scripts/waldo')
+    sp.Popen(['python', '/home/pi/Scripts/waldo/helpers/shutdown_button.py'])
+    os.system('sudo python /home/pi/Scripts/waldo/helpers/remote.py -ap %s' % modifier)
     # os.system('python %s/helpers/numpad_listener.py' % main_path)

@@ -18,6 +18,8 @@ number_of_measurements = 5
 #     Code Starts     #
 #######################
 
+print 'Shutdown button active.'
+
 # Button pin setup
 GPIO.setmode(GPIO.BCM)
 button_pin = 19
