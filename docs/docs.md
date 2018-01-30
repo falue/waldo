@@ -7,7 +7,7 @@
 2. [Main commands](#main-commands)
     - [Set record connection type](#set-record-connection-type)
     - [Copyright](#copyright)
-    - [Copy project folder](#copy-project-folder)
+    - [Copy channel](#copy-channel)
     - [Help for main.py](#help-for-main.py)
     - [Listing of project folders](#listing-of-project-folders)
     - [Create new project](#create-new-project)
@@ -27,7 +27,7 @@
     3. [killall.py: Exit every python script](#killallpy-exit-every-python-script)
 4. [Rigby (remote keyboard)](#rigby-remote-keyboard)
     - [Setup](#setup)
-    - [Configure buttons](#configure-buttons)
+    - [Main config file](#main-config-file)
 5. [Setup as independent unit](#setup-as-independent-unit)
 6. [Photos](#photos)
 
@@ -36,12 +36,13 @@
 
 ## Set fixed IP for raspberry pi
 1. Edit **/etc/dhcpcd.conf** , enable static ip config:
-    ```
-    interface eth0
-    static ip_address=192.168.0.4/24
-    static routers=192.168.0.1
-    static domain_name_servers=192.168.0.1
-    ```
+```
+# Uncomment if you want to give static IP
+interface eth0
+static ip_address=192.168.0.4/24
+static routers=192.168.0.1
+static domain_name_servers=192.168.0.1
+```
 2. reboot
 
 ## Set fixed IP for Laptop
@@ -76,10 +77,19 @@ eg. an Arduino on a USB port which does the translation and can do other, more s
 linear potentiometer could ever do.
 
 ## Copyright
+```
+python waldo/main.py -cc
+```
 Well, get copyright info.
 
-## Copy project folder
-*instructions follow*
+## Copy channel
+```
+python waldo/main.py -cp projectName channelfilename_old channelfilename_new [pin_inc|pin_copy|pin_new]
+```
+Duplicate channel_old to channel_new in projectName and copy config data associated with
+channel_old.  
+Servo_pin gets either incremented by total channels + 1 `pin_inc` (default), copied from old
+`pin_copy`, or gets user defined by integer value `pin_new`.
    
 ## Help for main.py
 ```
@@ -87,7 +97,40 @@ python waldo/main.py -h
 ```
 
 ## Listing of project folders
-*instructions follow*
+```
+python waldo/main.py -ls [projectName]
+```
+List evey project (or a specific one with [projectname]) and every channel with their
+servo-hat-pin-associations.  
+Point out difficulties like multiple use of servo_pin or missing files or config data.  
+Vizualize range of used servo degrees.  
+
+Example output:  
+```
+python waldo/main.py -ls
+List every channel in every project and point out difficulties.
+-------------------------------------------------------------
+test:
+╳  No file 'sopran' for specs in config
+╳  Multiple use of servo pin 3 (tenor)
+╳  No specs in config for file
+	channel		servo	mcp_in	map_min	map_max	st._pos	°DOF
+	bariton		3	    8	    233	    302	    233	    13°
+	░░░░░░░░░░░░░░░████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+	bass		6	    8	    160	    390	    160	    42°
+	░░░░░░████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░
+	sopran		4	    8	    120	    410	    120	    52°
+	░░██████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░
+	tenor		3	    8	    155	    444	    230	    52°
+	░░░░░░██████████████████████████████████░░░░░░░░░░░░░░░░░░░
+
+-------------------------------------------------------------
+
+empty_test:
+╳  No channels in config file.
+-------------------------------------------------------------
+```
+Whereas `°DOF` is an attempt to calculate the physical 'degrees of freedom' of the servo.
 
 ## Create new project
 ```
@@ -114,13 +157,18 @@ python waldo/main.py -r projectName channelName
 If you record channelName with a not existing projectName, you will be guided to [create a new project](#create-new-project).
 
 ## Singleplay channel
-*instructions follow*
+```
+python waldo/main.py -sp projectname channelfilename [audiofilename]
+```
+Playback of one specific servo in projectname through a specific servo. Optional specific audio
+playback with [audiofilename] (if none is entered, alphabetical first in folder will play if
+existent).
 
 ## Recalibrate a servo
 This functionality is used to store the settings of a certain servo (e.g., of a box) for a certain channel within a certain project.
 
 ### Requirements:
-1. Potentiometer is connected to the topr-ow of connectors (labelled 0-23), on Pin 8.
+1. Potentiometer is connected to the toprow of connectors (labelled 0-23), on Pin 8.
 2. Servo to calibrate is connected to bottom-row, to one of the pins.
 
 ### Steps
@@ -130,8 +178,8 @@ This functionality is used to store the settings of a certain servo (e.g., of a 
 python waldo/main.py -ss /path/to/project channelName
 Set MCP3008 Pin [default 8] # this is the potentiometer, you can just hit enter
 Set Servo Pin [default 0]   # this is the servo pin, here use 2
-Set minimum position:       # hit &#39;m&#39; to set the value with the potentiometer
-Set maximum position:       # hit &#39;m&#39; to set the value with the potentiometer
+Set minimum position:       # hit 'm' to set the value with the potentiometer
+Set maximum position:       # hit 'm' to set the value with the potentiometer
 Set start position:         # usually use the minimum position to start closed
 ```
 
@@ -142,7 +190,7 @@ Use any of these helpers for your convenience.
 **Hint:** Some functionality may be broken if you don't `cd` in the main folder `waldo/`.
 Honestly, i don't know exactly. Never tried.
 
-## remoty.py: Remote commands
+## remote.py: Remote commands
 ### Use keyboard remote control
 To start using the analog keyboard Rigby or an USB (numpad) keyboard as a remote for playing or stopping any track, type
 ```
@@ -154,9 +202,9 @@ whereas the key numbers represent the button numbers defined in the main config 
 **Hint:** See [Rigby (remote keyboard)](#rigby-remote-keyboard) for setup analog keyboard Rigby.
 ### Autostart
 ```
-python helpers/remote.py -ap buttonNumber
+python helpers/remote.py -ap [buttonNumber]
 ```
-buttonNumber represents the button definition integer from the main config file.
+buttonNumber represents the button definition integer from the main config file. This track will start when the Pi starts up.
 
 ### (Re-)calibrate
 Needs to be done when the cable connecting rigby and the pi has changed.
@@ -187,7 +235,7 @@ Switch between 'remover' and 'adder' mode.
 * Merge (needs to have channelName set in input field): Merge the currently drawn line with the existing line (useful, if only a certain part of the curve needs to be changed).
 
 ## killall.py: Exit every python script
-Handy after `autostart.py` startet some scripts and you want to kill them all.
+Handy after `autostart.py` startet some scripts and you want to kill them all. Also sets LED pins to false.
 
 # Rigby (remote keyboard)
 ## Setup
@@ -195,7 +243,7 @@ Handy after `autostart.py` startet some scripts and you want to kill them all.
 2. Boot pi
 
 
-## Configure buttons
+## Main config file
 Button commands are stored in config file, the following config for example defines the first 10 buttons.  
 Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root exists - it will take 'projects' as Project path.
 
@@ -203,9 +251,9 @@ Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root
 Erase invalid comments in json file below when copy-pasting.
 
 ```json
-PROJECT_PATH: ~/waldo_projects  # define where your project folder is.
-                                # if folder 'waldo/projects' exists, this gets ignored.
-                                # DO NOT use '~' for user expanding; does not work when autostarting
+PROJECT_PATH: /home/pi/waldo_projects   # define where your project folder is.
+                                        # if folder 'waldo/projects' exists, this gets ignored.
+                                        # DO NOT use '~' for user expanding; does not work when autostarting
 REC_REPL: false   # Always false; just true if a track is being played. 
 button_value:     # Calibrated values for analog keyboard Rigby (changes depending on the length of ethernet cable)
   0: 89
@@ -225,7 +273,7 @@ buttons:          # define buttons: key-number on USB numpad or button-number on
   8: -p reset
   9: -p reset
   10: -p reset
-  30: cancel
+  30: cancel      # Name a function of any button 'cancel' and you have yourself a cancel button
 mcp:              # Leave alone if you use Mortekay as analog-digital transformer
   0:
     CLK: 4
@@ -244,7 +292,7 @@ mcp:              # Leave alone if you use Mortekay as analog-digital transforme
     MOSI: 12
 numpad: true      # Set to true if you use USB keyboard to play tracks instead of Rigby
 autostart: true   # Set to false if you dont want anything to start on startup.
-                  # ^Set to true if you want to start remote.py, shutdown_button.py and numpad_listener.py to start on RasPi startup
+                  # ^Set to true if you want to start remote.py, shutdown_button.py to start on RasPi startup
                   # ^Set to integer number of defined button to start any track on startup
 
 ```
@@ -266,8 +314,6 @@ It executes the following scripts:
     - Use modifier '(...)scripts/remote.py -ap tracknumber &' to autoplay when startup RasPi
 - scripts/shutdown_button.py
     - displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
-- scripts/numpad_listener.py
-    - should globally match keystrokes from keyboard to the specific waldo-window, no matter whats in the forgeground
 
 
 # Photos
