@@ -198,9 +198,10 @@ def cancel():
 
 # Numpad keys
 keys = {79: 1, 80: 2, 81: 3, 75: 4, 76: 5, 77: 6, 71: 7, 72: 8, 73: 9, 82: 0,  # numpad
-      2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 10: 9, 11: 0,  # regular number keys
-      16: 'q', 28: 'enter', 98: '/', 55: '*', 14: 'backspace', 74: '-', 78: '+', 96: 'enter', 83: '.'
-      }
+        2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 10: 9, 11: 0,  # regular number keys
+        16: 'q', 28: 'enter', 98: '/', 55: '*', 14: 'backspace', 74: '-', 78: '+', 96: 'enter', 83: '.'
+        }
+
 
 def get_pressed_keys(e):
     # KeyboardEvent.scan_code
@@ -329,9 +330,9 @@ if __name__ == '__main__':
 
             # Get button_number from MCP or USB numpad
             if button_number:
-                # Cancel any ongoing 'play' instances
-                cancel()
                 if button_number in BUTTONS:
+                    # Cancel any ongoing 'play' instances
+                    cancel()
                     # Check if special 'Cancel' button
                     if BUTTONS[button_number] == 'cancel':
                         button_number = False
@@ -347,7 +348,8 @@ if __name__ == '__main__':
             # Read if project is ongoing
             config = None
             while config == None:
-                config = read_config(config_path)
+                if os.path.isfile(os.path.join(config_path, 'config')):
+                    config = read_config(config_path)
                 time.sleep(0.05)
             REC_REPL = config["REC_REPL"]
 

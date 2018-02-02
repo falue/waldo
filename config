@@ -12,6 +12,7 @@ buttons:
   1: -p test
   2: -p test2
   30: cancel
+  enter: cancel
 mcp:
   0:
     CLK: 4
@@ -28,4 +29,4 @@ mcp:
     CS: 13
     MISO: 6
     MOSI: 12
-numpad: false
+numpad: true
