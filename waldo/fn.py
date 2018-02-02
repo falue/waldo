@@ -129,15 +129,12 @@ def playback_servo(project, channel, play_from=0):
     logger.info("Channelname:\t%s\tServopin:\t%s\tStart @\t%ss" % (channel, servo_pin, play_from))
 
     # Fill pulse_list with pulses
-    channelfile = os.path.join(PROJECT_PATH, project, channel)
-    if os.path.isfile(channelfile):
-        with open(channelfile, 'r') as pulse_file:
-            pulse_list = []
-            for line in pulse_file.readlines():
-                timestamp, value = line.split(": ")
-                pulse_list.append((float(timestamp), int(value)))
-    else:
-        print "╳ Channelfile doesn't exist."
+    with open(os.path.join(PROJECT_PATH, project, channel), 'r') as pulse_file:
+        pulse_list = []
+        for line in pulse_file.readlines():
+            timestamp, value = line.split(": ")
+            pulse_list.append((float(timestamp), int(value)))
+
     # Cut beginning of tuple list when play_from is set
     # if play_from:
     #     play_from = float(play_from)
@@ -707,13 +704,17 @@ def play_all(project, play_from=0):
     for channel, data in play_channels['channels'].iteritems():
         # print "%s --- %s" % (channel, data)
         # threading.Thread(target=playback_servo, args=(project, channel, play_from,), name='channel').start()
-        process_thread_1 = threading.Thread(
-            target=playback_servo,
-            args=(project, channel, play_from,)
-        )
-        # ^ note extra ','
-        SERVO_READY.update({channel: False})
-        process_thread_1.start()
+
+        if os.path.isfile(os.path.join(PROJECT_PATH, project, channel)):
+            process_thread_1 = threading.Thread(
+                target=playback_servo,
+                args=(project, channel, play_from,)
+            )
+            # ^ note extra ','
+            SERVO_READY.update({channel: False})
+            process_thread_1.start()
+        else:
+            print "╳ Channelfile doesn't exist."
 
     wait_for_servos()
 
