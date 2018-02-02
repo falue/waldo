@@ -22,6 +22,6 @@ if autostart:
     else:
         modifier = ''
     # main_path = os.path.expanduser('~/Scripts/waldo')
-    sp.Popen(['python', '/home/pi/Scripts/waldo/helpers/shutdown_button.py'])
+    # sp.Popen(['python', '/home/pi/Scripts/waldo/helpers/shutdown_button.py'])
     os.system('sudo python /home/pi/Scripts/waldo/helpers/remote.py -ap %s' % modifier)
     # os.system('python %s/helpers/numpad_listener.py' % main_path)
