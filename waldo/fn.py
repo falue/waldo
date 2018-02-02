@@ -129,12 +129,15 @@ def playback_servo(project, channel, play_from=0):
     logger.info("Channelname:\t%s\tServopin:\t%s\tStart @\t%ss" % (channel, servo_pin, play_from))
 
     # Fill pulse_list with pulses
-    with open(os.path.join(PROJECT_PATH, project, channel), 'r') as pulse_file:
-        pulse_list = []
-        for line in pulse_file.readlines():
-            timestamp, value = line.split(": ")
-            pulse_list.append((float(timestamp), int(value)))
-
+    channelfile = os.path.join(PROJECT_PATH, project, channel)
+    if os.path.isfile(channelfile):
+        with open(channelfile, 'r') as pulse_file:
+            pulse_list = []
+            for line in pulse_file.readlines():
+                timestamp, value = line.split(": ")
+                pulse_list.append((float(timestamp), int(value)))
+    else:
+        print "╳ Channelfile doesn't exist."
     # Cut beginning of tuple list when play_from is set
     # if play_from:
     #     play_from = float(play_from)
