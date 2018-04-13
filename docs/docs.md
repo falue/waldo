@@ -146,9 +146,9 @@ Things you may want to do:
 ## Play an entire project
 Play every channel of projectName
 ```
-python waldo/main.py -p projectName [start_offset_in_seconds]
+python waldo/main.py -p projectName [start_offset_in_seconds, repeat]
 ```
-Optional argument: Start after n seconds.
+Optional argument: If integer: Start after n seconds. If "repeat": repeat track forever.
 
 ## Record channel
 ```

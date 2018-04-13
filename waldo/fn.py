@@ -243,6 +243,11 @@ def servo_start_pos(project, channels=False):
         # print 'Servo playback to die: %s' % (channel)
     print "All servos cut off."
 
+    # if global repeat is True
+    if repeat:
+        print "Repeat this track: %s" % project
+        play_all(project, "repeat")
+
     change_glob_rec_repl(False)
 
 
@@ -684,17 +689,29 @@ def singleplay(arg):
         # REC_REPL = True # if no audio
 
 
-def play_all(project, play_from=0):
+def play_all(project, attribute=0):
     """
     Setup play whole project: Start threads for audiofile and all servos.
     :param project:
     :param play_from:
     :return:
     """
-
+    global repeat
     global SERVO_READY
 
-    print "Play everything; start @ %ss" % play_from
+    repeat = False
+
+    if attribute:
+        if attribute == "repeat":
+            play_from=0
+            repeat = True
+            print "Play everything; on repeat till the end of time"
+        else:
+            play_from = attribute
+            print "Play everything; start @ %ss" % play_from
+
+
+
 
     # Get data from channel config
     play_channels = read_config(os.path.join(PROJECT_PATH, project))
