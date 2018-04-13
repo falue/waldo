@@ -16,12 +16,12 @@ PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__
 autostart = PREFERENCES['autostart']
 
 if autostart:
-    # if autostart is not number:
+    # if autostart is number:
     if autostart is not True:
         modifier = autostart
     else:
         modifier = ''
-    # main_path = os.path.expanduser('~/Scripts/waldo')
-    # sp.Popen(['python', '/home/pi/Scripts/waldo/helpers/shutdown_button.py'])
+    main_path = os.path.expanduser('~/Scripts/waldo')
+    sp.Popen(['python', '/home/pi/Scripts/waldo/helpers/shutdown_button.py'])
     os.system('sudo python /home/pi/Scripts/waldo/helpers/remote.py -ap %s' % modifier)
-    # os.system('python %s/helpers/numpad_listener.py' % main_path)
+    os.system('python %s/helpers/numpad_listener.py' % main_path)
