@@ -18,3 +18,6 @@ GPIO.setup(led_pin_green, GPIO.OUT)
 GPIO.output(led_pin_green, False)
 GPIO.setup(led_pin_red, GPIO.OUT)
 GPIO.output(led_pin_red, False)
+
+bashcommando = 'play /home/pi/Scripts/waldo/waldo/sounds/terminated.wav -q'
+os.system(bashcommando)  # invoke 'sox' in quiet mode
