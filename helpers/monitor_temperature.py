@@ -22,7 +22,7 @@ while True:
 
     print data
     data += "\n"
-    file = open("helpers/temperature_log", "a")
+    file = open("/home/pi/Scripts/waldo/helpers/temperature_log", "a")
     file.write(data)
     file.close()
     time.sleep(60)
