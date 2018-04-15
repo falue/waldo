@@ -45,7 +45,7 @@ BUTTONS = config['buttons'].copy()
 button_number = False
 
 # reset config file value recrepl (in case waldo is shut off unexpected):
-change_glob_rec_repl(False)
+# change_glob_rec_repl(False)
 
 
 def set_button_connection(new_config):

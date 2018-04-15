@@ -43,6 +43,7 @@ if not os.path.isdir(PROJECT_PATH):
 REC_REPL = False
 SERVO_READY = {}
 SERVO_FREQ = 60
+REPEAT = False
 
 
 def playback_audio(audiofile, play_from=0):
@@ -201,6 +202,8 @@ def servo_start_pos(project, channels=False):
     :return:
     """
 
+    global REPEAT
+
     # Read config data for channel
     config = read_config(os.path.join(PROJECT_PATH, project))
 
@@ -244,8 +247,10 @@ def servo_start_pos(project, channels=False):
     print "All servos cut off."
 
     # if global repeat is True
-    if repeat:
+    if REPEAT:
         print "Repeat this track: %s" % project
+        time.sleep(5)
+        REPEAT = False  # Just one servo should replay the track
         play_all(project, "repeat")
 
     change_glob_rec_repl(False)
@@ -696,22 +701,21 @@ def play_all(project, attribute=0):
     :param play_from:
     :return:
     """
-    global repeat
     global SERVO_READY
+    global REPEAT
 
-    repeat = False
+    REPEAT = False  # set anyhow to False when repeated track is interrupted by another, non-repeat track
 
     if attribute:
         if attribute == "repeat":
             play_from=0
-            repeat = True
+            REPEAT = True
             print "Play everything; on repeat till the end of time"
         else:
             play_from = attribute
             print "Play everything; start @ %ss" % play_from
-
-
-
+    else:
+        play_from = 0
 
     # Get data from channel config
     play_channels = read_config(os.path.join(PROJECT_PATH, project))
