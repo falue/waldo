@@ -246,6 +246,8 @@ def servo_start_pos(project, channels=False):
         # print 'Servo playback to die: %s' % (channel)
     print "All servos cut off."
 
+    change_glob_rec_repl(False)
+
     # if global repeat is True
     if REPEAT:
         print "Repeat this track: %s" % project
