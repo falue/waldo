@@ -140,6 +140,7 @@ Name your project what you want except 'cancel' - this cannot be replayed with R
 You can choose to duplicate an existing config file.  
 Things you may want to do:
 - Add audio file in path/to/project/audio (`.mp3`, `.wave`, `.aiff`)
+    - Audio should be 32-bit sampled, 24-bit raises SOX's alsa driver error.
 - Delete channels that are not needed anymore from the config file
 - Call setservo for all channels if the servos are not calibrated
 
@@ -206,6 +207,8 @@ python helpers/remote.py -ap [buttonNumber]
 ```
 buttonNumber represents the button definition integer from the main config file. This track will start when the Pi starts up.
 
+**Hint:** The `autostart.py` file itself gets started in `/etc/rc.local`, see [Setup as independent unit](#setup-as-independent-unit)
+
 ### (Re-)calibrate
 Needs to be done when the cable connecting rigby and the pi has changed.
 1. Kill running scripts/remote.py process
@@ -235,7 +238,8 @@ Switch between 'remover' and 'adder' mode.
 * Merge (needs to have channelName set in input field): Merge the currently drawn line with the existing line (useful, if only a certain part of the curve needs to be changed).
 
 ## killall.py: Exit every python script
-Handy after `autostart.py` startet some scripts and you want to kill them all. Also sets LED pins to false.
+Handy after `autostart.py` startet some scripts and you want to kill them all. Also sets LED pins to false.  
+Does not kill temperature monitoring started by `autostart.py`
 
 # Rigby (remote keyboard)
 ## Setup
@@ -296,6 +300,48 @@ autostart: true   # Set to false if you dont want anything to start on startup.
                   # ^Set to integer number of defined button to start any track on startup
 
 ```
+Naked:  
+```json
+PROJECT_PATH: /home/pi/waldo_projects
+REC_REPL: false
+autostart: 1
+button_value:
+  0: 58
+  1: 962
+  2: 798
+  3: 685
+  4: 600
+  5: 290
+buttons:
+  1: -p servo_test_4 repeat
+  2: -p hatschi
+  3: -p ohlala
+  4: -p hey
+  5: -p wow
+  6: -p ohappyday
+  7: -p nanana
+  8: -p ohyea
+  9: -p reset
+  30: cancel
+  enter: cancel
+mcp:
+  0:
+    CLK: 4
+    CS: 27
+    MISO: 17
+    MOSI: 18
+  1:
+    CLK: 22
+    CS: 25
+    MISO: 23
+    MOSI: 24
+  2:
+    CLK: 5
+    CS: 13
+    MISO: 6
+    MOSI: 12
+numpad: true
+```
 
 # Setup as independent unit
 Add the script `scripts/autostart.py` to the startup cycle of RasPi:
@@ -309,11 +355,13 @@ sudo -u pi python /home/pi/Scripts/waldo/helpers/autostart.py
 ```
 
 It executes the following scripts:
-- scripts/remote.py
+- `helpers/remote.py`
     - Listens to numpad or analog play buttons
     - Use modifier '(...)scripts/remote.py -ap tracknumber &' to autoplay when startup RasPi
-- scripts/shutdown_button.py
+- `helpers/shutdown_button.py`
     - displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
+- `helpers/monitor_temperature.py`
+    - saves core temperature once a minute in `helpers/temperature_log`
 
 
 # Photos
