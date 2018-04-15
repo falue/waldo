@@ -251,7 +251,7 @@ def servo_start_pos(project, channels=False):
     # if global repeat is True
     if REPEAT:
         print "Repeat this track: %s" % project
-        time.sleep(5)
+        time.sleep(1)
         REPEAT = False  # Just one servo should replay the track
         play_all(project, "repeat")
 
