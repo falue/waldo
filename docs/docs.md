@@ -1,5 +1,6 @@
 # Waldo and Rigby
 1. [General Setup (using pi and waldo via SSH)](#general-setup-using-pi-and-waldo-via-ssh)
+    - [Powering raspberry pi](#powering-raspberry-pi)
     - [Set fixed IP for raspberry pi](#set-fixed-ip-for-raspberry-pi)
     - [Set fixed IP for Laptop](#set-fixed-ip-for-laptop)
     - [Mount remote file system](#mount-remote-file-system)
@@ -33,6 +34,11 @@
 
 
 # General Setup (using pi and waldo via SSH)
+
+## Powering raspberry Pi
+Use a 5V 2.5A power adaptor. 2.2A is too few and the yellow "flash" icon is displaying,
+potentially corrupting SD cards or causing other problems.  
+
 
 ## Set fixed IP for raspberry pi
 1. Edit **/etc/dhcpcd.conf** , enable static ip config:

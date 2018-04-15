@@ -1,6 +1,6 @@
 PROJECT_PATH: /home/pi/waldo_projects
 REC_REPL: false
-autostart: 3
+autostart: 1
 button_value:
   0: 58
   1: 962
