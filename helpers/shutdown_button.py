@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import RPi.GPIO as GPIO
 import time, os
+import subprocess as sp
 
 #######################
 #    Configuration    #
@@ -46,5 +47,8 @@ while True:
         GPIO.output(led_pin_red, True)
         shutdown_started = True
         print('Shutdown button pressed. Shutdown: Now.')
+
+        sp.Popen(['python', '/home/pi/Scripts/waldo/helpers/killall.py'])
+
         os.system("sudo shutdown now -h")
     time.sleep(waiting_time)
