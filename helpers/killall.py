@@ -5,6 +5,7 @@ import RPi.GPIO as GPIO
 
 os.system("sudo kill -9 `ps -aef | grep 'remote' | grep -v grep | awk '{print $2}'`")
 os.system("sudo kill -9 `ps -aef | grep 'shutdown_button' | grep -v grep | awk '{print $2}'`")
+os.system("sudo kill -9 `ps -aef | grep 'monitor_temperature' | grep -v grep | awk '{print $2}'`")
 os.system("sudo kill -9 `ps -aef | grep 'numpad_listener' | grep -v grep | awk '{print $2}'`")
 os.system("sudo kill -9 `ps -aef | grep 'main' | grep -v grep | awk '{print $2}'`")
 os.system("sudo kill -9 `ps -aef | grep 'audiotest' | grep -v grep | awk '{print $2}'`")
