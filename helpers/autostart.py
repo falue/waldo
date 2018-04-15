@@ -24,6 +24,10 @@ change_glob_rec_repl(False)
 # os.system('%s/helpers/crash_recover.sh' % main_path)  # commented because it shuts down because autostart is running "now"
 
 if autostart:
+    # Notify about autostart
+    bashcommando = 'play %s/waldo/sounds/chime.mp3 -q' % main_path
+    os.system(bashcommando)  # invoke 'sox' in quiet mode
+
     # if autostart is number:
     if autostart is not True:
         modifier = autostart

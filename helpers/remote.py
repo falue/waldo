@@ -290,9 +290,6 @@ if __name__ == '__main__':
         bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'
         os.system(bashcommando)
 
-        if config['autostart']:
-            system_sound('chime')
-
         # Wait for button presses...
         while True:
             # If USB is used, get button_number via Keyboard input:
