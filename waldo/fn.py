@@ -255,8 +255,6 @@ def servo_start_pos(project, channels=False):
         REPEAT = False  # Just one servo should replay the track
         play_all(project, "repeat")
 
-    change_glob_rec_repl(False)
-
 
 def change_glob_rec_repl(on_off):
     # set general global var to false
