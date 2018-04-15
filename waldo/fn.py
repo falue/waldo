@@ -524,7 +524,7 @@ def set_servo(project, channel):
     mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-23] (Default: %s)\n" % (channel, default_mcp_in))
                  or default_mcp_in)
 
-    servo_pin = int(raw_input("Set servo pin out pin [0-15] (Default: %s)\n" % (default_servo_pin))
+    servo_pin = int(raw_input("Set servo pin out pin [0-31] (Default: %s)\n" % (default_servo_pin))
                     or default_servo_pin)
 
     map_min = raw_input("Set minimum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_min))\
