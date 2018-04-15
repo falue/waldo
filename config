@@ -1,6 +1,6 @@
 PROJECT_PATH: /home/pi/waldo_projects
 REC_REPL: false
-autostart: true
+autostart: 3
 button_value:
   0: 58
   1: 962
@@ -9,8 +9,15 @@ button_value:
   4: 600
   5: 290
 buttons:
-  1: -p test
-  2: -p test2
+  1: -p servo_test_4 repeat
+  2: -p hatschi
+  3: -p ohlala repeat
+  4: -p hey
+  5: -p wow
+  6: -p ohappyday
+  7: -p nanana
+  8: -p ohyea
+  9: -p reset
   30: cancel
   enter: cancel
 mcp:
