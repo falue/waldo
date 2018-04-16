@@ -17,15 +17,22 @@
     - [Singleplay channel](#singleplay-channel)
     - [Recalibrate a servo](#recalibrate-a-servo) ([Requirements](#requirements)|[Steps](#steps))
 3. [Helpers](#helpers)
-    1. [remote.py: Remote commands](#remotepy-remote-commands)
-        - [Use keyboard remote control](#use-keyboard-remote-control)
-        - [Autostart](#autostart)
-        - [(Re-)calibrate](#re-calibrate)
-        - [Help for remote.py](#help-for-remotepy)
-    2. [editor.py: Editor](#editorpy-editor)
+    1. [audiotest.py: Test R&L channels](#audiotestpy-test-r-l-channels)
+    2. [autostart.py: Files on startup](#autostartpy-files-on-startup)
+    3. [clean_channelfile.py: Compress old channelfiles](#clean-channelfilepy-compress-old-channelfiles)
+    4. [crash_recover.sh: Quit & restart everything](#crash-recoversh-quit-restart-everything)
+    5. [editor.py: Edit channel values](#editorpy-edit-channel-values)
         - [remover / adder](#remover-adder)
         - [Convenience functions](#convenience-functions)
-    3. [killall.py: Exit every python script](#killallpy-exit-every-python-script)
+    6. [killall.py: Exit every python script](#killallpy-exit-every-python-script)
+    7. [monitor_temperature.py: Keep log of Core temperature](#monitor-temperaturepy-keep-log-of-core-temperature)
+    8. [notify.sh: GUI alert](#notifysh-gui-alert)
+    9. [remote.py: Remote commands](#remotepy-remote-commands)
+        - [Use keyboard remote control](#use-keyboard-remote-control)
+        - [Autoplay track on startup](#autoplay-track-on-startup)
+        - [(Re-)calibrate](#re-calibrate)
+        - [Help for remote.py](#help-for-remotepy)
+    10. [shutdown_button.py: Button & LED indicator to soft shutdown](#shutdown-buttonpy-button-led-indicator-to-soft-shutdown)
 4. [Rigby (remote keyboard)](#rigby-remote-keyboard)
     - [Setup](#setup)
     - [Main config file](#main-config-file)
@@ -33,7 +40,7 @@
 6. [Photos](#photos)
 
 
-# General Setup (using pi and waldo via SSH)
+# General Setup (using pi and waldo via SSH)    
 
 ## Powering raspberry Pi
 Use a 5V 2.5A power adaptor. 2.2A is too few and the yellow "flash" icon is displaying,
@@ -195,9 +202,83 @@ Set start position:         # usually use the minimum position to start closed
 Use any of these helpers for your convenience.  
 
 **Hint:** Some functionality may be broken if you don't `cd` in the main folder `waldo/`.
-Honestly, i don't know exactly. Never tried.
+Honestly, i don't know exactly.
+
+
+## audiotest.py: Test R&L channels
+```
+python helpers/audiotest.py
+```
+Plays test sounds indefinitely for testing your stereo channels.
+
+
+## autostart.py: Files on startup
+```
+python helpers/autostart.py
+```
+This file gets started in the RasPi startup sequence, defined in `/etc/rc.local`, see [Setup as independent unit](#setup-as-independent-unit)
+Checks if the variable `autostart` in main `config` file is true or an index number of buttons. Starts all scripts needed if so.
+
+
+## clean_channelfile.py: Compress old channelfiles
+```
+python helpers/clean_channelfile.py /path/to/project
+```
+Remove repetitive values in all channelfiles in a project as the new concept already does while recording.
+
+
+## crash_recover.sh: Quit & restart everything
+***ARCHIVED***
+```
+bash helpers/crash_recover.sh
+```
+At the moment this is in folder `_archive/`. It was executed by `rc.local` (like autostart). Probably useful again sometime.
+Checks if `autostart.py` is running and if so, `REC_REPL` is set to `False`, `killall.py` and other files are being
+executed to compensate for cutting power while playing without shutting down.
+
+
+## editor.py: Edit channel values
+```
+python helpers/editor.py /path/to/project
+```
+Post-process channel files. Only works on Linux, not Raspian nor OS X.
+
+### remover / adder
+Switch between 'remover' and 'adder' mode.
+* Adder (default after start of editor): clicking adds a point
+* Remover: clicking removes the closest point
+
+### Convenience functions
+* Erase all: remove all added points from the editor.
+* First/last to y = zero: changes the first and last point added by clicking to y = 0.
+* add start/end: add a value at t = 0, and t = end_of_recording with y = 0 for both values.
+* Save (needs to have channelName set in input field): write the new line to this channelName
+* set same height (needs to have channelName set in input field): set last / first added point y value such, that they match the previously existing y value at that time.
+* Merge (needs to have channelName set in input field): Merge the currently drawn line with the existing line (useful, if only a certain part of the curve needs to be changed).
+
+
+## killall.py: Exit every python script
+Handy after `autostart.py` startet some scripts and you want to kill them all. Also sets LED pins to false.  
+Does not kill temperature monitoring started by `autostart.py`
+
+
+## monitor_temperature.py: Keep log of Core temperature
+```
+python helpers/monitor_temperature.py
+```
+Saves every minute the temperature of the Core of the RasPi in the file `logs/temperature.log`.
+Soon this can also measure different temperature sensors for eg. surveilling servo-hats. 
+
+
+## notify.sh: GUI alert
+```
+bash helpers/notify.sh
+```
+First sketch of GUI alert for RasPi display. Probably gets replaced by native GUI.
+
 
 ## remote.py: Remote commands
+
 ### Use keyboard remote control
 To start using the analog keyboard Rigby or an USB (numpad) keyboard as a remote for playing or stopping any track, type
 ```
@@ -207,13 +288,12 @@ If you defined `numpad: true` in the main config file, you can use any regular c
 whereas the key numbers represent the button numbers defined in the main config file.
 
 **Hint:** See [Rigby (remote keyboard)](#rigby-remote-keyboard) for setup analog keyboard Rigby.
-### Autostart
+
+### Autoplay track on startup
 ```
 python helpers/remote.py -ap [buttonNumber]
 ```
-buttonNumber represents the button definition integer from the main config file. This track will start when the Pi starts up.
-
-**Hint:** The `autostart.py` file itself gets started in `/etc/rc.local`, see [Setup as independent unit](#setup-as-independent-unit)
+buttonNumber represents the button definition integer from the main config file.
 
 ### (Re-)calibrate
 Needs to be done when the cable connecting rigby and the pi has changed.
@@ -227,25 +307,15 @@ python helpers/remote.py -cal
 python helpers/remote.py -h
 ```
 
-## editor.py: Editor
-```
-python helpers/editor.py /path/to/project
-```
-### remover / adder
-Switch between 'remover' and 'adder' mode.
-* Adder (default after start of editor): clicking adds a point
-* Remover: clicking removes the closest point
-### Convenience functions
-* Erase all: remove all added points from the editor.
-* First/last to y = zero: changes the first and last point added by clicking to y = 0.
-* add start/end: add a value at t = 0, and t = end_of_recording with y = 0 for both values.
-* Save (needs to have channelName set in input field): write the new line to this channelName
-* set same height (needs to have channelName set in input field): set last / first added point y value such, that they match the previously existing y value at that time.
-* Merge (needs to have channelName set in input field): Merge the currently drawn line with the existing line (useful, if only a certain part of the curve needs to be changed).
 
-## killall.py: Exit every python script
-Handy after `autostart.py` startet some scripts and you want to kill them all. Also sets LED pins to false.  
-Does not kill temperature monitoring started by `autostart.py`
+## shutdown_button.py: Button & LED indicator to soft shutdown
+```
+python helpers/shutdown_button.py
+```
+When pressing the button (pin 19), it resets `REC_REPL` to `False` and executes `killall.py`.  
+Also it turns on an indicator green LED (pin 20), and when pressed,
+a red LED (pin 21) lights up till the pi is fully save to cut power.
+
 
 # Rigby (remote keyboard)
 ## Setup
