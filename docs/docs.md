@@ -17,22 +17,22 @@
     - [Singleplay channel](#singleplay-channel)
     - [Recalibrate a servo](#recalibrate-a-servo) ([Requirements](#requirements)|[Steps](#steps))
 3. [Helpers](#helpers)
-    1. [audiotest.py: Test R&L channels](#audiotestpy-test-r-l-channels)
+    1. [audiotest.py: Test R&L channels](#audiotestpy-test-rl-channels)
     2. [autostart.py: Files on startup](#autostartpy-files-on-startup)
-    3. [clean_channelfile.py: Compress old channelfiles](#clean-channelfilepy-compress-old-channelfiles)
-    4. [crash_recover.sh: Quit & restart everything](#crash-recoversh-quit-restart-everything)
+    3. [clean_channelfile.py: Compress old channelfiles](#clean_channelfilepy-compress-old-channelfiles)
+    4. [crash_recover.sh: Quit & restart everything](#crash_recoversh-quit-restart-everything)
     5. [editor.py: Edit channel values](#editorpy-edit-channel-values)
         - [remover / adder](#remover-adder)
         - [Convenience functions](#convenience-functions)
     6. [killall.py: Exit every python script](#killallpy-exit-every-python-script)
-    7. [monitor_temperature.py: Keep log of Core temperature](#monitor-temperaturepy-keep-log-of-core-temperature)
+    7. [monitor_temperature.py: Keep log of Core temperature](#monitor_temperaturepy-keep-log-of-core-temperature)
     8. [notify.sh: GUI alert](#notifysh-gui-alert)
     9. [remote.py: Remote commands](#remotepy-remote-commands)
         - [Use keyboard remote control](#use-keyboard-remote-control)
         - [Autoplay track on startup](#autoplay-track-on-startup)
         - [(Re-)calibrate](#re-calibrate)
         - [Help for remote.py](#help-for-remotepy)
-    10. [shutdown_button.py: Button & LED indicator to soft shutdown](#shutdown-buttonpy-button-led-indicator-to-soft-shutdown)
+    10. [shutdown_button.py: Button & LED indicator to soft shutdown](#shutdown_buttonpy-button-led-indicator-to-soft-shutdown)
 4. [Rigby (remote keyboard)](#rigby-remote-keyboard)
     - [Setup](#setup)
     - [Main config file](#main-config-file)
@@ -299,9 +299,10 @@ buttonNumber represents the button definition integer from the main config file.
 Needs to be done when the cable connecting rigby and the pi has changed.
 1. Kill running scripts/remote.py process
 2. Calibrate:
-```
-python helpers/remote.py -cal
-```
+    ```
+    python helpers/remote.py -cal
+    ```
+
 ### Help for remote.py
 ```
 python helpers/remote.py -h
