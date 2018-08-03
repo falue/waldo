@@ -35,7 +35,5 @@ if autostart:
         modifier = ''
 
     sp.Popen(['python', '%s/helpers/shutdown_button.py' % main_path])
-    # os.system('sudo python %s/helpers/monitor_temperature.py' % main_path)
-    sp.Popen(['python', '%s/helpers/monitor_temperature.py' % main_path])
     os.system('sudo python %s/helpers/remote.py -ap %s' % (main_path, modifier))
-    # os.system('python %s/helpers/numpad_listener.py' % main_path)
+    os.system('python %s/helpers/numpad_listener.py' % main_path)
