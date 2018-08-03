@@ -287,8 +287,10 @@ if __name__ == '__main__':
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
         # Set max volume
-        bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'
+        bashcommando = 'sudo amixer cset numid=1 -- 100% > /dev/null'  # ???
         os.system(bashcommando)
+
+        system_sound("chime")
 
         # Wait for button presses...
         while True:
