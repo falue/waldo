@@ -11,6 +11,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 
 from bisect import bisect_left
 
+
 def takeClosest(myList, myNumber):
     """
     Assumes myList is sorted. Returns closest value to myNumber.
@@ -29,11 +30,13 @@ def takeClosest(myList, myNumber):
     else:
         return pos-1
 
+
 def add(x,y):
     global dots
     print "adding", x, y
     dots.append([x, y])
     dots.sort()
+
 
 def remove(x,y):
     global dots
@@ -42,11 +45,13 @@ def remove(x,y):
     idx = takeClosest(xs, x)
     dots.pop(idx)
 
+
 folderName = ''
 
 dots = []
 plotdots = []
 mode = add
+
 
 def interpol():
     global plotdots
@@ -274,6 +279,7 @@ class MyWindow(QtGui.QWidget):
 
         self.matplotlibWidget.waldoupdate()
 
+
 class ControlMainWindow(QtGui.QMainWindow):
     def __init__(self, foldername, parent=None):
         super(ControlMainWindow, self).__init__(parent)
@@ -356,11 +362,8 @@ class MatplotlibWidget(FigureCanvasQTAgg):
         ax.xaxis.set_ticks(range(1,96))
         for legobj in leg.legendHandles:
             legobj.set_linewidth(3.0)
-        
-
 
     def onclick(self, event):
-
         global dots
 
         x, y = event.x, event.y        
@@ -376,6 +379,7 @@ class MatplotlibWidget(FigureCanvasQTAgg):
             #ax.plot(event.xdata, event.ydata, 'ro')
             self.draw()
 
+
 def loadFile(fname):
     with open(fname) as f:
         lines = f.read().splitlines() 
@@ -383,6 +387,7 @@ def loadFile(fname):
     for line in lines: 
         datas.append(line.split(': '))
     return datas
+
 
 def loadFolder(name):
 
