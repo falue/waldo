@@ -300,10 +300,11 @@ mcp:              # Leave alone if you use Mortekay as analog-digital transforme
     CS: 13
     MISO: 6
     MOSI: 12
-numpad: true      # Set to true if you use USB keyboard to play tracks instead of Rigby
-autostart: true   # Set to false if you dont want anything to start on startup.
-                  # ^Set to true if you want to start remote.py, shutdown_button.py to start on RasPi startup
-                  # ^Set to integer number of defined button to start any track on startup
+numpad: true       # Set to true if you use USB keyboard to play tracks instead of Rigby
+measure_temp: true # starts on startup and measures temp every minute and logs it
+autostart: true    # Set to false if you dont want anything to start on startup.
+                   # ^Set to true if you want to start remote.py, shutdown_button.py to start on RasPi startup
+                   # ^Set to integer number of defined button to start any track on startup
 
 ```
 Naked:  
@@ -346,6 +347,7 @@ mcp:
     CS: 13
     MISO: 6
     MOSI: 12
+measure_temp: true
 numpad: true
 ```
 
@@ -360,14 +362,14 @@ At the bottom (just before `exit 0`), note the following:
 sudo -u pi python /home/pi/Scripts/waldo/helpers/autostart.py
 ```
 
-It executes the following scripts:
+It executes the following scripts if `autostart` is set to `true` in config:
 - `helpers/remote.py`
     - Listens to numpad or analog play buttons
-    - Use modifier '(...)scripts/remote.py -ap tracknumber &' to autoplay when startup RasPi
+    - Use modifier '(...)scripts/remote.py -ap tracknumber &' to autoplay when startup RasPi (? functionality should be: set `autostart` to a tracknumber in config)
 - `helpers/shutdown_button.py`
     - displays 'ready' indicator LED (pin 16) and listens to pushbutton (pin 19) 
 - `helpers/monitor_temperature.py`
-    - saves core temperature once a minute in `helpers/temperature_log`
+    - saves core temperature once a minute in `logs/temperature/[today].log` if `measure_temp` is set to `true` in config
 
 
 # Photos
