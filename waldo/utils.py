@@ -5,6 +5,7 @@ import time
 import yaml
 from RPi import GPIO as GPIO
 
+GPIO.setwarnings(False)
 
 def read_config(path):
     """
@@ -12,9 +13,14 @@ def read_config(path):
     :param path:
     :return:
     """
-    with open(os.path.join(path, 'config'), 'r') as c:
-        config = yaml.load(c.read())
-    return config
+    filepath = os.path.join(path, 'config')
+    if(os.path.isfile(filepath)):
+        with open(filepath, 'r') as c:
+            config = yaml.load(c.read())
+        return config
+    else:
+        print "There is no such project or no config file in project '%s'" % path.split("/")[::1]
+        exit()
 
 
 def write_config(path, config):

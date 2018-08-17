@@ -871,12 +871,12 @@ def list_projects(project=False):
     if project:
         projects = [project]
         print "List every channel in project '%s' and point out difficulties.\n" \
-              "-------------------------------------------------------------" % project
+              "--------------------------------------------------------------------" % project
     else:
         filelist = os.listdir(PROJECT_PATH)
         projects = [a for a in filelist if not a.startswith(".")]
         print "List every channel in every project and point out difficulties.\n" \
-              "-------------------------------------------------------------"
+              "--------------------------------------------------------------------"
 
     # TODO: md5 hashing content of channels, find and mark duplicates
 
@@ -969,7 +969,7 @@ def list_projects(project=False):
         else:
             print "%s\n╳  No channels in config file.\n" % project
 
-        print "-------------------------------------------------------------\n"
+        print "--------------------------------------------------------------------\n"
 
 
 def legal():

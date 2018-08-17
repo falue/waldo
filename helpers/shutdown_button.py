@@ -14,12 +14,18 @@ waiting_time = 0.1
 # Number of measurements
 number_of_measurements = 5
 
+main_path = os.path.expanduser('~/Scripts/waldo')
+GPIO.setwarnings(False)
 
 #######################
 #     Code Starts     #
 #######################
 
+
 print 'Shutdown button active.'
+bashcommando = 'play %s/waldo/sounds/temp/shutdown_button.mp3 -q' % main_path
+os.system(bashcommando)  # invoke 'sox' in quiet mode
+
 
 # Button pin setup
 GPIO.setmode(GPIO.BCM)

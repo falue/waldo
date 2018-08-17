@@ -28,6 +28,8 @@ PROJECT_PATH = os.path.expanduser(config["PROJECT_PATH"])
 if not os.path.isdir(PROJECT_PATH):
     os.makedirs(PROJECT_PATH)
 
+main_path = path.dirname(path.dirname(path.abspath(__file__)))
+
 # Globals
 LIVE_ZONE = 22  # +/- analog read = button x
 
@@ -139,7 +141,8 @@ def system_sound(audiofile):
     :param audiofile:
     :return:
     """
-    bashcommando = 'play /home/pi/Scripts/waldo/waldo/sounds/%s.mp3 -q' % audiofile
+    bashcommando = 'su - pi -c "play %s/waldo/sounds/%s.mp3 -q"' % (main_path, audiofile)
+    print("i play this: %s" % bashcommando)
     os.system(bashcommando)  # invoke 'sox' in quiet mode
 
 
@@ -235,6 +238,7 @@ if __name__ == '__main__':
     try:
         # Set GPIO pins as used by mcp read/write pins
         set_gpio_pins(config)
+        GPIO.setwarnings(False)
 
         print "==============================="
         print " _ _ _ _____ __    ____  _____ "
@@ -259,10 +263,10 @@ if __name__ == '__main__':
         # If primay/first executed file from bash is scripts/remote.py
         # keyboard interrupt fallback
         elif arg == "-ap" or arg == "--autoplay":
-            print 'Autoplay activated.'
             try:
-                print 'Play button %s.' % sys.argv[2]
                 button_number = int(sys.argv[2])
+                print 'Autoplay activated: Play track no. %s' % sys.argv[2]
+                print 'Play button %s.' % sys.argv[2]
             except IndexError:
                 print 'No autoplay startup track defined in config (use integer of button instead of "True").'
 
