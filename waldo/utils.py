@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 import os
 import time
+from threading import Thread
+
 import yaml
 from RPi import GPIO as GPIO
 
 GPIO.setwarnings(False)
+
 
 def read_config(path):
     """
@@ -14,9 +17,9 @@ def read_config(path):
     :return:
     """
     filepath = os.path.join(path, 'config')
-    if(os.path.isfile(filepath)):
+    if os.path.isfile(filepath):
         with open(filepath, 'r') as c:
-            config = yaml.load(c.read())
+            config = yaml.safe_load(c.read())
         return config
     else:
         print "There is no such project or no config file in project '%s'" % path.split("/")[::1]
@@ -47,7 +50,7 @@ def mapvalue(x, in_min, in_max, out_min, out_max):
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
-def getfilesize(size, precision=2):
+def get_filesize(size, precision=2):
     """
     Get human readable filesizes of file.
     :param size:
@@ -55,14 +58,14 @@ def getfilesize(size, precision=2):
     :return:
     """
     suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
-    suffixIndex = 0
+    suffix_index = 0
     if size < 1024:
-        return "%.*f%s" % (precision, size, suffixes[suffixIndex])
+        return "%.*f%s" % (precision, size, suffixes[suffix_index])
     else:
-        while size >= 1024 and suffixIndex < 4:
-            suffixIndex += 1
+        while size >= 1024 and suffix_index < 4:
+            suffix_index += 1
             size /= 1024.0
-        return "%.*f %s" % (precision, size, suffixes[suffixIndex])
+        return "%.*f %s" % (precision, size, suffixes[suffix_index])
 
 
 def usbdetection():
@@ -103,11 +106,11 @@ def get_servo_connection(servo_pin):
     hat_adress = servo_pin / 16
     servo_pin %= 16
 
-    hat_adress = int(hex(64+hat_adress), 16)
+    hat_adress = int(hex(64 + hat_adress), 16)
 
     connection = {'servo_pin': servo_pin,
                   'hat_adress': hat_adress
-                 }
+                  }
 
     return connection
 
@@ -149,7 +152,7 @@ def bar(value, max_bar=30):
     :return:
     """
     if value > 0:
-        return "█" * (mapvalue(value, 100, 500, 0, max_bar)-1) + "░"
+        return "█" * (mapvalue(value, 100, 500, 0, max_bar) - 1) + "░"
     else:
         return "░"
 
@@ -163,3 +166,12 @@ def get_first_file(path, suffix=False):
         return audiofiles[0]
     else:
         return False
+
+
+def threaded(fn):
+    def wrapper(*args, **kwargs):
+        t = Thread(target=fn, args=args, kwargs=kwargs)
+        t.daemon = True
+        t.start()
+
+    return wrapper

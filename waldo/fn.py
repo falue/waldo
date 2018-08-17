@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 import bisect
+import getpass
 import logging
 import os
+import subprocess
 import threading
 import time
 import select
@@ -12,23 +16,19 @@ from shutil import copyfile
 import RPi.GPIO as GPIO
 import serial
 
-from utils import (set_gpio_pins, read_config, write_config, mapvalue,
-                   getfilesize, usbdetection, get_servo_connection,
-                   get_mcp_connection, bar, get_first_file)
-
-FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.WARNING)  # DEBUG / INFO / WARNING
-logger = logging.getLogger()
-
-
-
-
-
 # Import fake library if not @ RaspberryPi
 try:
     from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
 except ImportError:
     from fake import PWM
+
+from utils import (set_gpio_pins, read_config, write_config, mapvalue,
+                   get_filesize, usbdetection, get_servo_connection,
+                   get_mcp_connection, bar, get_first_file, threaded)
+
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
+logger = logging.getLogger()
 
 # Read preferences and set project folder path
 PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
@@ -55,18 +55,17 @@ def playback_audio(audiofile, play_from=0):
     """
     global REC_REPL
 
-    print "Audio start:\t%s" % audiofile
+    logger.info('Audio start:\t%s', audiofile)
 
-    # Play from beginning or play_from
+    cmd = ['/usr/bin/play', '-q', audiofile]
+
     if play_from:
-        bashcommando = 'play %s -q trim %s' % (audiofile, play_from)
-    else:
-        bashcommando = 'play %s -q' % (audiofile)
+        cmd += ['trim', play_from]
 
-    os.system(bashcommando)  # invoke 'sox' in quiet mode
+    subprocess.call(cmd)
 
     REC_REPL = False
-    print "Audio stop:\t%s" % audiofile
+    logger.info('Audio stop:\t%s', audiofile)
 
 
 def wait_for_servos():
@@ -75,21 +74,21 @@ def wait_for_servos():
     :return:
     """
     global REC_REPL
-    print 'Wait for all servos to be ready',
+    logger.info('Waiting for all servos to be ready')
 
     # Wait for every servo to catch up
     while not REC_REPL:
         sys.stdout.write('.')
         sys.stdout.flush()
-        if all(value == True for value in SERVO_READY.values()):
-            print "\nAll servos ready."
+        if all(value is True for value in SERVO_READY.values()):
+            logger.info('All servos ready.')
             change_glob_rec_repl(True)
             REC_REPL = True
             return
         time.sleep(0.05)
 
 
-def getValue(l, t):
+def get_value(l, t):
     x = bisect.bisect_left(l, (t, None))
     if x < len(l) and l[x][0] == t:
         pass
@@ -159,8 +158,8 @@ def playback_servo(project, channel, play_from=0):
         try:
             now = time.time()
             # XXX
-            #timestamp, pulse = pulse_list[bisect.bisect_right(pulse_list, (now - start_time + play_from, None))]
-            timestamp, pulse = getValue(pulse_list, now - start_time + play_from)
+            # timestamp, pulse = pulse_list[bisect.bisect_right(pulse_list, (now - start_time + play_from, None))]
+            timestamp, pulse = get_value(pulse_list, now - start_time + play_from)
             pulse_map = mapvalue(pulse, 0, 1024, map_min, map_max)
             servo_obj.setPWM(servo_pin, 0, pulse_map)
             logger.debug("{}\t{}\t{}\t{}\t{}{}".format(timestamp,
@@ -225,8 +224,7 @@ def servo_start_pos(project, channels=False):
 
         servo_obj.setPWM(servo_pin, 0, start_pos)  # Go to start position
         logger.info('Servo playback to start: %s\tStart position: %d' % (channel, start_pos))
-        # print 'Servo playback to start: %s\tStart position: %d' % (channel, start_pos)
-    print "All servos moved to start_pos."
+    logger.info('All servos moved to start_pos.')
 
     time.sleep(0.35)
 
@@ -243,14 +241,13 @@ def servo_start_pos(project, channels=False):
         # Time for moving servo
         # servo_obj.setPWM(servo_pin, 4096, 0)  # completly off
         logger.info('Servo playback to start: %s' % (channel))
-        # print 'Servo playback to die: %s' % (channel)
-    print "All servos cut off."
+    logger.info('All servos cut off.')
 
     change_glob_rec_repl(False)
 
     # if global repeat is True
     if REPEAT:
-        print "Repeat this track: %s" % project
+        logger.info('Repeat this track: %s', project)
         time.sleep(1)
         REPEAT = False  # Just one servo should replay the track
         play_all(project, "repeat")
@@ -291,7 +288,7 @@ def record(project, channel, audiofile):
     if config['connection']['type'] == "usb":
         usb_port = config['connection']['device']
         baudrate = config['connection']['baudrate']
-        print "USB port: %s @ %d baud" % (usb_port, baudrate)
+        logger.info('USB port: %s @ %d baud' % (usb_port, baudrate))
     else:
         mcp_in = config['channels'][channel]['mcp_in']
         mcp_connection = get_mcp_connection(mcp_in)
@@ -301,18 +298,18 @@ def record(project, channel, audiofile):
         CS = mcp_connection['CS']
         mcp_in %= 8
         servo_obj.setPWMFreq(SERVO_FREQ)
-        print "Connection via MCP3008 (%d %d %d %d)" % (CLK, MISO, MOSI, CS)
+        logger.info('Connection via MCP3008 (%d %d %d %d)' % (CLK, MISO, MOSI, CS))
 
     # Countdown for slow recordists
-    print "Start recording in..."
+    print('Start recording in...')
     time.sleep(1)
-    print "3"
+    print('3')
     time.sleep(1)
-    print "2"
+    print('2')
     time.sleep(1)
-    print "1"
+    print('1')
     time.sleep(1)
-    print "Go!"
+    print('Go!')
     time.sleep(0.1)
 
     # Get audio file name if existent
@@ -357,12 +354,12 @@ def record(project, channel, audiofile):
             servo_obj.setPWM(int(servo_pin), 0, servo_value)  # move servo
             # setServoPulse(int(servo_pin), record)
 
-            timecode = round(time.time()-start_time, 3)
+            timecode = round(time.time() - start_time, 3)
             record_file.write("%s: %s\n" % (timecode, record))  # write timecode and 0-1024 in file...
             servo_last_position = record
-            print "Servo %s:\t%s\t%s" % (servo_pin, record, bar(record))  # 0-1024
+            print('Servo %s:\t%s\t%s' % (servo_pin, record, bar(record)))  # 0-1024
         else:
-            print "----- %s:\t%s\t%s" % (servo_pin, servo_last_position, bar(servo_last_position))  # 0-1024
+            logger.info('----- %s:\t%s\t%s' % (servo_pin, servo_last_position, bar(servo_last_position)))  # 0-1024
         pass
 
         time.sleep(0.001)
@@ -373,11 +370,11 @@ def record(project, channel, audiofile):
     if config['connection']['type'] == "mcp3008":
         GPIO.cleanup()
 
-    print "Recording ended."
+    logger.info("Recording ended.")
 
     # Get filesize of recorded file
-    heavyness = getfilesize(os.path.getsize(os.path.join(PROJECT_PATH, project, channel)), 2)
-    print "Recorded file '%s' is %s heavy." % (channel, heavyness)
+    heavyness = get_filesize(os.path.getsize(os.path.join(PROJECT_PATH, project, channel)), 2)
+    logger.info("Recorded file '%s' is %s heavy." % (channel, heavyness))
 
 
 # FIXME: USB Interface useful? functional?
@@ -391,12 +388,12 @@ def read_usb(usbport, baudrate):
     ser = serial.Serial(usbport, baudrate)
     serial_line = str(ser.readline().strip()).split("#")
     # ^ read serial input by arduino, delete carriage return and errors while transmitting
-    #print serial_line
+    # print serial_line
     if len(serial_line) == 3:
         record = serial_line[1]
     else:
         record = last_record
-        print ''.join(serial_line), "\t[interpolated", record, "]"
+        logger.info(''.join(serial_line), "\t[interpolated", record, "]")
     if record.isdigit():
         return record
     last_record = record
@@ -423,7 +420,7 @@ def read_mcp(adcnum, clockpin, mosipin, misopin, cspin):
     commandout |= 0x18  # start bit + single-ended bit
     commandout <<= 3  # we only need to send 5 bits here
     for i in range(5):
-        if (commandout & 0x80):
+        if commandout & 0x80:
             GPIO.output(mosipin, True)
         else:
             GPIO.output(mosipin, False)
@@ -437,7 +434,7 @@ def read_mcp(adcnum, clockpin, mosipin, misopin, cspin):
         GPIO.output(clockpin, True)
         GPIO.output(clockpin, False)
         adcout <<= 1
-        if (GPIO.input(misopin)):
+        if GPIO.input(misopin):
             adcout |= 0x1
 
     GPIO.output(cspin, True)
@@ -451,7 +448,7 @@ def helpfile():
     Read and print help file.
     """
     with open(os.path.join(os.path.dirname(__file__), 'help'), 'r') as f:
-        print f.read()
+        print(f.read())
 
 
 def set_connection(project):
@@ -467,7 +464,7 @@ def set_connection(project):
 
     answer = raw_input("Set up potentiometer connection with USB or analog input via MCP3008? [USB/MCP]\n").lower()
     if answer == "usb":
-        print "Connection set: USB"
+        print("Connection set: USB")
         connection = usbdetection().split()
         config.update({'connection': {'type': 'usb',
                                       'device': connection[0],
@@ -476,19 +473,19 @@ def set_connection(project):
                        }
                       )
     elif answer == "mcp":
-        print "Connection set: MCP3008"
+        print("Connection set: MCP3008")
         config.update({'connection': {'type': 'mcp3008'
                                       }
                        }
                       )
     else:
-        print "Either enter USB or MCP, pretty please."
+        print("Either enter USB or MCP, pretty please.")
         set_connection(project)
         return
 
     path = os.path.join(PROJECT_PATH, project)
     write_config(path, config)
-    print "New connection saved."
+    print("New connection saved.")
 
 
 def set_servo(project, channel):
@@ -518,7 +515,7 @@ def set_servo(project, channel):
         default_servo_pin = config['channels'][channel]["servo_pin"]
         default_map_min = config['channels'][channel]["map_min"]
         default_map_max = config['channels'][channel]["map_max"]
-        default_start_pos =  config['channels'][channel]["start_pos"]
+        default_start_pos = config['channels'][channel]["start_pos"]
 
     # Questions, questions, questions!
     mcp_in = int(raw_input("%s:\nSet MCP3008 in pin [0-23] (Default: %s)\n" % (channel, default_mcp_in))
@@ -527,14 +524,14 @@ def set_servo(project, channel):
     servo_pin = int(raw_input("Set servo pin out pin [0-31] (Default: %s)\n" % (default_servo_pin))
                     or default_servo_pin)
 
-    map_min = raw_input("Set minimum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_min))\
+    map_min = raw_input("Set minimum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_min)) \
               or default_map_min
     if map_min == 'm':
         map_min = get_dof(mcp_in, servo_pin)
         # FIXME: Catch pressing enter and prevent next raw_input to get executed
         raw_input("")
 
-    map_max = raw_input("Set maximum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_max))\
+    map_max = raw_input("Set maximum position [100-600] (Default: %s; 'm' for manual detection)\n" % (default_map_max)) \
               or default_map_max
     if map_max == 'm':
         map_max = get_dof(mcp_in, servo_pin)
@@ -548,13 +545,13 @@ def set_servo(project, channel):
 
     # Update config list
     config['channels'].update({channel: {
-                'mcp_in': mcp_in,
-                'servo_pin': servo_pin,
-                'map_min': int(map_min),
-                'map_max': int(map_max),
-                'start_pos': start_pos
-            }
-        }
+        'mcp_in': mcp_in,
+        'servo_pin': servo_pin,
+        'map_min': int(map_min),
+        'map_max': int(map_max),
+        'start_pos': start_pos
+    }
+    }
     )
 
     # Write to config
@@ -587,7 +584,7 @@ def get_dof(mcp_in, servo_pin):
     servo_obj = PWM(servo_connection['hat_adress'])
     servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
-    print "Press enter for returning value."
+    print("Press enter for returning value.")
 
     while True:
         value = read_mcp(mcp_in, CLK, MOSI, MISO, CS)
@@ -596,16 +593,15 @@ def get_dof(mcp_in, servo_pin):
         servo_obj.setPWM(servo_pin, 0, value)
         # print "servo_obj.setPWM(%s, 0, %s)" % (servo_pin, value)
         # print "\r%s " % bar(value),
-        print "%s %s" % (value, bar(value))
+        print("%s %s" % (value, bar(value)))
         time.sleep(0.05)
 
         # Exit loop when enter is pressed
         if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-            print "Defined: %s" % value
+            print("Defined: %s" % value)
             servo_obj.setPWM(servo_pin, 4096, 0)  # completly off
             GPIO.cleanup()
             return value
-            break
 
 
 def record_setup(arg):
@@ -636,15 +632,15 @@ def record_setup(arg):
             # backup file in 'trash'
             copyfile(os.path.join(PROJECT_PATH, project, channel),
                      os.path.join(PROJECT_PATH, project, "trash",
-                     channel + "_" + time.strftime("%Y-%m-%d_%H_%M_%S"))
+                                  channel + "_" + time.strftime("%Y-%m-%d_%H_%M_%S"))
                      )
         elif answer == "n":
-            print "Abort."
+            print("Abort.")
             return
         else:
-            print "[Y/N] murmel, murmel"
+            print("[Y/N] murmel, murmel")
             record_setup(arg)
-            return # sure?
+            return  # sure?
 
     else:
         set_servo(project, channel)
@@ -671,7 +667,7 @@ def singleplay(arg):
     except IndexError:
         audiofile = False
 
-    print "Play single servo."
+    print("Play single servo.")
 
     # Play servo thread:
     process_thread_1 = threading.Thread(
@@ -691,15 +687,15 @@ def singleplay(arg):
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile), )) # <- note extra ','
         process_thread_0.start()
     # else:
-        # REC_REPL = True # if no audio
+    #     REC_REPL = True # if no audio
 
 
 def play_all(project, attribute=0):
     """
     Setup play whole project: Start threads for audiofile and all servos.
     :param project:
-    :param play_from:
-    :return:
+    :param attribute:
+    :return threads:
     """
     global SERVO_READY
     global REPEAT
@@ -708,12 +704,12 @@ def play_all(project, attribute=0):
 
     if attribute:
         if attribute == "repeat":
-            play_from=0
+            play_from = 0
             REPEAT = True
-            print "Play everything; on repeat till the end of time"
+            print("Play everything; on repeat till the end of time")
         else:
             play_from = attribute
-            print "Play everything; start @ %ss" % play_from
+            print("Play everything; start @ %ss" % play_from)
     else:
         play_from = 0
 
@@ -722,20 +718,22 @@ def play_all(project, attribute=0):
     # print play_channels
 
     # Start threads for playback all servos
+    threads = []
     for channel, data in play_channels['channels'].iteritems():
         # print "%s --- %s" % (channel, data)
         # threading.Thread(target=playback_servo, args=(project, channel, play_from,), name='channel').start()
 
         if os.path.isfile(os.path.join(PROJECT_PATH, project, channel)):
-            process_thread_1 = threading.Thread(
+            servo_thread = threading.Thread(
                 target=playback_servo,
                 args=(project, channel, play_from,)
             )
             # ^ note extra ','
             SERVO_READY.update({channel: False})
-            process_thread_1.start()
+            servo_thread.start()
+            threads.append(servo_thread)
         else:
-            print "╳ Channelfile doesn't exist."
+            print("╳ Channelfile doesn't exist.")
 
     wait_for_servos()
 
@@ -744,14 +742,15 @@ def play_all(project, attribute=0):
 
     # Play audio thread when set:
     if audiofile:
-        process_thread_0 = threading.Thread(
+        audio_thread = threading.Thread(
             target=playback_audio,
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile),
                   play_from, ))
         # <- note extra ','
-        process_thread_0.start()
-    # else:
-        # REC_REPL = True
+        audio_thread.start()
+        threads.append(audio_thread)
+
+    return threads
 
 
 def new_project(project_name):
@@ -769,7 +768,8 @@ def new_project(project_name):
         os.makedirs(os.path.join(path, 'audio'))
         os.makedirs(os.path.join(path, 'trash'))
 
-        answer = raw_input("Copy config file from existing project? [Y/N] (For servo settings & recording connection type)\n").lower()
+        answer = raw_input(
+            "Copy config file from existing project? [Y/N] (For servo settings & recording connection type)\n").lower()
         if answer == "y":
 
             filelist = os.listdir(PROJECT_PATH)
@@ -779,16 +779,16 @@ def new_project(project_name):
             if project_name in projects:
                 projects.remove(project_name)
 
-
             if not projects:
-                print "There are no project folders in '%s'." % PROJECT_PATH
+                print("There are no project folders in '%s'." % PROJECT_PATH)
             else:
                 project_list = list()
-                print 'Copy from where?'
-                print 'ID:\tProject:'
+                print('Copy from where?')
+                print('ID:\tProject:')
                 # For each project to analyze
                 for i, project in enumerate(projects):
-                    print '%s\t%s' % (i, project)
+                    print
+                    '%s\t%s' % (i, project)
                     project_list.append(i)
 
                 answer = int(raw_input("Type your ID:\n").lower())
@@ -799,15 +799,15 @@ def new_project(project_name):
                     copyfile(copy_from, copy_to)
                     pass
                 else:
-                    print 'By god, this is not an acceptable answer.'
+                    print('By god, this is not an acceptable answer.')
 
         else:
             os.mknod(os.path.join(path, 'config'))
             set_connection(project_name)
 
-        print "Created new project structure."
+        print("Created new project structure.")
     else:
-        print "╳  Project already exists."
+        print("╳  Project already exists.")
 
 
 def copy_channel(project, channel_old, channel_new, preserve_pin="pin_inc"):
@@ -855,11 +855,11 @@ def copy_channel(project, channel_old, channel_new, preserve_pin="pin_inc"):
         )
         # Write in config file
         write_config(os.path.join(PROJECT_PATH, project), config)
-        print "File and config data for new channel '%s' in project '%s' copied from '%s'." % (channel_new,
+        print("File and config data for new channel '%s' in project '%s' copied from '%s'." % (channel_new,
                                                                                                project,
-                                                                                               channel_old)
+                                                                                               channel_old))
     else:
-        print "╳  File or config data for channel '%s' in project '%s' already exists." % (channel_new, project)
+        print("╳  File or config data for channel '%s' in project '%s' already exists." % (channel_new, project))
 
 
 def list_projects(project=False):
@@ -870,13 +870,13 @@ def list_projects(project=False):
     # Read every folder or define specific
     if project:
         projects = [project]
-        print "List every channel in project '%s' and point out difficulties.\n" \
-              "--------------------------------------------------------------------" % project
+        print("List every channel in project '%s' and point out difficulties.\n"
+              "--------------------------------------------------------------------" % project)
     else:
         filelist = os.listdir(PROJECT_PATH)
         projects = [a for a in filelist if not a.startswith(".")]
-        print "List every channel in every project and point out difficulties.\n" \
-              "--------------------------------------------------------------------"
+        print("List every channel in every project and point out difficulties.\n"
+              "--------------------------------------------------------------------")
 
     # TODO: md5 hashing content of channels, find and mark duplicates
 
@@ -886,7 +886,7 @@ def list_projects(project=False):
     pass
 
     if not projects:
-        print "There are no project folders in '%s'." % PROJECT_PATH
+        print("There are no project folders in '%s'." % PROJECT_PATH)
 
     # For each project to analyze
     for project in sorted(projects):
@@ -918,8 +918,8 @@ def list_projects(project=False):
 
                 # Calculate visual representation for max degrees of angular freedom
                 dof_prepend = mapvalue(data['map_min'], 100, 600, 0, servo_dof_deg)
-                dof_append =  servo_dof_deg-mapvalue(data['map_max'], 100, 600, 0, servo_dof_deg)
-                dof = servo_dof_deg-dof_append-dof_prepend
+                dof_append = servo_dof_deg - mapvalue(data['map_max'], 100, 600, 0, servo_dof_deg)
+                dof = servo_dof_deg - dof_append - dof_prepend
 
                 # Check if channel was reversed, change visual representation
                 if dof < 0:
@@ -947,9 +947,9 @@ def list_projects(project=False):
 
                 # Sum up channel content
                 ch += "\t%s\t%s%s\t%s\t%s\t%s\t%s\t%s°\n\t%s%s\n" % (channel, name_space, data['servo_pin'],
-                                                                 data['mcp_in'], data['map_min'],
-                                                                 data['map_max'], data['start_pos'], dof,
-                                                                 graph_rep, reversed_channel)
+                                                                     data['mcp_in'], data['map_min'],
+                                                                     data['map_max'], data['start_pos'], dof,
+                                                                     graph_rep, reversed_channel)
 
             # Check if all channel files have corresponding config data specified
             channel_list = os.listdir(os.path.join(PROJECT_PATH, project))
@@ -958,28 +958,27 @@ def list_projects(project=False):
                             not a == 'trash' and
                             not a == 'audio']
             no_specs = "'\n╳  No specs in config for file '".join([item for item in channelfiles if item
-                                                                  not in channelfiles_spec])
+                                                                   not in channelfiles_spec])
             if no_specs:
                 error += "╳  No specs in config for file '%s'\n" % no_specs
 
             # Print table header
             thead = "\tchannel\t\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF"
-            print "%s:\n%s%s\n%s" % (project, error, thead, ch)
+            print("%s:\n%s%s\n%s" % (project, error, thead, ch))
 
         else:
-            print "%s\n╳  No channels in config file.\n" % project
+            print("%s\n╳  No channels in config file.\n" % project)
 
-        print "--------------------------------------------------------------------\n"
+        print("--------------------------------------------------------------------\n")
 
 
 def legal():
-    print "==============================="
-    print " _ _ _ _____ __    ____  _____ "
-    print "| | | |  [] |  |  |    \|     | analog"
-    print "| | | |     |  |__|  [] |  [] | digital"
-    print "|_____|__||_|_____|____/|_____| pupeteering"
-    print "_______________________________"
-    print "By Fabian Lüscher 2016."
-    print "http://www.filmkulissen.ch"
-    print "With generous help of Ben Hagen. Thanks a bunch!"
-
+    print("===============================")
+    print(" _ _ _ _____ __    ____  _____ ")
+    print("| | | |  [] |  |  |    \|     | analog")
+    print("| | | |     |  |__|  [] |  [] | digital")
+    print("|_____|__||_|_____|____/|_____| pupeteering")
+    print("_______________________________")
+    print("By Fabian Lüscher 2016.")
+    print("http://www.filmkulissen.ch")
+    print("With generous help of Ben Hagen. Thanks a bunch!")

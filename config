@@ -9,17 +9,16 @@ button_value:
   4: 600
   5: 290
 buttons:
-  1: -p servo_test_4 repeat
-  2: -p hatschi
-  3: -p ohlala
-  4: -p hey
-  5: -p wow
-  6: -p ohappyday
-  7: -p nanana
-  8: -p ohyea
-  9: -p reset
-  30: cancel
-  enter: cancel
+  KEY_KP1: servo_test_4
+  KEY_KP2: hatschi
+  KEY_KP3: ohlala
+  KEY_KP4: hey
+  KEY_KP5: wow
+  KEY_KP6: ohappyday
+  KEY_KP7: nanana
+  KEY_KP8: ohyea
+  KEY_KP9: reset
+  KEY_KPENTER: cancel
 mcp:
   0:
     CLK: 4

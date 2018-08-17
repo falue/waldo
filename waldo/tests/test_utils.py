@@ -1,4 +1,4 @@
-from waldo.fn import mapvalue, getfilesize
+from waldo.fn import mapvalue, get_filesize
 
 
 def test_mapvalue():
@@ -6,4 +6,4 @@ def test_mapvalue():
 
 
 def test_getfilesize():
-    assert getfilesize(2 ** 40, 1) == '1.0 TiB'
+    assert get_filesize(2 ** 40, 1) == '1.0 TiB'

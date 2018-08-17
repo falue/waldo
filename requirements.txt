@@ -1,3 +1,5 @@
+evdev
+serial
 Adafruit_MotorHAT
 click
 pyserial

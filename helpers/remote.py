@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 import os
 import signal
 import sys
@@ -9,6 +11,7 @@ import subprocess as sp
 import keyboard
 
 from os import path
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 from waldo.utils import read_config, write_config, get_mcp_connection, set_gpio_pins
@@ -46,14 +49,16 @@ activity = 0
 BUTTONS = config['buttons'].copy()
 button_number = False
 
+
 # reset config file value recrepl (in case waldo is shut off unexpected):
 # change_glob_rec_repl(False)
 
 
 def set_button_connection(new_config):
-    answer = raw_input("Set up play button connection with USB (numpad) or analog input via MCP3008? [USB/MCP]\n").lower()
+    answer = raw_input(
+        "Set up play button connection with USB (numpad) or analog input via MCP3008? [USB/MCP]\n").lower()
     if answer == "usb":
-        print "Connect your USB keyboard. Number keys equal button key defined in main config."
+        print("Connect your USB keyboard. Number keys equal button key defined in main config.")
         new_config.update({'numpad': True})
         return new_config
 
@@ -75,7 +80,7 @@ def set_button_connection(new_config):
         return new_config
 
     else:
-        print "Either enter USB or MCP, pretty please."
+        print("Either enter USB or MCP, pretty please.")
         set_button_connection(new_config)
 
 
@@ -84,13 +89,13 @@ def calibrate():
     (Re-) Calibrate buttons. Necessary because different lengths of ethernet cables have different resistances.
     :return:
     """
-    print "Calibrate wire controls: Press first 5 buttons for approx. 1 sec each. Wait for 'beep' to release."
+    print("Calibrate wire controls: Press first 5 buttons for approx. 1 sec each. Wait for 'beep' to release.")
     # Define "zero"-button (eg., nothing is pressed)
     null_average = average(20)
     last_average = null_average
-    print "Button 0: set @ %s [%s ... %s]" % (null_average,
+    print("Button 0: set @ %s [%s ... %s]" % (null_average,
                                               null_average - LIVE_ZONE,
-                                              null_average + LIVE_ZONE)
+                                              null_average + LIVE_ZONE))
 
     # Define 6 example buttons (incl. "zero"-button)
     button = {0: null_average,
@@ -106,7 +111,7 @@ def calibrate():
         if position != 0:
             while not button[position]:
                 curr_average = average(10)
-        print curr_average
+        print(curr_average)
 
         # Check if button is pressed
         if curr_average > null_average + LIVE_ZONE:
@@ -121,9 +126,9 @@ def calibrate():
                 button[position] = curr_average
                 last_average = curr_average
                 system_sound("beep")
-                print "Button %s: set @ %s [%s ... %s]" % (position, button[position],
+                print("Button %s: set @ %s [%s ... %s]" % (position, button[position],
                                                            button[position] - LIVE_ZONE,
-                                                           button[position] + LIVE_ZONE)
+                                                           button[position] + LIVE_ZONE))
 
                 # Important - user lets go off button -> new reading!
                 time.sleep(0.75)
@@ -165,9 +170,9 @@ def play(args):
     global PLAY
     # set to thread
     PLAY[0] = sp.Popen(['python', '/home/pi/Scripts/waldo/waldo/main.py'] + args,
-                    stdout=sp.PIPE,  # hide prints from function
-                    preexec_fn=os.setsid
-                    )
+                       stdout=sp.PIPE,  # hide prints from function
+                       preexec_fn=os.setsid
+                       )
     # set to project name
     PLAY[1] = args[1]
 
@@ -184,7 +189,7 @@ def cancel():
     is_replaying = config["REC_REPL"]
 
     if is_replaying or PLAY[0]:  # if PLAY[0]
-        print "\nCancel PLAY '%s'" % PLAY[1]
+        print("\nCancel PLAY '%s'" % PLAY[1])
         os.killpg(os.getpgid(PLAY[0].pid), signal.SIGTERM)
         servo_start_pos(PLAY[1])
         PLAY[0] = False
@@ -192,7 +197,7 @@ def cancel():
         change_glob_rec_repl(False)
         time.sleep(0.25)
         if not config['numpad']:
-            print "Waiting for input via control panel 'rigby'..."
+            print("Waiting for input via control panel 'rigby'...")
     else:
         # print "Nothing to cancel"
         time.sleep(0.25)
@@ -220,10 +225,10 @@ def get_pressed_keys(e):
         keycode = int('\n'.join(str(p) for p in keycode))
         # exclude num lock
         try:
-            return keys[keycode] if keycode != 69 else False
             time.sleep(0.25)
+            return keys[keycode] if keycode != 69 else False
         except KeyError:
-            print 'This button is not programmed to do a damn thing.'
+            print('This button is not programmed to do a damn thing.')
 
 
 def foo(e):
@@ -240,12 +245,12 @@ if __name__ == '__main__':
         set_gpio_pins(config)
         GPIO.setwarnings(False)
 
-        print "==============================="
-        print " _ _ _ _____ __    ____  _____ "
-        print "| | | |  [] |  |  |    \|     | analog"
-        print "| | | |     |  |__|  [] |  [] | digital"
-        print "|_____|__||_|_____|____/|_____| pupeteering"
-        print "_______________________________"
+        print("===============================")
+        print(" _ _ _ _____ __    ____  _____ ")
+        print("| | | |  [] |  |  |    \|     | analog")
+        print("| | | |     |  |__|  [] |  [] | digital")
+        print("|_____|__||_|_____|____/|_____| pupeteering")
+        print("_______________________________")
 
         # If arg is submitted
         if len(sys.argv) > 1:
@@ -256,7 +261,7 @@ if __name__ == '__main__':
         # Print helpfile
         if arg == "-h" or arg == "--help":
             with open(os.path.join(os.path.dirname(__file__), 'help'), 'r') as f:
-                print f.read()
+                print(f.read())
             GPIO.cleanup()
             raise SystemExit
 
@@ -265,10 +270,10 @@ if __name__ == '__main__':
         elif arg == "-ap" or arg == "--autoplay":
             try:
                 button_number = int(sys.argv[2])
-                print 'Autoplay activated: Play track no. %s' % sys.argv[2]
-                print 'Play button %s.' % sys.argv[2]
+                print('Autoplay activated: Play track no. %s' % sys.argv[2])
+                print('Play button %s.' % sys.argv[2])
             except IndexError:
-                print 'No autoplay startup track defined in config (use integer of button instead of "True").'
+                print('No autoplay startup track defined in config (use integer of button instead of "True").')
 
         # Start calibration
         elif arg == "-cal" or arg == "--calibrate" or 'button_value' not in config:
@@ -276,14 +281,14 @@ if __name__ == '__main__':
 
             # Write data to main config
             write_config(os.path.dirname(os.path.realpath(__file__)), new_config)
-            print "Buttons calibrated."
+            print("Buttons calibrated.")
 
         button_value = config['button_value'].copy()
 
         if not config['numpad']:
-            print "Waiting for input via control panel 'rigby'..."
+            print("Waiting for input via control panel 'rigby'...")
         else:
-            print 'Awaiting keyboard input (Press 1-30 & enter) with directly connected USB keyboard'
+            print('Awaiting keyboard input (Press 1-30 & enter) with directly connected USB keyboard')
             # hook global keyboard presses to function
             keyboard.hook(foo)
 
@@ -343,14 +348,14 @@ if __name__ == '__main__':
 
                     # Set commands as defined in main config file
                     play(BUTTONS[button_number].split(" "))
-                    print "Button %s: waldo/main.py %s" % (button_number, BUTTONS[button_number])
+                    print("Button %s: waldo/main.py %s" % (button_number, BUTTONS[button_number]))
                 else:
-                    print "The button '%s' is not defined in main config file." % (button_number)
+                    print("The button '%s' is not defined in main config file." % button_number)
                 button_number = False
 
             # Read if project is ongoing
             config = None
-            while config == None:
+            while config is None:
                 if os.path.isfile(os.path.join(config_path, 'config')):
                     config = read_config(config_path)
                 time.sleep(0.05)
@@ -370,6 +375,4 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         GPIO.cleanup()
-        print "\nExit by user."
-
-
+        print("\nExit by user.")
