@@ -31,8 +31,5 @@ if measure_temp:
     monitor_temperature()
 
 if autostart:
-    if type(autostart) is str:  # if autostart is project name
-        play_all(autostart)
-
     shutdown_on_button_press()
-    run_listener()
+    run_listener(autostart=autostart if type(autostart) is str else None)

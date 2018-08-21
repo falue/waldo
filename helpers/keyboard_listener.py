@@ -30,7 +30,7 @@ def create_players():
     return players
 
 
-def run_listener():
+def run_listener(autostart=None):
     config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
     config = read_config(config_path)
 
@@ -38,6 +38,9 @@ def run_listener():
 
     players = create_players()
     playback_audio(os.path.expanduser('~/Scripts/waldo/waldo/sounds/chime.mp3'))
+
+    if autostart:
+        players[autostart].play()
 
     for event in dev.read_loop():
         if event.value == 1:
