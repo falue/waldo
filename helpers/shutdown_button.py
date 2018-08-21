@@ -3,12 +3,11 @@
 from __future__ import print_function
 
 import os
-import subprocess as sp
+import subprocess
 import time
 
 import RPi.GPIO as GPIO
 
-from waldo.fn import playback_audio
 from waldo.utils import threaded
 
 
@@ -59,10 +58,7 @@ def shutdown_on_button_press():
             GPIO.output(led_pin_red, True)
             shutdown_started = True
             print('Shutdown button pressed. Shutdown: Now.')
-
-            sp.Popen(['python', '/home/pi/Scripts/waldo/helpers/killall.py'])
-
-            os.system("sudo shutdown now -h")
+            subprocess.call("sudo shutdown now -h")
         time.sleep(waiting_time)
 
 

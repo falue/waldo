@@ -3,14 +3,13 @@
 from __future__ import print_function
 
 import bisect
-import getpass
 import logging
 import os
+import select
 import subprocess
+import sys
 import threading
 import time
-import select
-import sys
 from shutil import copyfile
 
 import RPi.GPIO as GPIO
@@ -26,8 +25,8 @@ except ImportError:
     from fake import PWM
 
 from utils import (set_gpio_pins, read_config, write_config, mapvalue,
-                   get_filesize, usbdetection, get_servo_connection,
-                   get_mcp_connection, bar, get_first_file, threaded)
+                   get_filesize, detect_usb_device, get_servo_connection,
+                   get_mcp_connection, bar, get_first_file)
 
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
@@ -468,10 +467,10 @@ def set_connection(project):
     answer = raw_input("Set up potentiometer connection with USB or analog input via MCP3008? [USB/MCP]\n").lower()
     if answer == "usb":
         print("Connection set: USB")
-        connection = usbdetection().split()
+        device, baud_rate = detect_usb_device()
         config.update({'connection': {'type': 'usb',
-                                      'device': connection[0],
-                                      'baudrate': int(connection[1])
+                                      'device': device,
+                                      'baudrate': int(baud_rate)
                                       }
                        }
                       )
@@ -496,7 +495,6 @@ def set_servo(project, channel):
     Set config file for project - MCPin, servo_pin, map_min, map_max, start_pos.
     :param project:
     :param channel:
-    :param servo_pin:
     :return:
     """
     # Read channel config data

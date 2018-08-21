@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import os
-import time
 import datetime
+import os
+import subprocess
+import time
 
 from waldo.utils import threaded
 
@@ -24,25 +25,24 @@ def monitor_temperature():
             print('%s removed.' % f)
 
     def measure_temp():
-        temp = os.popen("vcgencmd measure_temp").readline()
-        temp = temp.replace("temp=", "")
-        temp = float(temp.replace("'C", ""))
+        temp = subprocess.check_output(['vcgencmd', 'measure_temp']).strip()
+        temp = temp.replace('temp=', '')
+        temp = float(temp.replace('\'C', ''))
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        visual = int(temp) / 5 * "█"
+        visual = int(temp) / 5 * '█'
 
-        return now, "\t", str(temp) + '°C', "\t", visual
+        output = '{}\t{}°C\t{}'.format(now, temp, visual)
+
+        return output
 
     while True:
-        data = ""
-        for m in measure_temp():
-            data += str(m)
-
-        with open("%s/../logs/temperature/%s.log" % (main_path, date), "a") as f:
-            f.write(data + "\n")
+        data = measure_temp()
+        with open('%s/../logs/temperature/%s.log' % (main_path, date), 'a') as f:
+            f.write(data + '\n')
         time.sleep(60)
 
 
 if __name__ == '__main__':
     monitor_temperature()
     while True:
-        time.sleep(60)
+        time.sleep(1)

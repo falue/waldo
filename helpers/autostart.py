@@ -26,8 +26,6 @@ main_path = os.path.expanduser('~/Scripts/waldo')
 # reset config file value recrepl (in case waldo is shut off unexpected):
 change_glob_rec_repl(False)
 
-# commented because it shuts down because autostart is running "now"
-# os.system('%s/helpers/crash_recover.sh' % main_path)
 
 if measure_temp:
     monitor_temperature()

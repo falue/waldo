@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import os
+import subprocess
 import sys
 
 from evdev import InputDevice, ecodes
@@ -31,7 +32,7 @@ class Player(object):
 
 
 def cancel():
-    os.system('killall play -9')
+    subprocess.call(['/usr/bin/killall', 'play'])
     global REC_REPL
     REC_REPL = False
 

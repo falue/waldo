@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 import os
+import subprocess
 import time
 from threading import Thread
 
@@ -22,7 +25,7 @@ def read_config(path):
             config = yaml.safe_load(c.read())
         return config
     else:
-        print "There is no such project or no config file in project '%s'" % path.split("/")[::1]
+        print("There is no such project or no config file in project '%s'" % path.split("/")[::1])
         exit()
 
 
@@ -68,39 +71,35 @@ def get_filesize(size, precision=2):
         return "%.*f %s" % (precision, size, suffixes[suffix_index])
 
 
-def usbdetection():
+def detect_usb_device():
     """
     Detect and write usb connection in file 'config'
     :return:
     """
-    print "Please unplug and replug desired usb device."
-    print "Listening to USB ports..."
-    usb_detected = False
-    usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
-    # print "start: ",
-    # print len(usbdevices)
+    print("Please unplug and replug desired usb device.")
+    print("Listening to USB ports...")
+    usb_devices = get_usb_devices()
 
-    while not usb_detected:
-        if len(usbdevices) + 1 == len(
-                os.popen("ls /dev/tty*").read().strip().split("\n")):
-            usbdevice = "".join(
-                set(os.popen("ls /dev/tty*").read().strip().split("\n"))
-                    .symmetric_difference(usbdevices))
-            print "USB device detected; yours is @ %s." % usbdevice
-            baudrate = raw_input(
-                "Set baudrate:\n[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & "
+    while True:
+        if len(usb_devices) + 1 == len(get_usb_devices()):
+            usb_device = set(get_usb_devices()).symmetric_difference(usb_devices).pop()
+            print("USB device detected; yours is @ %s." % usb_device)
+            baud_rate = raw_input(
+                "Set baud_rate:\n[300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200] & "
                 "[return] (Default: 9600)\n") or 9600
-            usb_detected = True
-            return "%s %s" % (usbdevice, baudrate)
+            return usb_device, baud_rate
         else:
-            usbdevices = os.popen("ls /dev/tty*").read().strip().split("\n")
-            # print len(usbdevices)
+            usb_devices = get_usb_devices()
         time.sleep(0.25)
+
+
+def get_usb_devices():
+    return subprocess.check_output('ls /dev/tty*', shell=True).strip().splitlines()
 
 
 def get_servo_connection(servo_pin):
     """
-    Returns servo pins as int and servo hat board adress as hex.
+    Returns servo pins as int and servo hat board address as hex.
     :param servo:
     """
     hat_adress = servo_pin / 16
@@ -175,3 +174,7 @@ def threaded(fn):
         t.start()
 
     return wrapper
+
+
+if __name__ == '__main__':
+    print(detect_usb_device())
