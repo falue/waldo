@@ -14,7 +14,10 @@ import sys
 from shutil import copyfile
 
 import RPi.GPIO as GPIO
+
+print("strange counting start:")
 import serial
+print("strange counting stop")
 
 # Import fake library if not @ RaspberryPi
 try:

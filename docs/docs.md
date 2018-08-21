@@ -344,18 +344,17 @@ button_value:     # Calibrated values for analog keyboard Rigby (changes dependi
   4: 594
   5: 306
 buttons:          # define buttons: key-number on USB numpad or button-number on Rigby, followed by bash commands to play songs
-  1: -p s1_tonleiter_einzaehlen
-  2: -p s23_teaser_variante_tonleiter
-  3: -p s12_refrain_piano
-  4: -p s4_variante_solostimmen
-  5: -p s9_variante_lalala
-  6: -p reset
-  7: -p reset
-  8: -p reset
-  9: -p reset
-  10: -p reset
-  30: cancel      # Name a function of any button 'cancel' and you have yourself a cancel button
-mcp:              # Leave alone if you use Mortekay as analog-digital transformer
+  KEY_KP1: servo_test_4
+  KEY_KP2: hatschi
+  KEY_KP3: ohlala
+  KEY_KP4: hey
+  KEY_KP5: wow
+  KEY_KP6: ohappyday
+  KEY_KP7: nanana
+  KEY_KP8: ohyea
+  KEY_KP9: reset
+  KEY_KPENTER: cancel # Name a function of any button 'cancel' and you have yourself a cancel button
+mcp:                  # Leave alone if you use Mortekay as analog-digital transformer
   0:
     CLK: 4
     CS: 27
@@ -374,8 +373,8 @@ mcp:              # Leave alone if you use Mortekay as analog-digital transforme
 numpad: true       # Set to true if you use USB keyboard to play tracks instead of Rigby
 measure_temp: true # starts on startup and measures temp every minute and logs it
 autostart: true    # Set to false if you dont want anything to start on startup.
-                   # ^Set to true if you want to start remote.py, shutdown_button.py to start on RasPi startup
-                   # ^Set to integer number of defined button to start any track on startup
+                   # ^Set to true if you want to start keyboard_listener.py, shutdown_button.py to start on RasPi startup
+                   # ^Set to track name to play after startup
 
 ```
 Naked:  
@@ -391,17 +390,16 @@ button_value:
   4: 600
   5: 290
 buttons:
-  1: -p servo_test_4 repeat
-  2: -p hatschi
-  3: -p ohlala
-  4: -p hey
-  5: -p wow
-  6: -p ohappyday
-  7: -p nanana
-  8: -p ohyea
-  9: -p reset
-  30: cancel
-  enter: cancel
+  KEY_KP1: servo_test_4
+  KEY_KP2: hatschi
+  KEY_KP3: ohlala
+  KEY_KP4: hey
+  KEY_KP5: wow
+  KEY_KP6: ohappyday
+  KEY_KP7: nanana
+  KEY_KP8: ohyea
+  KEY_KP9: reset
+  KEY_KPENTER: cancel
 mcp:
   0:
     CLK: 4

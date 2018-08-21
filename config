@@ -35,5 +35,5 @@ mcp:
     CS: 13
     MISO: 6
     MOSI: 12
-measure_temp: true
+measure_temp: false
 numpad: true
