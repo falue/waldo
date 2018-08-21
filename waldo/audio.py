@@ -1,6 +1,7 @@
+import logging
 import subprocess
 
-from waldo.player import logger
+logger = logging.getLogger(__name__)
 
 
 class AudioPlayer(object):
