@@ -12,7 +12,7 @@ from keyboard_listener import run_listener
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from waldo.utils import read_config
-from waldo.fn import change_glob_rec_repl, playback_audio, play_all
+from waldo.fn import change_glob_rec_repl, play_all
 from shutdown_button import shutdown_on_button_press
 from monitor_temperature import monitor_temperature
 

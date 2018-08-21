@@ -1,40 +1,33 @@
 #!/usr/bin/env python
+# coding=utf-8
 from __future__ import print_function
 
+import logging
 import os
-import subprocess
 import sys
 
 from evdev import InputDevice, ecodes
 
+from waldo.player import Player
+
+
+# FIXME: würg
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from waldo.fn import play_all, REC_REPL, playback_audio
+from waldo.fn import playback_audio
 from waldo.utils import read_config
 
-
-class Player(object):
-    # NOT YET FUNCTIONAL!!
-    threads = []
-
-    def __init__(self, song):
-        self.song = song
-        self.play()
-
-    def play(self):
-        print('play {}'.format(self.song))
-        self.threads = play_all(self.song)
-        print(self.threads)
-
-    def stop(self):
-        print('stop {}'.format(self.song))
-        for t in self.threads:
-            t.stop()
+logger = logging.getLogger(__name__)
 
 
-def cancel():
-    subprocess.call(['/usr/bin/killall', 'play'])
-    global REC_REPL
-    REC_REPL = False
+def create_players():
+    logger.info('Pre-loading players')
+    players = {}
+    song_names = sorted([item for item in os.listdir(PROJECT_PATH) if not item.startswith('.')])
+
+    for name in song_names:
+        players[name] = Player(song=name)
+
+    return players
 
 
 def run_listener():
@@ -42,6 +35,8 @@ def run_listener():
     config = read_config(config_path)
 
     dev = InputDevice('/dev/input/event1')
+
+    players = create_players()
     playback_audio(os.path.expanduser('~/Scripts/waldo/waldo/sounds/chime.mp3'))
 
     for event in dev.read_loop():
@@ -49,13 +44,25 @@ def run_listener():
 
             try:
                 command = config['buttons'][ecodes.KEY[event.code]]
-                cancel()
+
+                for p in players.values():
+                    if p.running:
+                        p.stop()
 
                 if command != 'cancel':
-                    play_all(command)
+                    players[command].play()
+
             except KeyError:
                 pass
 
 
 if __name__ == '__main__':
+    FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
+
+    # Read preferences and set project folder path
+    PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+    # do not expand user due to autostart user is 'root' not 'pi'
+    PROJECT_PATH = PREFERENCES["PROJECT_PATH"] if not os.path.isdir('projects') else 'projects'
+
     run_listener()

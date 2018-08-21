@@ -23,7 +23,6 @@ def shutdown_on_button_press():
     # Number of measurements
     number_of_measurements = 5
 
-    main_path = os.path.expanduser('~/Scripts/waldo')
     GPIO.setwarnings(False)
 
     #######################
@@ -45,7 +44,7 @@ def shutdown_on_button_press():
     GPIO.setup(led_pin_red, GPIO.OUT)
     GPIO.output(led_pin_red, False)
 
-    signal_values = [True for i in range(number_of_measurements)]
+    signal_values = [True for _ in range(number_of_measurements)]
 
     shutdown_started = False  # has the shutdown already been initiated? To prevent multiple shutdown commands
 

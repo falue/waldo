@@ -13,10 +13,7 @@ import time
 from shutil import copyfile
 
 import RPi.GPIO as GPIO
-
-print("strange counting start:")
 import serial
-print("strange counting stop")
 
 # Import fake library if not @ RaspberryPi
 try:
@@ -28,8 +25,6 @@ from utils import (set_gpio_pins, read_config, write_config, mapvalue,
                    get_filesize, detect_usb_device, get_servo_connection,
                    get_mcp_connection, bar, get_first_file)
 
-FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
 logger = logging.getLogger()
 
 # Read preferences and set project folder path
@@ -122,10 +117,10 @@ def playback_servo(project, channel, play_from=0):
     map_max = config['channels'][channel]['map_max']
     start_pos = config['channels'][channel]['start_pos']
 
-    # Get servo pin and set servo hat adress
+    # Get servo pin and set servo hat address
     servo_connection = get_servo_connection(servo_pin)
     servo_pin = servo_connection['servo_pin']
-    servo_obj = PWM(servo_connection['hat_adress'])
+    servo_obj = PWM(servo_connection['hat_address'])
     servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
     logger.info("Channelname:\t%s\tServopin:\t%s\tStart @\t%ss" % (channel, servo_pin, play_from))
@@ -187,10 +182,10 @@ def servo_init():
     # map_max = config['channels'][channel]['map_max']
     # start_pos = config['channels'][channel]['start_pos']
     #
-    # # Get servo pin and set servo hat adress
+    # # Get servo pin and set servo hat address
     # servo_connection = get_servo_connection(servo_pin)
     # servo_pin = servo_connection['servo_pin']
-    # servo_obj = PWM(servo_connection['hat_adress'])
+    # servo_obj = PWM(servo_connection['hat_address'])
     # servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
     pass
 
@@ -218,10 +213,10 @@ def servo_start_pos(project, channels=False):
         servo_pin = config['channels'][channel]['servo_pin']
         start_pos = config['channels'][channel]['start_pos']
 
-        # Get servo pin and set servo hat adress
+        # Get servo pin and set servo hat address
         servo_connection = get_servo_connection(servo_pin)
         servo_pin = servo_connection['servo_pin']
-        servo_obj = PWM(servo_connection['hat_adress'])
+        servo_obj = PWM(servo_connection['hat_address'])
         # servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
         servo_obj.setPWM(servo_pin, 0, start_pos)  # Go to start position
@@ -234,15 +229,15 @@ def servo_start_pos(project, channels=False):
     for channel in channels:
         servo_pin = config['channels'][channel]['servo_pin']
 
-        # Get servo pin and set servo hat adress
+        # Get servo pin and set servo hat address
         servo_connection = get_servo_connection(servo_pin)
         servo_pin = servo_connection['servo_pin']
-        servo_obj = PWM(servo_connection['hat_adress'])
+        servo_obj = PWM(servo_connection['hat_address'])
         # servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
         # Time for moving servo
-        # servo_obj.setPWM(servo_pin, 4096, 0)  # completly off
-        logger.info('Servo playback to start: %s' % (channel))
+        # servo_obj.setPWM(servo_pin, 4096, 0)  # completely off
+        logger.info('Servo playback to start: %s' % channel)
     logger.info('All servos cut off.')
 
     change_glob_rec_repl(False)
@@ -281,10 +276,10 @@ def record(project, channel, audiofile):
     map_max = config['channels'][channel]['map_max']
     start_pos = config['channels'][channel]["start_pos"]
 
-    # Get servo pin and set servo hat adress
+    # Get servo pin and set servo hat address
     servo_connection = get_servo_connection(servo_pin)
     servo_pin = servo_connection['servo_pin']
-    servo_obj = PWM(servo_connection['hat_adress'])
+    servo_obj = PWM(servo_connection['hat_address'])
 
     # Define type of user-input
     if config['connection']['type'] == "usb":
@@ -323,7 +318,7 @@ def record(project, channel, audiofile):
     if audiofile:
         processThread0 = threading.Thread(
             target=playback_audio,
-            args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile), ))
+            args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile),))
         processThread0.start()
 
     REC_REPL = True
@@ -582,7 +577,7 @@ def get_dof(mcp_in, servo_pin):
 
     servo_connection = get_servo_connection(servo_pin)
     servo_pin = servo_connection['servo_pin']
-    servo_obj = PWM(servo_connection['hat_adress'])
+    servo_obj = PWM(servo_connection['hat_address'])
     servo_obj.setPWMFreq(SERVO_FREQ)  # Set frequency to 60 Hz
 
     print("Press enter for returning value.")
@@ -673,7 +668,7 @@ def singleplay(arg):
     # Play servo thread:
     process_thread_1 = threading.Thread(
         target=playback_servo,
-        args=(project, channelname, )) # ^ note extra ','
+        args=(project, channelname,))  # ^ note extra ','
     process_thread_1.start()
 
     wait_for_servos()
@@ -685,7 +680,7 @@ def singleplay(arg):
     if audiofile:
         process_thread_0 = threading.Thread(
             target=playback_audio,
-            args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile), )) # <- note extra ','
+            args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile),))  # <- note extra ','
         process_thread_0.start()
     # else:
     #     REC_REPL = True # if no audio
@@ -746,7 +741,7 @@ def play_all(project, attribute=0):
         audio_thread = threading.Thread(
             target=playback_audio,
             args=(os.path.join(PROJECT_PATH, project, 'audio', audiofile),
-                  play_from, ))
+                  play_from,))
         # <- note extra ','
         audio_thread.start()
         threads.append(audio_thread)

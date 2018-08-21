@@ -100,15 +100,15 @@ def get_usb_devices():
 def get_servo_connection(servo_pin):
     """
     Returns servo pins as int and servo hat board address as hex.
-    :param servo:
+    :type servo_pin: int
     """
-    hat_adress = servo_pin / 16
+    hat_address = servo_pin / 16
     servo_pin %= 16
 
-    hat_adress = int(hex(64 + hat_adress), 16)
+    hat_address = int(hex(64 + hat_address), 16)
 
     connection = {'servo_pin': servo_pin,
-                  'hat_adress': hat_adress
+                  'hat_address': hat_address
                   }
 
     return connection
@@ -159,12 +159,12 @@ def bar(value, max_bar=30):
 def get_first_file(path, suffix=False):
     if not suffix:
         suffix = ''
-    filelist = os.listdir(path)
-    audiofiles = [a for a in filelist if a.lower().endswith(suffix) and not a.startswith('.')]
-    if len(audiofiles):
-        return audiofiles[0]
+    file_list = os.listdir(path)
+    audio_files = [a for a in file_list if a.lower().endswith(suffix) and not a.startswith('.')]
+    if len(audio_files):
+        return audio_files[0]
     else:
-        return False
+        return None
 
 
 def threaded(fn):
