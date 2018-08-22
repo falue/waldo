@@ -50,9 +50,13 @@ class Player(object):
 
     def _create_servo_channels(self):
         for channel_name, channel_config in self._config['channels'].items():
-            s = servo.ServoChannel(os.path.join(self.song_path, channel_name), channel_config['servo_pin'],
-                                   channel_config['map_min'], channel_config['map_max'], channel_config['start_pos'])
-            self._servo_channels.append(s)
+            channel_path = os.path.join(self.song_path, channel_name)
+            if os.path.isfile(channel_path):
+                s = servo.ServoChannel(channel_path, channel_config['servo_pin'],
+                                       channel_config['map_min'], channel_config['map_max'], channel_config['start_pos'])
+                self._servo_channels.append(s)
+            else:
+                logger.info('No such channel file: {}'.format(channel_path))
 
     def _create_audio_player(self):
         audio_file = get_first_file(os.path.join(self.song_path, 'audio'), ('.wav', '.mp3', '.aiff'))
