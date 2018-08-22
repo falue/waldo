@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import subprocess
 import time
 
 import RPi.GPIO as GPIO
