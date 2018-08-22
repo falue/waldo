@@ -57,7 +57,7 @@ def shutdown_on_button_press():
             GPIO.output(led_pin_red, True)
             shutdown_started = True
             print('Shutdown button pressed. Shutdown: Now.')
-            subprocess.call("sudo shutdown now -h")
+            subprocess.call(['sudo', 'shutdown', 'now', '-h'])
         time.sleep(waiting_time)
 
 
