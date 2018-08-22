@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 def create_players():
     logger.info('Pre-loading players')
     players = {}
-    song_names = sorted([item for item in os.listdir(PROJECT_PATH) if not item.startswith('.')])
+    song_names = sorted([item for item in os.listdir(PROJECT_PATH) if not item.startswith('.') and not item == '_archive'])
 
     for name in song_names:
         players[name] = Player(song=name)

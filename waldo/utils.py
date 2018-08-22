@@ -25,7 +25,7 @@ def read_config(path):
             config = yaml.safe_load(c.read())
         return config
     else:
-        print("There is no such project or no config file in project '%s'" % path.split("/")[::1])
+        print("There is no such project or no config file in %s" % path)
         exit()
 
 
