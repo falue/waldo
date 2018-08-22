@@ -9,14 +9,14 @@ button_value:
   4: 600
   5: 290
 buttons:
-  KEY_KP1: servo_test_4
-  KEY_KP2: hatschi
-  KEY_KP3: ohlala
-  KEY_KP4: hey
-  KEY_KP5: wow
-  KEY_KP6: ohappyday
-  KEY_KP7: nanana
-  KEY_KP8: ohyea
+  KEY_KP1: ohappyday
+  KEY_KP2: hey
+  KEY_KP3: wow
+  KEY_KP4: nanana
+  KEY_KP5: hatschi
+  KEY_KP6: ohyea
+  KEY_KP7: ohlala
+  KEY_KP8: raeuspern
   KEY_KP9: reset
   KEY_KPENTER: cancel
 mcp:
@@ -35,5 +35,5 @@ mcp:
     CS: 13
     MISO: 6
     MOSI: 12
-measure_temp: false
+measure_temp: true
 numpad: true
