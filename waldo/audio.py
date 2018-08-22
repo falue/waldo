@@ -20,4 +20,5 @@ class AudioPlayer(object):
         self.play_process = subprocess.Popen(cmd)
 
     def stop(self):
-        self.play_process.kill()
+        if self.play_process:
+            self.play_process.kill()
