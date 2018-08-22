@@ -12,7 +12,7 @@ from keyboard_listener import run_listener
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from waldo.utils import read_config
-from waldo.fn import change_glob_rec_repl, play_all
+from waldo.fn import change_glob_rec_repl
 from shutdown_button import shutdown_on_button_press, rg_led
 from monitor_temperature import monitor_temperature
 
@@ -23,8 +23,6 @@ PROJECT_PATH = PREFERENCES["PROJECT_PATH"] if not os.path.isdir('projects') else
 
 autostart = PREFERENCES['autostart']
 measure_temp = PREFERENCES['measure_temp']
-
-main_path = os.path.expanduser('~/Scripts/waldo')
 
 # reset config file value recrepl (in case waldo is shut off unexpected):
 change_glob_rec_repl(False)

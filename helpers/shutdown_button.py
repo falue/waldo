@@ -48,6 +48,7 @@ def rg_led(mode):
         GPIO.output(led_pin_green, True)
         GPIO.output(led_pin_red, False)
 
+
 # SETUP
 led_pin_green = 20
 led_pin_red = 21
