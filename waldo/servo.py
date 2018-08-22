@@ -95,9 +95,10 @@ class ServoChannel(object):
                 self.stop()
 
     def stop(self):
-        self.running = False
-        self.servo.set_pos(self.start_pos)
-        self.servo.turn_off()
+        if self.servo:
+            self.running = False
+            self.servo.set_pos(self.start_pos)
+            self.servo.turn_off()
 
     @staticmethod
     def _get_value(l, t):
