@@ -159,12 +159,13 @@ def bar(value, max_bar=30):
 def get_first_file(path, suffix=False):
     if not suffix:
         suffix = ''
-    file_list = os.listdir(path)
-    audio_files = [a for a in file_list if a.lower().endswith(suffix) and not a.startswith('.')]
-    if len(audio_files):
-        return audio_files[0]
-    else:
-        return None
+    if os.path.isdir(path):
+        file_list = os.listdir(path)
+        audio_files = [a for a in file_list if a.lower().endswith(suffix) and not a.startswith('.')]
+        if len(audio_files):
+            return audio_files[0]
+        else:
+            return None
 
 
 def threaded(fn):
