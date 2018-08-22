@@ -26,10 +26,10 @@ main_path = os.path.expanduser('~/Scripts/waldo')
 # reset config file value recrepl (in case waldo is shut off unexpected):
 change_glob_rec_repl(False)
 
+shutdown_on_button_press()
 
 if measure_temp:
     monitor_temperature()
 
 if autostart:
-    shutdown_on_button_press()
     run_listener(autostart=autostart if type(autostart) is str else None)
