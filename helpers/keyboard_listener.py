@@ -10,11 +10,19 @@ from evdev import InputDevice, ecodes
 
 from waldo.player import Player
 
-
-# FIXME: würg
+# FIXME: Fix project structure
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from waldo.fn import playback_audio
 from waldo.utils import read_config
+
+# FIXME: Remove global variables!
+# Read preferences and set project folder path
+PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+# do not expand user due to autostart user is 'root' not 'pi'
+PROJECT_PATH = PREFERENCES["PROJECT_PATH"] if not os.path.isdir('projects') else 'projects'
+
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
 
 logger = logging.getLogger(__name__)
 
@@ -60,12 +68,4 @@ def run_listener(autostart=None):
 
 
 if __name__ == '__main__':
-    FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
-
-    # Read preferences and set project folder path
-    PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-    # do not expand user due to autostart user is 'root' not 'pi'
-    PROJECT_PATH = PREFERENCES["PROJECT_PATH"] if not os.path.isdir('projects') else 'projects'
-
     run_listener()

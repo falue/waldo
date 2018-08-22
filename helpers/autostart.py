@@ -18,6 +18,9 @@ from monitor_temperature import monitor_temperature
 
 # Read preferences
 PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+# do not expand user due to autostart user is 'root' not 'pi'
+PROJECT_PATH = PREFERENCES["PROJECT_PATH"] if not os.path.isdir('projects') else 'projects'
+
 autostart = PREFERENCES['autostart']
 measure_temp = PREFERENCES['measure_temp']
 
