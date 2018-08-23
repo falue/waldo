@@ -33,13 +33,17 @@ class Recorder(object):
             GPIO.setup(self.mcp[chip]['cs'], GPIO.OUT)
 
     def read(self):
-        reading = self._mcp_reading(self.mcp_in,
-                                    self.mcp[self.mcp_chip]['clk'],
-                                    self.mcp[self.mcp_chip]['mosi'],
-                                    self.mcp[self.mcp_chip]['miso'],
-                                    self.mcp[self.mcp_chip]['cs']
-                                    )
-        return reading
+        passes = 80
+        reading = 0
+        for i in range(passes):
+            reading += self._mcp_reading(self.mcp_in,
+                                        self.mcp[self.mcp_chip]['clk'],
+                                        self.mcp[self.mcp_chip]['mosi'],
+                                        self.mcp[self.mcp_chip]['miso'],
+                                        self.mcp[self.mcp_chip]['cs']
+                                        )
+            sleep(0.0001)
+        return reading / passes
 
     def _mcp_reading(self, mcp_chip, clk, mosi, miso, cs):
         if (mcp_chip > 7) or (mcp_chip < 0):
@@ -77,16 +81,15 @@ if __name__ == '__main__':
     FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.DEBUG)  # DEBUG / INFO / WARNING
 
-    r = Recorder(8)
+    r = Recorder(20)
 
     channel = '/home/pi/waldo_projects/sine_test/sine'
     # s = servo.ServoChannel(channel, 0, 0, 1024, 0)
     s = servo.Servo(0)
     # s.set_pos(512)
 
-
     while True:
         reading = r.read()
         # s.set_pos(reading)
-        print("{}\t\t{}".format(reading, "█" * (reading/5)))
-        sleep(0.001)  # 0.001
+        print("{}{}{}░".format(reading, ' ' * (5-len(str(reading))), "█" * (reading/5)))
+        # sleep(0.001)  # 0.001
