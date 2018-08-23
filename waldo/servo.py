@@ -26,11 +26,9 @@ class Servo(object):
         self.servo_obj.setPWM(self.servo_pin, 0, 4096)
 
     def set_pos(self, new_pos):
-        # FIXME: Do nice PWM duty cycle
-        logger.debug('Going to {}'.format(new_pos))
-        self.pos = new_pos
-        self.servo_obj.setPWM(channel=self.servo_pin, on=0, off=new_pos)
-        # sleep(0.005)
+        logger.debug('Servo {}\tgoing to {}'.format(self.servo_pin, new_pos))
+        self.servo_obj.setPWM(channel=self.servo_pin, on=0, off=new_pos)  # new generation servos check only total
+                                                                          # length of duty cycle
 
     @staticmethod
     def _get_servo_connection(servo_pin):
