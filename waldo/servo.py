@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Import fake library if not @ RaspberryPi
 import bisect
 import logging
@@ -15,14 +16,11 @@ logger = logging.getLogger(__name__)
 
 class Servo(object):
     def __init__(self, servo_number, start_pos=300):
-        self.pos = 512
         self.servo_number = servo_number
         self.start_pos = start_pos
         self.servo_pin, self.servo_hat_address = self._get_servo_connection(servo_number)
         self.servo_obj = PWM(self.servo_hat_address)
-        self.servo_obj.setPWMFreq(60)
-
-        self.set_pos(start_pos)
+        self.servo_obj.setPWMFreq(50)  # 60hz = 16.666ms, 50hz = 20ms, 40hz = 25ms
 
     def turn_off(self):
         self.servo_obj.setPWM(self.servo_pin, 0, 4096)
