@@ -81,13 +81,28 @@ class Player(object):
         for s in self._servo_channels:
             s.stop()
 
+    def create_test(self, channel):
+        # create file with timestamps and servo positions from map_min to map_max
+        file_path = os.path.join(self.song_path, "{}_test".format(channel))
+        print file_path
+        with open(file_path, 'w') as f:
+            test_data = ''
+            values = {self._config['channels'][channel]['map_min'], self._config['channels'][channel]['map_max']}
+            map_min = min(values)
+            map_max = max(values)
+            for i in range(map_max - map_min + 1):
+                test_data += "{}: {}\n".format(float(i)/10, map_min+i)
+            print test_data
+            f.write(test_data)
+            # f.write("{} ==> {}".format(self.map_min, self.map_max))
+
 
 if __name__ == '__main__':
     FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.DEBUG)  # DEBUG / INFO / WARNING
 
-    p = Player('ohappyday')
+    p = Player('ohyea')
+    # p.create_test('1')
+    p.play()
     while True:
-        sleep(3)
-        p.stop()
-        sleep(20)
+        sleep(1)
