@@ -71,7 +71,8 @@ class Player(object):
             s.play(play_from=self.play_from)
 
     def _play_audio(self):
-        self._audio_player.play()
+        if self._audio_player:
+            self._audio_player.play()
 
     def _stop_audio(self):
         self._audio_player.stop()
