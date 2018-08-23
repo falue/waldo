@@ -13,7 +13,7 @@ class AudioPlayer(object):
 
     def play(self):
         logger.info('Playing audio file {}'.format(self.audio_file))
-        cmd = ['/usr/bin/play', '-q', self.audio_file]
+        cmd = ['/usr/bin/play', '-v', '0.99', '-q', self.audio_file]
         if self.play_from:
             cmd += ['trim', self.play_from]
 

@@ -5,6 +5,7 @@ Start scripts if startup is true in main config file.
 Play defined track
 """
 import os
+import subprocess
 import sys
 from os import path
 
@@ -28,6 +29,9 @@ measure_temp = PREFERENCES['measure_temp']
 change_glob_rec_repl(False)
 
 shutdown_on_button_press()
+
+# set volume to 80%
+subprocess.call(['amixer', '-q', 'set', 'Speaker', '20%'])  # amixer set PCM -- 100% amixer sset 'Master' 50%
 
 if measure_temp:
     monitor_temperature()

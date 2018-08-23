@@ -56,14 +56,14 @@ class Player(object):
                                        channel_config['map_min'], channel_config['map_max'], channel_config['start_pos'])
                 self._servo_channels.append(s)
             else:
-                logger.info('No such channel file: {}'.format(channel_path))
+                logger.debug('No such channel file: {}'.format(channel_path))
 
     def _create_audio_player(self):
         audio_file = get_first_file(os.path.join(self.song_path, 'audio'), ('.wav', '.mp3', '.aiff'))
         try:
             self._audio_player = AudioPlayer(os.path.join(self.song_path, 'audio', audio_file), self.play_from)
         except AttributeError:
-            logger.info('No audio clip found for {}'.format(self.song))
+            logger.debug('No audio clip found for {}'.format(self.song))
             pass
 
     def _play_servos(self):

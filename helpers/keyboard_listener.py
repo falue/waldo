@@ -9,6 +9,7 @@ import sys
 from evdev import InputDevice, ecodes
 
 from shutdown_button import rg_led
+from waldo.audio import AudioPlayer
 from waldo.player import Player
 
 # FIXME: Fix project structure
@@ -46,7 +47,7 @@ def run_listener(autostart=None):
     dev = InputDevice('/dev/input/event1')
 
     players = create_players()
-    playback_audio(os.path.expanduser('~/Scripts/waldo/waldo/sounds/chime.mp3'))
+    AudioPlayer(os.path.expanduser('~/Scripts/waldo/waldo/sounds/chime.mp3')).play()
     rg_led('green')
 
     if autostart:
@@ -54,7 +55,6 @@ def run_listener(autostart=None):
 
     for event in dev.read_loop():
         if event.value == 1:
-
             try:
                 command = config['buttons'][ecodes.KEY[event.code]]
 

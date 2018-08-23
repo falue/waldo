@@ -54,7 +54,7 @@ def playback_audio(audiofile, play_from=0):
 
     logger.info('Audio start:\t%s', audiofile)
 
-    cmd = ['/usr/bin/play', '-q', audiofile]
+    cmd = ['/usr/bin/play', '-v', '0.99', '-q', audiofile]
 
     if play_from:
         cmd += ['trim', play_from]
