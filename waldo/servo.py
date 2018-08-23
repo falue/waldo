@@ -76,16 +76,15 @@ class ServoChannel(object):
             try:
                 now = time()
                 timestamp, pulse = self._get_value(self.pulse_list, now - start_time + play_from)
-                pulse_map = self._map_value(pulse, 0, 1024, self.map_min, self.map_max)
+                pulse_map = map_value(pulse, 0, 1024, self.map_min, self.map_max)
                 self.servo.set_pos(pulse_map)
-                logger.debug("{}\t{}\t{}\t{}\t{}\t{}".format(self.channel_file_path,
+                logger.debug("Channel: {}\tTimestamp: {}\tPulse: {}\tPulse_map: {}\tServo pin: {}".format(self.channel_file_path,
                                                              timestamp,
-                                                             now - start_time - timestamp,
                                                              pulse,
+                                                             pulse_map,
                                                              self.servo.servo_pin,
-                                                             "\t" * self.servo.servo_pin,
                                                              )
-                             )
+                            )
                 sleep(0.005)  # TODO: Research
             except IndexError:
                 self.stop()
@@ -110,12 +109,12 @@ class ServoChannel(object):
 
         return l[x]
 
-    @staticmethod
-    def _map_value(x, in_min, in_max, out_min, out_max):
-        """
-        Map values from one range to another.
-        """
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+def map_value(x, in_min, in_max, out_min, out_max):
+    """
+    Map values from one range to another.
+    """
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
 if __name__ == '__main__':
