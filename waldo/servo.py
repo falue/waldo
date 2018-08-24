@@ -96,7 +96,7 @@ class ServoChannel(object):
             pulse_map = map_value(self.start_pos, 0, 1024, self.map_min, self.map_max)
             logger.info("Go to start {}: servo {}".format(pulse_map, self.servo_number))
             self.servo.set_pos(pulse_map)
-            sleep(0.005)
+            sleep(0.001)
             self.servo.turn_off()
 
     @staticmethod
