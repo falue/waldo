@@ -68,6 +68,32 @@ def run_listener(autostart=None):
             except KeyError:
                 pass
 
+            # KEY_NUMLOCK
+            # KEY_RESERVED
+            # KEY_EQUAL
+            # KEY_KPSLASH
+            # KEY_KPASTERISK
+            # KEY_BACKSPACE
+            # KEY_KPMINUS
+            # KEY_KPPLUS
+            # KEY_KPENTER
+            # KEY_KPDOT
+            # KEY_TAB
+
+            # if(ecodes.KEY[event.code] == 'KEY_KPMINUS'):
+            #     print('set MAP MIN')
+            #
+            # if(ecodes.KEY[event.code] == 'KEY_KPPLUS'):
+            #     print('set MAP Max')
+            #
+            # if(ecodes.KEY[event.code] == 'KEY_KPASTERISK'):
+            #     print('start recording and stop recording')
+
+            # return ecodes.KEY[event.code]  # to control different things
+
 
 if __name__ == '__main__':
     run_listener()
+
+    while True:
+        sleep(1)
