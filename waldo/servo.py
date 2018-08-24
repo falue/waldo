@@ -67,7 +67,7 @@ class ServoChannel(object):
 
     @threaded
     def play(self, play_from=0):
-        self.servo = Servo(self.servo_number)
+        self.servo = Servo(servo_number=self.servo_number, start_pos=self.start_pos)
 
         start_time = time()
         self.running = True
@@ -92,7 +92,10 @@ class ServoChannel(object):
     def stop(self):
         if self.servo:
             self.running = False
-            self.servo.set_pos(self.start_pos)
+            pulse_map = map_value(self.start_pos, 0, 1024, self.map_min, self.map_max)
+            logger.info("Go to start {}: servo {}".format(pulse_map, self.servo_number))
+            self.servo.set_pos(pulse_map)
+            sleep(0.005)
             self.servo.turn_off()
 
     @staticmethod
