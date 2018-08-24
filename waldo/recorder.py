@@ -20,9 +20,9 @@ class Recorder(object):
 
         # MCP Analog in
         self.mcp = {
-            0: {'clk': 4,  'cs': 27, 'miso': 17, 'mosi': 18},
+            0: {'clk': 4, 'cs': 27, 'miso': 17, 'mosi': 18},
             1: {'clk': 22, 'cs': 25, 'miso': 23, 'mosi': 24},
-            2: {'clk': 5,  'cs': 13, 'miso': 6,  'mosi': 12},
+            2: {'clk': 5, 'cs': 13, 'miso': 6, 'mosi': 12},
         }
 
         for chip in self.mcp:
@@ -37,15 +37,16 @@ class Recorder(object):
         measurement = 0
         for i in range(passes):
             measurement += self._mcp_reading(self.mcp_in,
-                                        self.mcp[self.mcp_chip]['clk'],
-                                        self.mcp[self.mcp_chip]['mosi'],
-                                        self.mcp[self.mcp_chip]['miso'],
-                                        self.mcp[self.mcp_chip]['cs']
-                                        )
+                                             self.mcp[self.mcp_chip]['clk'],
+                                             self.mcp[self.mcp_chip]['mosi'],
+                                             self.mcp[self.mcp_chip]['miso'],
+                                             self.mcp[self.mcp_chip]['cs'],
+                                             )
             sleep(0.0001)
         return measurement / passes
 
-    def _mcp_reading(self, mcp_chip, clk, mosi, miso, cs):
+    @staticmethod
+    def _mcp_reading(mcp_chip, clk, mosi, miso, cs):
         if (mcp_chip > 7) or (mcp_chip < 0):
             return False
         GPIO.output(cs, True)
@@ -90,6 +91,6 @@ if __name__ == '__main__':
 
     while True:
         reading = r.read()
-        # s.set_pos(reading)
-        print("{}{}{}░".format(reading, ' ' * (5-len(str(reading))), "█" * (reading/5)))
+        s.set_pos(reading)
+        print("{}{}{}░".format(reading, ' ' * (5 - len(str(reading))), "█" * (reading / 5)))
         # sleep(0.001)  # 0.001

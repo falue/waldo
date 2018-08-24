@@ -27,8 +27,8 @@ class Servo(object):
 
     def set_pos(self, new_pos):
         logger.debug('Servo {}\tgoing to {}'.format(self.servo_pin, new_pos))
-        self.servo_obj.setPWM(channel=self.servo_pin, on=0, off=new_pos)  # new generation servos check only total
-                                                                          # length of duty cycle
+        # new generation servos check only total length of duty cycle
+        self.servo_obj.setPWM(channel=self.servo_pin, on=0, off=new_pos)
 
     @staticmethod
     def _get_servo_connection(servo_pin):
@@ -78,13 +78,14 @@ class ServoChannel(object):
                 timestamp, pulse = self._get_value(self.pulse_list, now - start_time + play_from)
                 pulse_map = map_value(pulse, 0, 1024, self.map_min, self.map_max)
                 self.servo.set_pos(pulse_map)
-                logger.debug("Channel: {}\tTimestamp: {}\tPulse: {}\tPulse_map: {}\tServo pin: {}".format(self.channel_file_path,
-                                                             timestamp,
-                                                             pulse,
-                                                             pulse_map,
-                                                             self.servo.servo_pin,
-                                                             )
-                            )
+                logger.debug(
+                    "Channel: {}\tTimestamp: {}\tPulse: {}\tPulse_map: {}\tServo pin: {}".format(self.channel_file_path,
+                                                                                                 timestamp,
+                                                                                                 pulse,
+                                                                                                 pulse_map,
+                                                                                                 self.servo.servo_pin,
+                                                                                                 )
+                    )
                 sleep(0.005)  # TODO: Research
             except IndexError:
                 self.stop()

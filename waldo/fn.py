@@ -15,6 +15,8 @@ from shutil import copyfile
 import RPi.GPIO as GPIO
 import serial
 
+# FIXME: file obsolete when recorder & "ls" works
+
 # Import fake library if not @ RaspberryPi
 try:
     from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM

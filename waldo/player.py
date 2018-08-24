@@ -52,8 +52,12 @@ class Player(object):
         for channel_name, channel_config in self._config['channels'].items():
             channel_path = os.path.join(self.song_path, channel_name)
             if os.path.isfile(channel_path):
-                s = servo.ServoChannel(channel_path, channel_config['servo_pin'],
-                                       channel_config['map_min'], channel_config['map_max'], channel_config['start_pos'])
+                s = servo.ServoChannel(channel_path,
+                                       channel_config['servo_pin'],
+                                       channel_config['map_min'],
+                                       channel_config['map_max'],
+                                       channel_config['start_pos']
+                                       )
                 self._servo_channels.append(s)
             else:
                 logger.debug('No such channel file: {}'.format(channel_path))
@@ -101,7 +105,7 @@ if __name__ == '__main__':
     FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.DEBUG)  # DEBUG / INFO / WARNING
 
-    p = Player('ohyea')
+    p = Player('sine_half_test')
     # p.create_test('1')
     p.play()
     while True:

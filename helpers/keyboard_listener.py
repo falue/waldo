@@ -5,6 +5,7 @@ from __future__ import print_function
 import logging
 import os
 import sys
+from time import sleep
 
 from evdev import InputDevice, ecodes
 
@@ -14,7 +15,6 @@ from waldo.player import Player
 
 # FIXME: Fix project structure
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from waldo.fn import playback_audio
 from waldo.utils import read_config
 
 # FIXME: Remove global variables!
@@ -29,10 +29,13 @@ logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
 logger = logging.getLogger(__name__)
 
 
+# FIXME: move where it belongs
 def create_players():
     logger.info('Pre-loading players')
     players = {}
-    song_names = sorted([item for item in os.listdir(PROJECT_PATH) if not item.startswith('.') and not item == '_archive'])
+    song_names = sorted(
+        [item for item in os.listdir(PROJECT_PATH) if not item.startswith('.') and not item == '_archive']
+    )
 
     for name in song_names:
         players[name] = Player(song=name)
