@@ -34,16 +34,16 @@ class Recorder(object):
 
     def read(self):
         passes = 80
-        reading = 0
+        measurement = 0
         for i in range(passes):
-            reading += self._mcp_reading(self.mcp_in,
+            measurement += self._mcp_reading(self.mcp_in,
                                         self.mcp[self.mcp_chip]['clk'],
                                         self.mcp[self.mcp_chip]['mosi'],
                                         self.mcp[self.mcp_chip]['miso'],
                                         self.mcp[self.mcp_chip]['cs']
                                         )
             sleep(0.0001)
-        return reading / passes
+        return measurement / passes
 
     def _mcp_reading(self, mcp_chip, clk, mosi, miso, cs):
         if (mcp_chip > 7) or (mcp_chip < 0):
