@@ -1,9 +1,0 @@
-evdev
-serial
-Adafruit_MotorHAT
-click
-pyserial
-pytest
-pyyaml
-RPi.GPIO
-keyboard

@@ -12,7 +12,7 @@ import threading
 import time
 from shutil import copyfile
 
-import RPi.GPIO as GPIO
+from RPi import GPIO
 import serial
 
 # FIXME: file obsolete when recorder & "ls" works

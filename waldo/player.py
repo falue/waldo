@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import logging
 import os
 from time import sleep
@@ -8,11 +10,6 @@ from waldo.utils import read_config, get_first_file
 
 logger = logging.getLogger(__name__)
 
-# Read preferences and set project folder path
-PREFERENCES = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-# Do not expand user due to autostart user is 'root' not 'pi'
-PROJECT_PATH = PREFERENCES["PROJECT_PATH"] if not os.path.isdir('projects') else 'projects'
-
 
 class Player(object):
     def __init__(self, song, play_from=0, repeat=False):
@@ -22,7 +19,11 @@ class Player(object):
         self.song = song
         self.play_from = play_from
         self.repeat = repeat
-        self.song_path = os.path.join(PROJECT_PATH, self.song)
+
+        preferences = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+        project_path = preferences['PROJECT_PATH'] if not os.path.isdir('projects') else 'projects'
+        self.song_path = os.path.join(project_path, self.song)
+
         self._read_config()
         self._create_servo_channels()
         self._create_audio_player()
@@ -88,17 +89,36 @@ class Player(object):
     def create_test(self, channel):
         # create file with timestamps and servo positions from map_min to map_max
         file_path = os.path.join(self.song_path, "{}_test".format(channel))
-        print file_path
+        logger.debug(file_path)
         with open(file_path, 'w') as f:
             test_data = ''
             values = {self._config['channels'][channel]['map_min'], self._config['channels'][channel]['map_max']}
             map_min = min(values)
             map_max = max(values)
             for i in range(map_max - map_min + 1):
-                test_data += "{}: {}\n".format(float(i)/10, map_min+i)
-            print test_data
+                test_data += "{}: {}\n".format(float(i) / 10, map_min + i)
+            logger.debug(test_data)
             f.write(test_data)
             # f.write("{} ==> {}".format(self.map_min, self.map_max))
+
+
+def preload_players():
+    logger.info('Pre-loading players')
+
+    # Read preferences and set project folder path
+    preferences = read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+    # do not expand user due to autostart user is 'root' not 'pi'
+    project_path = preferences['PROJECT_PATH'] if not os.path.isdir('projects') else 'projects'
+
+    players = {}
+    song_names = sorted(
+        [item for item in os.listdir(project_path) if not item.startswith('.') and not item == '_archive']
+    )
+
+    for name in song_names:
+        players[name] = Player(song=name)
+
+    return players
 
 
 if __name__ == '__main__':

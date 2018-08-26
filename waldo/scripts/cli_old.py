@@ -1,18 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import sys
 
-from fn import (helpfile, set_connection, set_servo, record_setup, singleplay,
-                play_all, new_project, copy_channel, list_projects, legal, GPIO,
-                change_glob_rec_repl)
+from RPi import GPIO
 
+from waldo.fn import (helpfile, set_connection, set_servo, record_setup, singleplay,
+                      play_all, new_project, copy_channel, list_projects, legal,
+                      change_glob_rec_repl)
 
 # reset config file value recrepl (in case waldo is shut off unexpected):
 change_glob_rec_repl(False)
 
 
-# If primay/first executed file from bash is scripts/remote.py
-if __name__ == '__main__':
+def cli():
     # keyboard interrupt fallback
     try:
         if sys.argv[1] == "-h" or sys.argv[1] == "--help":
@@ -73,3 +73,8 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         GPIO.cleanup()
         print "\nExit by user."
+
+
+# If primay/first executed file from bash is scripts/remote.py
+if __name__ == '__main__':
+    cli()

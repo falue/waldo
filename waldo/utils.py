@@ -8,7 +8,7 @@ import time
 from threading import Thread
 
 import yaml
-from RPi import GPIO as GPIO
+from RPi import GPIO
 
 GPIO.setwarnings(False)
 
