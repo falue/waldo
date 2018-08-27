@@ -29,6 +29,14 @@ def read_config(path):
         exit()
 
 
+def read_main_config():
+    try:
+        return read_config(os.path.expanduser('~/.config/waldo/main_config.yml'))
+    except:
+        # create config
+        pass
+
+
 def write_config(path, config):
     """
     Write in config file.
