@@ -19,7 +19,7 @@ def run_daemon():
     shutdown_on_button_press()
 
     # Set volume to 30%
-    subprocess.call(['amixer', '-q', 'set', 'Speaker', '100%'])  # amixer set PCM -- 100% amixer sset 'Master' 50%
+    subprocess.call(['amixer', '-q', 'set', 'Speaker', '30%'])  # amixer set PCM -- 100% amixer sset 'Master' 50%
 
     if measure_temp:
         monitor_temperature()
