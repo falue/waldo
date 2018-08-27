@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 import time
 
-from waldo.fn import playback_audio
+from waldo.audio import AudioPlayer
 
-playback_audio('/home/pi/Scripts/waldo/waldo/sounds/chime.mp3')
+AudioPlayer('/home/pi/Scripts/waldo/waldo/sounds/chime.mp3').play()
+
 while True:
-    playback_audio('/home/pi/Scripts/waldo/waldo/sounds/audiotest_l.wav')
+    AudioPlayer('/home/pi/Scripts/waldo/waldo/sounds/audiotest_l.wav').play()
     time.sleep(1)
 
-    playback_audio('/home/pi/Scripts/waldo/waldo/sounds/audiotest_r.wav')
+    AudioPlayer('/home/pi/Scripts/waldo/waldo/sounds/audiotest_r.wav').play()
     time.sleep(1)

@@ -4,7 +4,7 @@ import bisect
 import logging
 from time import sleep, time
 
-from waldo.utils import threaded
+from waldo.utils import threaded, map_value, processed
 
 try:
     from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
@@ -20,7 +20,8 @@ class Servo(object):
         self.start_pos = start_pos
         self.servo_pin, self.servo_hat_address = self._get_servo_connection(servo_number)
         self.servo_obj = PWM(self.servo_hat_address)
-        self.servo_obj.setPWMFreq(50)  # 60hz = 16.666ms, 50hz = 20ms, 40hz = 25ms
+        self.pwm_freq = 50
+        self.servo_obj.setPWMFreq(self.pwm_freq)  # 60hz = 16.666ms, 50hz = 20ms, 40hz = 25ms
 
     def turn_off(self):
         self.servo_obj.setPWM(self.servo_pin, 0, 4096)
@@ -86,7 +87,7 @@ class ServoChannel(object):
                                                                                                  self.servo.servo_pin,
                                                                                                  )
                     )
-                sleep(0.005)  # TODO: Research
+                sleep(1.0 / self.servo.pwm_freq)
             except IndexError:
                 self.stop()
 
@@ -112,13 +113,6 @@ class ServoChannel(object):
             x -= 1
 
         return l[x]
-
-
-def map_value(x, in_min, in_max, out_min, out_max):
-    """
-    Map values from one range to another.
-    """
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
 if __name__ == '__main__':

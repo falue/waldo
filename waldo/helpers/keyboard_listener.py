@@ -11,14 +11,13 @@ from evdev import InputDevice, ecodes
 from shutdown_button import rg_led
 from waldo.audio import AudioPlayer
 from waldo.player import preload_players
-from waldo.utils import read_config
+from waldo.utils import read_main_config
 
 logger = logging.getLogger(__name__)
 
 
 def run_listener(autostart=None):
-    config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
-    config = read_config(config_path)
+    config = read_main_config()
 
     dev = InputDevice('/dev/input/event1')
 

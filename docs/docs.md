@@ -326,13 +326,13 @@ a red LED (pin 21) lights up till the pi is fully save to cut power.
 
 ## Main config file
 Button commands are stored in config file, the following config for example defines the first 10 buttons.  
-Note the PROJECT_PATH on top: It gets ignored when the folder 'projects' in root exists - it will take 'projects' as Project path.
+Note the project_path on top: It gets ignored when the folder 'projects' in root exists - it will take 'projects' as Project path.
 
 **Hint:** Any button can have the value 'cancel' to stop every ongoing track. Standard may be 30.  
 Erase invalid comments in json file below when copy-pasting.
 
 ```json
-PROJECT_PATH: /home/pi/waldo_projects   # define where your project folder is.
+project_path: /home/pi/waldo_projects   # define where your project folder is.
                                         # if folder 'waldo/projects' exists, this gets ignored.
                                         # DO NOT use '~' for user expanding; does not work when autostarting
 REC_REPL: false   # Always false; just true if a track is being played. 
@@ -379,7 +379,7 @@ autostart: true    # Set to false if you dont want anything to start on startup.
 ```
 Naked:  
 ```json
-PROJECT_PATH: /home/pi/waldo_projects
+project_path: /home/pi/waldo_projects
 REC_REPL: false
 autostart: 1
 button_value:

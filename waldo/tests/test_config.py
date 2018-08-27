@@ -1,6 +1,6 @@
 import os
 
-from waldo.utils import read_config, write_config
+from waldo.utils import read_project_config, write_config
 
 TEST_PATH = os.path.join(os.path.dirname(__file__), 'data/projects')
 
@@ -23,4 +23,4 @@ def test_read_write_config():
               }
 
     write_config(config=config, path=TEST_PATH)
-    assert config == read_config(path=TEST_PATH)
+    assert config == read_project_config(path=TEST_PATH)
