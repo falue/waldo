@@ -1,12 +1,15 @@
-from PySide import QtGui, QtCore
-import numpy as np
-from scipy.interpolate import interp1d, spline, PchipInterpolator
+import os
+import shutil
 import sys
-import os, shutil
-from time import gmtime, strftime
+from time import strftime
+
 import matplotlib as mpl
+import numpy as np
+from PySide import QtGui, QtCore
+from scipy.interpolate import PchipInterpolator
+
 mpl.use('Qt4Agg')
-mpl.rcParams['backend.qt4']='PySide'
+mpl.rcParams['backend.qt4'] = 'PySide'
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 
 from bisect import bisect_left
@@ -22,23 +25,23 @@ def takeClosest(myList, myNumber):
     if pos == 0:
         return pos
     if pos == len(myList):
-        return pos-1
+        return pos - 1
     before = myList[pos - 1]
     after = myList[pos]
     if after - myNumber < myNumber - before:
         return pos
     else:
-        return pos-1
+        return pos - 1
 
 
-def add(x,y):
+def add(x, y):
     global dots
     print "adding", x, y
     dots.append([x, y])
     dots.sort()
 
 
-def remove(x,y):
+def remove(x, y):
     global dots
     print "removing"
     xs = [float(item[0]) for item in dots]
@@ -60,7 +63,7 @@ def interpol():
         x = [float(item[0]) for item in dots]
         y = [int(item[1]) for item in dots]
 
-        pchip = PchipInterpolator(x,y)
+        pchip = PchipInterpolator(x, y)
 
         newx = np.arange(min(x), max(x), 0.005)
         newy = pchip(newx)
@@ -87,11 +90,11 @@ class MyWindow(QtGui.QWidget):
         self.removerButton.setText("remover")
         self.removerButton.clicked.connect(self.removerButton_clicked)
 
-        self.adderButton= QtGui.QPushButton(self)
+        self.adderButton = QtGui.QPushButton(self)
         self.adderButton.setText("adder")
         self.adderButton.clicked.connect(self.adderButton_clicked)
 
-        self.zeroButton= QtGui.QPushButton(self)
+        self.zeroButton = QtGui.QPushButton(self)
         self.zeroButton.setText("first/last to y = zero")
         self.zeroButton.clicked.connect(self.zeroButton_clicked)
 
@@ -121,7 +124,6 @@ class MyWindow(QtGui.QWidget):
         self.layoutVertical = QtGui.QVBoxLayout(self)
         self.layoutVertical.addWidget(self.pushButtonPlot)
 
-
         self.scroll = QtGui.QScrollArea(self)
         self.scroll.setWidgetResizable(True)
         self.scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
@@ -129,7 +131,6 @@ class MyWindow(QtGui.QWidget):
         self.scroll.setWidget(self.matplotlibWidget)
 
         self.layoutVertical.addWidget(self.scroll)
-
 
         self.layoutVertical.addWidget(self.removerButton)
         self.layoutVertical.addWidget(self.adderButton)
@@ -153,8 +154,8 @@ class MyWindow(QtGui.QWidget):
     def startEndButton_clicked(self):
         global dots
         print "start end button pressed"
-        dots.insert(0, [0,0])
-        dots.append([self.matplotlibWidget.maxX,0])
+        dots.insert(0, [0, 0])
+        dots.append([self.matplotlibWidget.maxX, 0])
 
         self.matplotlibWidget.waldoupdate()
 
@@ -163,13 +164,13 @@ class MyWindow(QtGui.QWidget):
         print "zero button pressed"
         if len(dots) >= 1:
             dots[0][1] = 0
-            dots[len(dots)-1][1] = 0
+            dots[len(dots) - 1][1] = 0
 
         self.matplotlibWidget.waldoupdate()
 
     def saveButton_clicked(self):
         print "save button pressed, filename:", self.le.text()
-        
+
         if self.le.text() and len(self.le.text()) > 0:
             # check if file exists already
             fname = folderName + '/' + self.le.text()
@@ -214,8 +215,8 @@ class MyWindow(QtGui.QWidget):
             idx = takeClosest(xs, dots[0][0])
             dots[0] = [xs[idx], ys[idx]]
 
-            idx = takeClosest(xs, dots[len(dots)-1][0])
-            dots[len(dots)-1] = [xs[idx], ys[idx]]
+            idx = takeClosest(xs, dots[len(dots) - 1][0])
+            dots[len(dots) - 1] = [xs[idx], ys[idx]]
 
             self.matplotlibWidget.waldoupdate()
 
@@ -225,7 +226,6 @@ class MyWindow(QtGui.QWidget):
 
         if len(dots) < 1:
             return
-
 
         if self.le.text() and len(self.le.text()) > 0:
 
@@ -262,15 +262,13 @@ class MyWindow(QtGui.QWidget):
                 x = xs[i]
                 i += 1
 
-            newdots.extend(d[i:]) 
+            newdots.extend(d[i:])
 
             plotdots = newdots
 
             self.matplotlibWidget.waldoupdate(interpolation=False)
 
-
-
-    #@QtCore.pyqtSlot()
+    # @QtCore.pyqtSlot()
     def on_pushButtonPlot_clicked(self):
         global dots, plotdots
         print "erase pressed"
@@ -287,31 +285,27 @@ class ControlMainWindow(QtGui.QMainWindow):
         global folderName
         folderName = foldername
 
-        
-
         self.setupUi()
 
     def setupUi(self):
-
         myWin = MyWindow()
         self.setCentralWidget(myWin)
 
-        #figure = mpl.figure.Figure(figsize=(5, 5))
-        #leftPlot = MatplotlibWidget(figure, data)
-        #self.setCentralWidget(leftPlot)      
+        # figure = mpl.figure.Figure(figsize=(5, 5))
+        # leftPlot = MatplotlibWidget(figure, data)
+        # self.setCentralWidget(leftPlot)
 
-  
+
 class MatplotlibWidget(FigureCanvasQTAgg):
     def __init__(self, fig):
         super(MatplotlibWidget, self).__init__(fig)
 
-
         self.figure = fig
         self.initialize()
 
-        self.setFixedSize(self.maxX*200, 750)
+        self.setFixedSize(self.maxX * 200, 750)
 
-        #---- setup event ----          
+        # ---- setup event ----
 
         self.mpl_connect('button_press_event', self.onclick)
 
@@ -328,7 +322,6 @@ class MatplotlibWidget(FigureCanvasQTAgg):
 
         self.waldoupdate()
 
-
     def waldoupdate(self, interpolation=True):
         self.waldodraw(interpolation)
 
@@ -341,10 +334,10 @@ class MatplotlibWidget(FigureCanvasQTAgg):
         ax = self.figure.add_axes([0.1, 0.1, 0.85, 0.85])
         ax.set_ylim([0, 1300])
         for k in self.data:
-            #print k
+            # print k
             x = [float(item[0]) for item in self.data[k]]
             y = [int(item[1]) for item in self.data[k]]
-            ax.plot(x,y,label=str(k))
+            ax.plot(x, y, label=str(k))
 
         if interpolation:
             interpol()
@@ -352,21 +345,21 @@ class MatplotlibWidget(FigureCanvasQTAgg):
         if len(plotdots) >= 1:
             x = [float(item[0]) for item in plotdots]
             y = [int(item[1]) for item in plotdots]
-            ax.plot(x,y, 'r-', linewidth=4.0)
+            ax.plot(x, y, 'r-', linewidth=4.0)
         if len(dots) >= 1:
             x = [float(item[0]) for item in dots]
             y = [int(item[1]) for item in dots]
-            ax.plot(x,y, 'ko')
+            ax.plot(x, y, 'ko')
 
         leg = ax.legend(loc=2, ncol=8, mode="expand", borderaxespad=0.)
-        ax.xaxis.set_ticks(range(1,96))
+        ax.xaxis.set_ticks(range(1, 96))
         for legobj in leg.legendHandles:
             legobj.set_linewidth(3.0)
 
     def onclick(self, event):
         global dots
 
-        x, y = event.x, event.y        
+        x, y = event.x, event.y
         print(event.xdata, event.ydata)
 
         if event.xdata == None or event.ydata == None:
@@ -376,23 +369,22 @@ class MatplotlibWidget(FigureCanvasQTAgg):
             ydata = min(event.ydata, 1023)
             mode(event.xdata, ydata)
             self.waldodraw(interpolation=True)
-            #ax.plot(event.xdata, event.ydata, 'ro')
+            # ax.plot(event.xdata, event.ydata, 'ro')
             self.draw()
 
 
 def loadFile(fname):
     with open(fname) as f:
-        lines = f.read().splitlines() 
+        lines = f.read().splitlines()
     datas = []
-    for line in lines: 
+    for line in lines:
         datas.append(line.split(': '))
     return datas
 
 
 def loadFolder(name):
-
     ids = []
-    for filename in os.listdir(name): 
+    for filename in os.listdir(name):
         ids.append(filename)
 
     datas = {}
