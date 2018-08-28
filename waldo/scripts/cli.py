@@ -7,8 +7,8 @@ import click
 
 from waldo.helpers.autostart import run_daemon
 from waldo.player import Player
-from waldo.recorder import record_setup, record_channel, set_servo
-from waldo.utils import show_legal, print_projects
+from waldo.recorder import record_setup, record_channel, set_servo, check_project
+from waldo.utils import show_legal, print_projects, go_to_projects, copy_channel
 
 
 @click.group()
@@ -43,12 +43,14 @@ def play(start_from, project_name):
 
 @cli.command()
 @click.argument('project_name')
-@click.argument('channel_name')
+@click.argument('channel_name', default=False)
 def setup(project_name, channel_name):
     """
     Setup or re-set servo parameters for recording
     """
-    set_servo(project_name, channel_name)
+    check_project(project_name)
+    if channel_name:
+        set_servo(project_name, channel_name)
 
 
 @cli.command()
@@ -58,9 +60,9 @@ def record(project_name, channel_name):
     """
     Record CHANNEL_FILE in PROJECT_NAME
     """
+    check_project(project_name)
     record_setup(project_name, channel_name)
     record_channel(project_name, channel_name)
-
 
 
 @cli.command()
