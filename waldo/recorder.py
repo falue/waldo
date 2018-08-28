@@ -88,12 +88,15 @@ class Potentiometer(object):
         return adcout
 
 
-def record_setup(project_name, channel_name):
+def check_project(project_name):
     project_path = read_main_config()['project_path']
 
-    # Project folder exist?
     if not os.path.isdir(os.path.join(project_path, project_name)):
         new_project(project_name)
+
+
+def record_setup(project_name, channel_name):
+    project_path = read_main_config()['project_path']
 
     # Channel file exist?
     if os.path.isfile(os.path.join(project_path, project_name, channel_name)):
@@ -195,6 +198,8 @@ def new_project(project_name):
     """
     Create new folder structure and setup config file.
     """
+    print('Creating new project structure for \'{}\''.format(project_name))
+
     # Get path
     project_path = read_main_config()['project_path']
     path = os.path.join(project_path, project_name)
@@ -239,7 +244,7 @@ def new_project(project_name):
 
         print('Created new project structure.')
     else:
-        print('╳  Project already exists.')
+        print('✖  Project already exists.')
 
 
 def copy_channel(project_name, channel_old, channel_new, preserve_pin='pin_inc'):
@@ -286,7 +291,7 @@ def copy_channel(project_name, channel_old, channel_new, preserve_pin='pin_inc')
                                                                                                project_name,
                                                                                                channel_old))
     else:
-        print("╳  File or config data for channel '%s' in project '%s' already exists." % (channel_new, project_name))
+        print("✖  File or config data for channel '%s' in project '%s' already exists." % (channel_new, project_name))
 
 
 def get_dof(mcp_in, servo_pin):

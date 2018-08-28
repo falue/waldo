@@ -7,7 +7,8 @@ import click
 
 from waldo.helpers.autostart import run_daemon
 from waldo.player import Player
-from waldo.recorder import record_setup, record_channel, set_servo
+from waldo.recorder import record_setup, record_channel, set_servo, check_project
+from waldo.utils import show_legal, print_projects, go_to_projects, copy_channel
 
 
 @click.group()
@@ -42,12 +43,14 @@ def play(start_from, project_name):
 
 @cli.command()
 @click.argument('project_name')
-@click.argument('channel_name')
+@click.argument('channel_name', default=False)
 def setup(project_name, channel_name):
     """
-    Setup servo parameters for recording
+    Setup or re-set servo parameters for recording
     """
-    set_servo(project_name, channel_name)
+    check_project(project_name)
+    if channel_name:
+        set_servo(project_name, channel_name)
 
 
 @cli.command()
@@ -57,8 +60,52 @@ def record(project_name, channel_name):
     """
     Record CHANNEL_FILE in PROJECT_NAME
     """
+    check_project(project_name)
     record_setup(project_name, channel_name)
     record_channel(project_name, channel_name)
+
+
+@cli.command()
+@click.option('-p', default=None, help='Name of project')
+# @click.option('--bt_only', default=False, help='Only projects which are set by buttons')
+@click.option('--bt_only/--no-bt_only', default=False)
+def ls(p, bt_only):
+    """
+    Examine projects in waldo_projects
+    """
+    print_projects(p, bt_only)
+
+
+@cli.command()
+@click.argument('project_name_from')
+@click.argument('channel_name_old')
+@click.argument('project_name_to')
+@click.argument('channel_name_new', default=False)
+@click.option('--pin_mode', default='pin_inc', help='\'pin_inc\', \'pin_copy\' or int')
+def copy(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode):
+    """
+    Copy channel file
+    """
+    if not channel_name_new:
+        channel_name_new = project_name_to
+        project_name_to = project_name_from
+    copy_channel(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode)
+
+
+@cli.command()
+def projects():
+    """
+    Go to project folder and display content
+    """
+    go_to_projects()
+
+
+@cli.command()
+def legal():
+    """
+    Show legal info
+    """
+    show_legal()
 
 
 if __name__ == '__main__':
