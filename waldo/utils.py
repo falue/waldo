@@ -195,61 +195,68 @@ def processed(fn):
     return wrapper
 
 
-def list_projects(project=False):
+def print_projects(project_name, bt_only=False):
     """
     List every or a single channel in every project and point out difficulties.
-    :return:
     """
-    project_path = read_main_config()['project_path']
+    main_config = read_main_config()
+    project_path = main_config['project_path']
 
     # Read every folder or define specific
-    if project:
-        projects = [project]
-        print("List every channel in project '%s' and point out difficulties.\n"
-              "--------------------------------------------------------------------" % project)
+    if project_name:
+        projects = [project_name]
+        print('List project \'{}\' and show errors.\n'.format(project_name))
+    elif bt_only:
+        projects = main_config['buttons'].values()
+        print('List button projects and show errors.\n')
     else:
         filelist = os.listdir(project_path)
-        projects = [a for a in filelist if not a.startswith(".")]
-        print("List every channel in every project and point out difficulties.\n"
-              "--------------------------------------------------------------------")
+        projects = [a for a in filelist if not a.startswith(".") and not a == '_archive']
+        print('List every project and show errors.\n')
 
-    # TODO: md5 hashing content of channels, find and mark duplicates
-
-    # ignore archive
-    if '_archive' in projects:
-        projects.remove('_archive')
-    pass
+    print('────────────────────────────────────────────────────────────────────────')
 
     if not projects:
-        print("There are no project folders in '%s'." % project_path)
+        print('There are no project folders in \'{}\'.'.format(project_path))
 
     # For each project to analyze
-    for project in sorted(projects):
-        ch = ""
-        error = ""
-        disturbence = []
-        channelfiles_spec = []
+    for project_name in sorted(projects):
+        ch = ''
+        error = ''
+        spacer = ''
+        button_name = ''
+        used_servo_pins = []
+        channel_specs = []
+
+        if project_name in main_config['buttons'].values():
+            button_name = main_config['buttons'].keys()[main_config['buttons'].values().index(project_name)]
+            button_name = ' Button: {} '.format(button_name)
+            spacer = " " * (71 - len(project_name) - len(button_name))
+
+        print('{}:{}\033[100m{}\033[41m\033[0m'.format(project_name, spacer, button_name))
 
         # Read config of channel
-        play_channels = read_project_config(project)
-        if 'channels' in play_channels:
-            # Iter every channel in project
-            for channel, data in sorted(play_channels['channels'].iteritems()):
+        project = read_project_config(project_name)
+        if 'channels' in project:
+            for channel, data in sorted(project['channels'].iteritems()):
                 servo_dof_deg = 90
 
-                # Check if servo_pin was multiple used
-                if data['servo_pin'] in disturbence:
-                    error += "╳  Multiple use of servo pin %s (%s)\n" % (data['servo_pin'], channel)
+                # Check if servo_pin was used multiply
+                if data['servo_pin'] in used_servo_pins:
+                    error += '\033[41m ✖  Multiple use of servo pin {} ({}) \033[41m\033[0m\n'.format(
+                        data['servo_pin'],
+                        channel
+                    )
 
                 # Store servo pin for later use to check this^
-                disturbence.append(data['servo_pin'])
+                used_servo_pins.append(data['servo_pin'])
 
                 # Check if channel file exist as in config data specified
-                if not os.path.isfile(os.path.join(project_path, project, channel)):
-                    error += "╳  No file '%s' for specs in config\n" % channel
+                if not os.path.isfile(os.path.join(project_path, project_name, channel)):
+                    error += '✖  No file \'{}\' for specs in config\n'.format(channel)
 
-                # Store channelname for later use
-                channelfiles_spec.append(channel)
+                # Store channel name for later use
+                channel_specs.append(channel)
 
                 # Calculate visual representation for max degrees of angular freedom
                 dof_prepend = map_value(data['map_min'], 100, 600, 0, servo_dof_deg)
@@ -258,7 +265,7 @@ def list_projects(project=False):
 
                 # Check if channel was reversed, change visual representation
                 if dof < 0:
-                    reversed_channel = " ⇆"  # ↩ REVERSED
+                    reversed_channel = ' ↹'  # ↩ REVERSED
                     dof *= -1
                     dof_prepend_temp = dof_prepend
                     dof_append_temp = dof_append
@@ -266,57 +273,61 @@ def list_projects(project=False):
                     dof_append = servo_dof_deg - dof_prepend_temp
                 else:
                     reversed_channel = ''
-                # ch += "\t%s + %s + %s = %s (%s)\n" % (dof_prepend, dof,
-                #                                      dof_append, dof_prepend+dof+dof_append, servo_dof_deg)
 
                 # Create visual representation of max degrees of angular freedom
-                graph_rep = "░" * map_value(dof_prepend, 0, servo_dof_deg, 0, 60) + \
-                            "█" * map_value(dof, 0, servo_dof_deg, 0, 60) + \
-                            "░" * map_value(dof_append, 0, servo_dof_deg, 0, 60)
+                graph_rep = '\033[100m \033[0m\033[0m' * map_value(dof_prepend, 0, servo_dof_deg, 0, 60) + \
+                            '█' * map_value(dof, 0, servo_dof_deg, 0, 60) + \
+                            '\033[100m \033[0m\033[0m' * map_value(dof_append, 0, servo_dof_deg, 0, 60)
 
                 # Correct table layout if long channel name
                 if len(channel) < 8:
-                    name_space = "\t"
+                    name_space = '\t'
                 else:
-                    name_space = ""
+                    name_space = ''
 
                 # Sum up channel content
-                ch += "\t%s\t%s%s\t%s\t%s\t%s\t%s\t%s°\n\t%s%s\n" % (channel, name_space, data['servo_pin'],
-                                                                     data['mcp_in'], data['map_min'],
-                                                                     data['map_max'], data['start_pos'], dof,
-                                                                     graph_rep, reversed_channel)
+                ch += '\t{}\t{}{}\t{}\t{}\t{}\t{}\t{}°\n\t{}{}\n'.format(channel,
+                                                                         name_space,
+                                                                         data['servo_pin'],
+                                                                         data['mcp_in'],
+                                                                         data['map_min'],
+                                                                         data['map_max'],
+                                                                         data['start_pos'],
+                                                                         dof,
+                                                                         graph_rep,
+                                                                         reversed_channel
+                                                                         )
 
             # Check if all channel files have corresponding config data specified
-            channel_list = os.listdir(os.path.join(project_path, project))
+            channel_list = os.listdir(os.path.join(project_path, project_name))
             channelfiles = [a for a in channel_list if not a.startswith(".") and
                             not a == 'config' and
                             not a == 'trash' and
                             not a == 'audio']
-            no_specs = "'\n╳  No specs in config for file '".join([item for item in channelfiles if item
-                                                                   not in channelfiles_spec])
+            no_specs = '\'\n✖  No specs in config for file \''.join(
+                [item for item in channelfiles if item not in channel_specs])
             if no_specs:
-                error += "╳  No specs in config for file '%s'\n" % no_specs
+                error += '✖  No specs in config for file \'{}\'\n'.format(no_specs)
 
             # Print table header
-            thead = "\tchannel\t\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF"
-            print("%s:\n%s%s\n%s" % (project, error, thead, ch))
+            thead = '\tchannel\t\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF'
+            print('{}{}\n{}'.format(error, thead, ch))
 
         else:
-            print("%s\n╳  No channels in config file.\n" % project)
+            print('✖  No channels in config file.\n')
 
-        print("--------------------------------------------------------------------\n")
+        print('────────────────────────────────────────────────────────────────────────\n')
 
 
-def legal():
-    print("===============================")
-    print(" _ _ _ _____ __    ____  _____ ")
-    print("| | | |  [] |  |  |    \|     | analog")
-    print("| | | |     |  |__|  [] |  [] | digital")
-    print("|_____|__||_|_____|____/|_____| pupeteering")
-    print("_______________________________")
-    print("By Fabian Lüscher 2016.")
-    print("http://www.filmkulissen.ch")
-    print("With generous help of Ben Hagen. Thanks a bunch!")
+def show_legal():
+    print(""" _ _ _ _____ __    ____  _____ 
+| | | |  [] |  |  |    \|     | analog
+| | | |     |  |__|  [] |  [] | digital
+|_____|__||_|_____|____/|_____| pupeteering
+
+By OTTOMNATIC GmbH 2018.
+http://www.ottomatic.io"""
+          )
 
 
 if __name__ == '__main__':

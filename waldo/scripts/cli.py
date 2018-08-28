@@ -8,6 +8,7 @@ import click
 from waldo.helpers.autostart import run_daemon
 from waldo.player import Player
 from waldo.recorder import record_setup, record_channel, set_servo
+from waldo.utils import show_legal, print_projects
 
 
 @click.group()
@@ -45,7 +46,7 @@ def play(start_from, project_name):
 @click.argument('channel_name')
 def setup(project_name, channel_name):
     """
-    Setup servo parameters for recording
+    Setup or re-set servo parameters for recording
     """
     set_servo(project_name, channel_name)
 
@@ -59,6 +60,27 @@ def record(project_name, channel_name):
     """
     record_setup(project_name, channel_name)
     record_channel(project_name, channel_name)
+
+
+
+@cli.command()
+@click.option('-p', default=None, help='Name of project')
+# @click.option('--bt_only', default=False, help='Only projects which are set by buttons')
+@click.option('--bt_only/--no-bt_only', default=False)
+def ls(p, bt_only):
+    """
+    Examine projects in waldo_projects
+    """
+    print_projects(p, bt_only)
+
+
+
+@cli.command()
+def legal():
+    """
+    Show legal info
+    """
+    show_legal()
 
 
 if __name__ == '__main__':
