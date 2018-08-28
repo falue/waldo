@@ -10,6 +10,7 @@ from threading import Thread
 
 import yaml
 from RPi import GPIO
+from shutil import copyfile
 
 GPIO.setwarnings(False)
 
@@ -287,29 +288,29 @@ def print_projects(project_name, bt_only=False):
 
                 # Sum up channel content
                 ch += '\t{}\t{}{}\t{}\t{}\t{}\t{}\t{}°\n\t{}{}\n'.format(channel,
-                                                                         name_space,
-                                                                         data['servo_pin'],
-                                                                         data['mcp_in'],
-                                                                         data['map_min'],
-                                                                         data['map_max'],
-                                                                         data['start_pos'],
-                                                                         dof,
-                                                                         graph_rep,
-                                                                         reversed_channel
-                                                                         )
+                                                                          name_space,
+                                                                          data['servo_pin'],
+                                                                          data['mcp_in'],
+                                                                          data['map_min'],
+                                                                          data['map_max'],
+                                                                          data['start_pos'],
+                                                                          dof,
+                                                                          graph_rep,
+                                                                          reversed_channel
+                                                                          )
 
             # Check if all channel files have corresponding config data specified
             channel_list = os.listdir(os.path.join(project_path, project_name))
-            channelfiles = [a for a in channel_list if not a.startswith(".") and
+            channel_files = [a for a in channel_list if not a.startswith(".") and
                             not a == 'config' and
                             not a == 'trash' and
                             not a == 'audio']
-            no_specs = '\'\n✖  No specs in config for file \''.join(
-                [item for item in channelfiles if item not in channel_specs])
-            if no_specs:
-                error += '✖  No specs in config for file \'{}\'\n'.format(no_specs)
 
-            # Print table header
+            for item in channel_files:
+                if item not in channel_specs:
+                    error += '✖  No specs in config for file \'{}\'\n'.format(item)
+
+            # Print table header and all channels
             thead = '\tchannel\t\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF'
             print('{}{}\n{}'.format(error, thead, ch))
 
@@ -317,6 +318,61 @@ def print_projects(project_name, bt_only=False):
             print('✖  No channels in config file.\n')
 
         print('────────────────────────────────────────────────────────────────────────\n')
+
+
+def go_to_projects():
+    project_path = read_main_config()['project_path']
+    print('cd {}'.format(project_path))
+
+
+def copy_channel(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode):
+    """
+    Copies file channel_name_old to channel_name_new with matching config data. preserve_pin increments the total
+    amount of servo channels if 'pin_inc' (default), copies servo pin 1:1 if 'pin_copy', or sets integer if is integer.
+    """
+    print(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode)
+
+    project_path = read_main_config()['project_path']
+    config_old = read_project_config(project_name_from)
+    config_new = read_project_config(project_name_to)
+
+    # Check if new channel already exists
+    if not os.path.isfile(os.path.join(project_path, project_name_from, channel_name_old)):
+        print('\033[31mx\033[0m\033[0m Channel file \'{}\' of project \'{}\' does not exist.'.format(channel_name_old, project_name_to))
+
+    elif not os.path.isfile(os.path.join(project_path, project_name_to, channel_name_new)) \
+            and not channel_name_new in config_old['channels']:
+        copyfile(os.path.join(project_path, project_name_from, channel_name_old),
+                 os.path.join(project_path, project_name_to, channel_name_new))
+
+        if pin_mode == "pin_inc":
+            # Write new servo_pin
+            pin_mode = len(config_new['channels'])
+
+        elif pin_mode == "pin_copy":
+            # Copy servo_pin old to servo_pin new
+            pin_mode = config_old['channels'][channel_name_old]['servo_pin']
+        else:
+            # Write user defined integer as servo_pin
+            pin_mode = int(pin_mode)
+
+        config_new['channels'].update(
+            {
+                channel_name_new: {
+                    'mcp_in': config_old['channels'][channel_name_old]['mcp_in'],
+                    'servo_pin': pin_mode,
+                    'map_min': config_old['channels'][channel_name_old]['map_min'],
+                    'map_max': config_old['channels'][channel_name_old]['map_max'],
+                    'start_pos': config_old['channels'][channel_name_old]['start_pos']
+                }
+            }
+        )
+        write_project_config(project_name_to, config_new)
+        print("File and config data for new channel '%s' in project '%s' copied from '%s'." % (channel_name_new,
+                                                                                               project_name_to,
+                                                                                               channel_name_old))
+    else:
+        print("\033[31mx\033[0m\033[0m File or config data for channel '%s' in project '%s' already exists." % (channel_name_new, project_name_to))
 
 
 def show_legal():

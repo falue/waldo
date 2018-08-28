@@ -76,6 +76,29 @@ def ls(p, bt_only):
     print_projects(p, bt_only)
 
 
+@cli.command()
+@click.argument('project_name_from')
+@click.argument('channel_name_old')
+@click.argument('project_name_to')
+@click.argument('channel_name_new', default=False)
+@click.option('--pin_mode', default='pin_inc', help='\'pin_inc\', \'pin_copy\' or int')
+def copy(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode):
+    """
+    Copy channel file
+    """
+    if not channel_name_new:
+        channel_name_new = project_name_to
+        project_name_to = project_name_from
+    copy_channel(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode)
+
+
+@cli.command()
+def projects():
+    """
+    Go to project folder and display content
+    """
+    go_to_projects()
+
 
 @cli.command()
 def legal():

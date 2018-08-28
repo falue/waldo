@@ -291,7 +291,7 @@ def copy_channel(project_name, channel_old, channel_new, preserve_pin='pin_inc')
                                                                                                project_name,
                                                                                                channel_old))
     else:
-        print("╳  File or config data for channel '%s' in project '%s' already exists." % (channel_new, project_name))
+        print("✖  File or config data for channel '%s' in project '%s' already exists." % (channel_new, project_name))
 
 
 def get_dof(mcp_in, servo_pin):
