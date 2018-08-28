@@ -14,9 +14,8 @@
   * [Deamon](#deamon)
   * [Help](#help)
   * [Legal information](#legal-information)
-  * [Listing of project folders](#listing-of-project-folders)
+  * [Listing of project details](#listing-of-project-details)
   * [Play](#play)
-  * [Project folder](#project-folder)
   * [(Re)calibrate a servo](#-re-calibrate-a-servo)
     + [Requirements](#requirements)
     + [Steps](#steps)
@@ -92,7 +91,7 @@ sudo -u pi /usr/local/bin/waldo daemon
 waldo copy project_name_from channel_name_old [project_name_to] channel_name_new --pin_mode pin_copy
 ```
 Duplicate `project_name_from`/`channel_name_old` to `project_name_to`/`channel_name_new` and copy config data associated with
-channel_name_old. project_name_to is optional, same project as project_name_from applies.
+channel_name_old. project_name_to can be omitted, same project as project_name_from applies.
 Servo_pin gets either incremented by total channels + 1 `pin_inc` (default), copied from old
 `pin_copy`, or gets user defined by integer value `pin_new`.
 
@@ -131,17 +130,14 @@ waldo legal
 ```
 
 
-## Listing of project folders
+## Listing of project details
 ```
 waldo ls [-p PROJECT_NAME] [--bt_only]
 ```
-List evey project (or a specific one with [-p PROJECT_NAME]) and every channel and their details.
+Lists a specific project with [-p PROJECT_NAME] and every channel of it and their details.
+Points out difficulties like multiple use of servo_pin, missing files or config data.
+Omit [-p PROJECT_NAME] to get prompted var options.
 Only prints projects which are defined as buttons with option [--bt_only]
-Point out difficulties like multiple use of servo_pin, missing files or config data.
-`°DOF` is an attempt to calculate the physical 'degrees of freedom' of the servo, assuming maximal movement of 180°.  
-Visualize range of used servo degrees (approximation).
-Prints `↹` when map_min and map_max are reversed.
-Displays button key on top right if project has set one in the main config file.
 
 Example output:  
 ```
@@ -168,21 +164,18 @@ empty_test:
 ✖  No channels in config file.
 ────────────────────────────────────────────────────────────────────────
 ```
+`°DOF` is an attempt to calculate the physical 'degrees of freedom' of the servo, assuming maximal movement of 180°.  
+The bar visualizes the 'degrees of freedom' of the servo (approximation).
+Prints `↹` when map_min and map_max are reversed.
+Displays button key on top right if project has set one in the main config file.
 
 
 ## Play
 Play every channel of projectName
 ```
-waldo play project_name [--start_from]
+waldo play project_name [--start_from int]
 ```
 Optional argument --start_from: Start after n seconds. Press `enter` to stop replaying.
-
-
-## Project folder
-```
-waldo projects
-```  
-Returns the location of main projects folder.
 
 
 ## (Re)calibrate a servo

@@ -196,6 +196,12 @@ def processed(fn):
     return wrapper
 
 
+def get_all_projects():
+    project_path = read_main_config()['project_path']
+    file_list = os.listdir(project_path)
+    return [a for a in file_list if not a.startswith(".") and not a == '_archive']
+
+
 def print_projects(project_name, bt_only=False):
     """
     List every or a single channel in every project and point out difficulties.
@@ -205,14 +211,16 @@ def print_projects(project_name, bt_only=False):
 
     # Read every folder or define specific
     if project_name:
+        if not os.path.isdir(os.path.join(project_path, project_name)):
+            print('Project \'{}\' does not exist.'.format(project_name))
+            exit()
         projects = [project_name]
         print('List project \'{}\' and show errors.\n'.format(project_name))
     elif bt_only:
         projects = main_config['buttons'].values()
         print('List button projects and show errors.\n')
     else:
-        filelist = os.listdir(project_path)
-        projects = [a for a in filelist if not a.startswith(".") and not a == '_archive']
+        projects = get_all_projects()
         print('List every project and show errors.\n')
 
     print('────────────────────────────────────────────────────────────────────────')
@@ -229,6 +237,7 @@ def print_projects(project_name, bt_only=False):
         used_servo_pins = []
         channel_specs = []
 
+        # Display button
         if project_name in main_config['buttons'].values():
             button_name = main_config['buttons'].keys()[main_config['buttons'].values().index(project_name)]
             button_name = ' Button: {} '.format(button_name)
@@ -320,9 +329,15 @@ def print_projects(project_name, bt_only=False):
         print('────────────────────────────────────────────────────────────────────────\n')
 
 
-def go_to_projects():
+def display_projects():
     project_path = read_main_config()['project_path']
-    print('cd {}'.format(project_path))
+    print('Projects location: {}'.format(project_path))
+    projects = get_all_projects()
+    print('Total {} projects.'.format(len(projects)))
+    for project_name in projects:
+        config = read_project_config(project_name)
+        len_channels = len(config['channels']) if config else 0
+        print('  {} {} {}{} channels'.format(project_name, ' ' * (15-len(project_name)), ' ' if len_channels < 10 else '', len_channels))
 
 
 def copy_channel(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode):

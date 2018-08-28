@@ -8,7 +8,7 @@ import click
 from waldo.helpers.autostart import run_daemon
 from waldo.player import Player
 from waldo.recorder import record_setup, record_channel, set_servo, check_project
-from waldo.utils import show_legal, print_projects, go_to_projects, copy_channel
+from waldo.utils import show_legal, print_projects, display_projects, copy_channel
 
 
 @click.group()
@@ -73,7 +73,25 @@ def ls(p, bt_only):
     """
     Examine projects in waldo_projects
     """
-    print_projects(p, bt_only)
+    if p:
+        print_projects(p, bt_only)
+
+    else:
+        action = click.prompt('What do you want to do?\n'
+                              '  A) Display all project names\n'
+                              '  B) Display projects which are button controlled\n'
+                              '  C) Display all projects and details\n'
+                              'Answer',
+                              type=str)
+
+        if action.lower() == 'a':
+            display_projects()
+            p = click.prompt('Name of project to display', type=str)
+            print_projects(p, bt_only)
+        elif action.lower() == 'b':
+            print_projects(False, True)
+        elif action.lower() == 'c':
+            print_projects(False)
 
 
 @cli.command()
@@ -90,14 +108,6 @@ def copy(project_name_from, channel_name_old, project_name_to, channel_name_new,
         channel_name_new = project_name_to
         project_name_to = project_name_from
     copy_channel(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode)
-
-
-@cli.command()
-def projects():
-    """
-    Go to project folder and display content
-    """
-    go_to_projects()
 
 
 @cli.command()
