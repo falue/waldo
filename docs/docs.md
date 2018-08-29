@@ -140,23 +140,29 @@ Points out difficulties like multiple use of servo_pin, missing files or config 
 Omit [-p project_name] to get prompted var options.
 Only prints projects which are defined as buttons with option [--bt_only]
 
+```
+waldo ls                # Go to prompt
+waldo ls project_name   # Display project_name's details
+waldo ls --bt_only      # Display projects which are button controlled
+```
+
 Example output:  
 ```
 python waldo/main.py -ls
 List every channel in every project and point out difficulties.
 ────────────────────────────────────────────────────────────────────────
-test:                                                     Button: KEY_P1
+test                                                      Button: KEY_P1
 ✖  No file 'sopran' for specs in config
 ✖  Multiple use of servo pin 3 (tenor)
 ✖  No specs in config for file
-	channel		servo	mcp_in	map_min	map_max	st._pos	°DOF
-	bariton		3	    8	    233	    302	    233	    13°
+	channel file	servo	mcp_in	map_min	map_max	st._pos	°DOF
+	bariton	    	3	    8	    233	    302	    233	    13°
 	░░░░░░░░░░░░░░░████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-	bass		6	    8	    390	    160	    160	    42°
+	bass		    6	    8	    390	    160	    160	    42°
 	░░░░░░████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░ ↹
-	sopran		4	    8	    120	    410	    120	    52°
+	sopran		    4	    8	    120	    410	    120	    52°
 	░░██████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░
-	tenor		3	    8	    155	    444	    230	    52°
+	tenor		    3	    8	    155	    444	    230	    52°
 	░░░░░░██████████████████████████████████░░░░░░░░░░░░░░░░░░░
 
 ────────────────────────────────────────────────────────────────────────
