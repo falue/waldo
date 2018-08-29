@@ -52,9 +52,9 @@ pi / ...
 The main configuration settings are stored in `~/.waldo/main_config.yml`
 Button commands are stored, the following config for example defines the first 9 buttons.  
 
-```json
+```yaml
 project_path: /home/pi/waldo_projects   # define where your project folder is
-buttons:                                # define buttons: key-number on USB numpad or button-number on Rigby, followed name of project
+buttons:                                # define buttons: key-identifier on USB numpad and name of project
   KEY_KP1: servo_test_4
   KEY_KP2: hatschi
   KEY_KP3: ohlala
@@ -115,7 +115,8 @@ waldo deamon
 ```
 Runs all things necessary for listening to keyboard strokes and replaying projects. This gets started if
 autostart is `true` in [main-config-file](main config file).
-See [Setup as independent unit](setup-as-independent-unit)
+See [Setup as independent unit](setup-as-independent-unit).
+Kill running process with `killall -9 python`
 
 
 ## Help
@@ -132,11 +133,11 @@ waldo legal
 
 ## Listing of project details
 ```
-waldo ls [-p PROJECT_NAME] [--bt_only]
+waldo ls [project_name] [--bt_only]
 ```
-Lists a specific project with [-p PROJECT_NAME] and every channel of it and their details.
+Lists a specific project with [-p project_name] and every channel of it and their details.
 Points out difficulties like multiple use of servo_pin, missing files or config data.
-Omit [-p PROJECT_NAME] to get prompted var options.
+Omit [-p project_name] to get prompted var options.
 Only prints projects which are defined as buttons with option [--bt_only]
 
 Example output:  
@@ -171,10 +172,10 @@ Displays button key on top right if project has set one in the main config file.
 
 
 ## Play
-Play every channel of projectName
 ```
 waldo play project_name [--start_from int]
 ```
+Plays every channel of project_name and its sound file.
 Optional argument --start_from: Start after n seconds. Press `enter` to stop replaying.
 
 

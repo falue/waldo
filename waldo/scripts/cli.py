@@ -66,15 +66,15 @@ def record(project_name, channel_name):
 
 
 @cli.command()
-@click.option('-p', default=None, help='Name of project')
+@click.argument('project_name', default=False)
 # @click.option('--bt_only', default=False, help='Only projects which are set by buttons')
 @click.option('--bt_only/--no-bt_only', default=False)
-def ls(p, bt_only):
+def ls(project_name, bt_only):
     """
     Examine projects in waldo_projects
     """
-    if p:
-        print_projects(p, bt_only)
+    if project_name:
+        print_projects(project_name, bt_only)
 
     else:
         action = click.prompt('What do you want to do?\n'
@@ -86,8 +86,8 @@ def ls(p, bt_only):
 
         if action.lower() == 'a':
             display_projects()
-            p = click.prompt('Name of project to display', type=str)
-            print_projects(p, bt_only)
+            project_name = click.prompt('Name of project to display', type=str)
+            print_projects(project_name, bt_only)
         elif action.lower() == 'b':
             print_projects(False, True)
         elif action.lower() == 'c':

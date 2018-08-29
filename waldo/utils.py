@@ -223,7 +223,7 @@ def print_projects(project_name, bt_only=False):
         projects = get_all_projects()
         print('List every project and show errors.\n')
 
-    print('────────────────────────────────────────────────────────────────────────')
+    print(text_color('grey', '────────────────────────────────────────────────────────────────────────'))
 
     if not projects:
         print('There are no project folders in \'{}\'.'.format(project_path))
@@ -232,18 +232,19 @@ def print_projects(project_name, bt_only=False):
     for project_name in sorted(projects):
         ch = ''
         error = ''
-        spacer = ''
-        button_name = ''
         used_servo_pins = []
         channel_specs = []
 
         # Display button
-        if project_name in main_config['buttons'].values():
-            button_name = main_config['buttons'].keys()[main_config['buttons'].values().index(project_name)]
-            button_name = ' Button: {} '.format(button_name)
-            spacer = " " * (71 - len(project_name) - len(button_name))
+        button_name = get_button(project_name)
+        if button_name:
+            spacer = ' ' * (62 - len(project_name) - len(button_name))
+            button_name = color('black', 'grey', 'Button: {}'.format(button_name))
+        else:
+            spacer = ''
+            button_name = ''
 
-        print('{}:{}\033[100m{}\033[41m\033[0m'.format(project_name, spacer, button_name))
+        print('{}{}{}'.format(text_color('yellow', project_name), spacer, button_name))
 
         # Read config of channel
         project = read_project_config(project_name)
@@ -253,10 +254,7 @@ def print_projects(project_name, bt_only=False):
 
                 # Check if servo_pin was used multiply
                 if data['servo_pin'] in used_servo_pins:
-                    error += '\033[41m ✖  Multiple use of servo pin {} ({}) \033[41m\033[0m\n'.format(
-                        data['servo_pin'],
-                        channel
-                    )
+                    error += bg_color('red', '✖  Multiple use of servo pin {} ({})'.format(data['servo_pin'], channel)) + '\n'
 
                 # Store servo pin for later use to check this^
                 used_servo_pins.append(data['servo_pin'])
@@ -285,9 +283,9 @@ def print_projects(project_name, bt_only=False):
                     reversed_channel = ''
 
                 # Create visual representation of max degrees of angular freedom
-                graph_rep = '\033[100m \033[0m\033[0m' * map_value(dof_prepend, 0, servo_dof_deg, 0, 60) + \
+                graph_rep = bg_color('grey', ' ', False) * map_value(dof_prepend, 0, servo_dof_deg, 0, 60) + \
                             '█' * map_value(dof, 0, servo_dof_deg, 0, 60) + \
-                            '\033[100m \033[0m\033[0m' * map_value(dof_append, 0, servo_dof_deg, 0, 60)
+                            bg_color('grey', ' ', False) * map_value(dof_append, 0, servo_dof_deg, 0, 60)
 
                 # Correct table layout if long channel name
                 if len(channel) < 8:
@@ -326,7 +324,15 @@ def print_projects(project_name, bt_only=False):
         else:
             print('✖  No channels in config file.\n')
 
-        print('────────────────────────────────────────────────────────────────────────\n')
+        print(text_color('grey', '────────────────────────────────────────────────────────────────────────'))
+
+
+def get_button(project_name):
+    main_config = read_main_config()
+    if project_name in main_config['buttons'].values():
+        return main_config['buttons'].keys()[main_config['buttons'].values().index(project_name)]
+    else:
+        return ''
 
 
 def display_projects():
@@ -337,7 +343,16 @@ def display_projects():
     for project_name in projects:
         config = read_project_config(project_name)
         len_channels = len(config['channels']) if config else 0
-        print('  {} {} {}{} channels'.format(project_name, ' ' * (15-len(project_name)), ' ' if len_channels < 10 else '', len_channels))
+        display_channels = text_color('grey', '{} channels'.format(len_channels))
+
+        button_name = get_button(project_name)
+
+        if button_name:
+            button_name = color('black', 'grey', 'Button: {} '.format(button_name))
+        else:
+            button_name = ''
+
+        print('  {} {} {}{} {}'.format(project_name, ' ' * (15-len(project_name)), ' ' if len_channels < 10 else '', display_channels, button_name))
 
 
 def copy_channel(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode):
@@ -351,7 +366,9 @@ def copy_channel(project_name_from, channel_name_old, project_name_to, channel_n
 
     # Check if new channel already exists
     if not os.path.isfile(os.path.join(project_path, project_name_from, channel_name_old)):
-        print('\033[31mx\033[0m\033[0m Channel file \'{}\' of project \'{}\' does not exist.'.format(channel_name_old, project_name_to))
+        print('{} Channel file \'{}\' of project \'{}\' does not exist.'.format(text_color('red', 'x'),
+                                                                                channel_name_old,
+                                                                                project_name_to))
 
     elif not os.path.isfile(os.path.join(project_path, project_name_to, channel_name_new)) \
             and not channel_name_new in config_old['channels']:
@@ -385,7 +402,9 @@ def copy_channel(project_name_from, channel_name_old, project_name_to, channel_n
                                                                                                project_name_to,
                                                                                                channel_name_old))
     else:
-        print("\033[31mx\033[0m\033[0m File or config data for channel '%s' in project '%s' already exists." % (channel_name_new, project_name_to))
+        print("{} File or config data for channel '{}' in project '{}' already exists.".format(text_color('red', 'x'),
+                                                                                               channel_name_new,
+                                                                                               project_name_to))
 
 
 def empty_project_trash(project_name):
@@ -398,6 +417,39 @@ def empty_project_trash(project_name):
         print('Emptied trash in \'{}\': {} {}'.format(project_name, len_files, 'file' if len_files == 1 else 'files'))
     else:
         print('Trash is empty.')
+
+
+def color(set_text_color, set_bg_color, text, padding=True):
+    return text_color(set_text_color, bg_color(set_bg_color, text, padding))
+
+
+def text_color(set_color, text):
+    if set_color == 'black':
+        return '\033[0;30m{}\033[0m\033[0m'.format(text)
+    elif set_color == 'grey':
+        return '\033[0;90m{}\033[0m\033[0m'.format(text)
+    elif set_color == 'red':
+        return '\033[0;31m{}\033[0m\033[0m'.format(text)
+    elif set_color == 'green':
+        return '\033[0;32m{}\033[0m\033[0m'.format(text)
+    elif set_color == 'yellow':
+        return '\033[0;33m{}\033[0m\033[0m'.format(text)
+    else:
+        return text
+
+
+def bg_color(set_color, text, padding=True):
+    text = ' {} '.format(text) if padding else text
+    if set_color == 'grey':
+        return '\033[100m{}\033[0m\033[0m'.format(text)
+    elif set_color == 'red':
+        return '\033[41m{}\033[0m\033[0m'.format(text)
+    elif set_color == 'green':
+        return '\033[42m{}\033[0m\033[0m'.format(text)
+    elif set_color == 'yellow':
+        return '\033[43m{}\033[0m\033[0m'.format(text)
+    else:
+        return text
 
 
 def show_legal():
