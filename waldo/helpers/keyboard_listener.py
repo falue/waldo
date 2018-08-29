@@ -38,7 +38,7 @@ def run_listener(autostart=None):
                         p.stop()
 
                 if command != 'cancel':
-                    players[command].play()
+                    players[command].play(pre_loaded=True)
 
             except KeyError:
                 pass

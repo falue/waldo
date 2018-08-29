@@ -8,7 +8,7 @@ from time import sleep, time
 
 import servo
 from waldo.audio import AudioPlayer
-from waldo.utils import read_project_config, get_first_file, read_main_config, text_color
+from waldo.utils import read_project_config, get_first_file, read_main_config, text_color, threaded
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Player(object):
     def __init__(self, project_name, play_from=0, repeat=False, mute_pins=None):
         """
-        :type mute_channels: list
+        :type mute_pins: list
         """
         self._servo_channels = []
         self._mute_pins = mute_pins if mute_pins else []
@@ -35,19 +35,21 @@ class Player(object):
         self._create_servo_channels()
         self._create_audio_player()
 
-    def play(self):
-        # Wait if still running --> ???
+    @threaded
+    def play(self, pre_loaded=False):
+        # Wait if still running (?)
         while self.running:
             print('still running?')
             sleep(0.01)
 
-        logger.info('loading...')
-        # wait for all servos to load channel file
-        while not all([s.ready for s in self._servo_channels]):
-            # print('waiting on ready: {}'.format([s.ready for s in self._servo_channels]))
-            sleep(0.01)
+        self.running = True
 
-        # print('READY: {}'.format([s.ready for s in self._servo_channels]))
+        # Wait for all servos to load channel file if not pre loaded by daemon
+        if not pre_loaded:
+            logger.info('loading...')
+            while not all([s.ready for s in self._servo_channels]):
+                sleep(0.01)
+
         logger.info('Ready - playing project \'{}\''.format(self.project_name))
         self._play_servos()
 
@@ -66,7 +68,6 @@ class Player(object):
         self.stop()
         self.running = False
         logger.info('Reached end - stopping project \'{}\''.format(self.project_name))
-        return
 
     def stop(self):
         print()

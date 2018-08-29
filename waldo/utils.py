@@ -107,23 +107,6 @@ def get_usb_devices():
     return subprocess.check_output('ls /dev/tty*', shell=True).strip().splitlines()
 
 
-def get_servo_connection(servo_pin):
-    """
-    Returns servo pins as int and servo hat board address as hex.
-    :type servo_pin: int
-    """
-    hat_address = servo_pin / 16
-    servo_pin %= 16
-
-    hat_address = int(hex(64 + hat_address), 16)
-
-    connection = {'servo_pin': servo_pin,
-                  'hat_address': hat_address
-                  }
-
-    return connection
-
-
 def get_mcp_connection(mcp_pin):
     """
     Returns connection pin numbers based on input pin.
