@@ -215,13 +215,13 @@ def print_projects(project_name, bt_only=False):
             print('Project \'{}\' does not exist.'.format(project_name))
             exit()
         projects = [project_name]
-        print('List project \'{}\' and show errors.\n'.format(project_name))
+        print('List project \'{}\' and show errors.'.format(project_name))
     elif bt_only:
         projects = main_config['buttons'].values()
-        print('List button projects and show errors.\n')
+        print('List button projects and show errors.')
     else:
         projects = get_all_projects()
-        print('List every project and show errors.\n')
+        print('List every project and show errors.')
 
     print(text_color('grey', '────────────────────────────────────────────────────────────────────────'))
 
@@ -318,7 +318,7 @@ def print_projects(project_name, bt_only=False):
                     error += '✖  No specs in config for file \'{}\'\n'.format(item)
 
             # Print table header and all channels
-            thead = '\tchannel\t\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF'
+            thead = text_color('grey', '\tchannel file\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF')
             print('{}{}\n{}'.format(error, thead, ch))
 
         else:
@@ -337,9 +337,9 @@ def get_button(project_name):
 
 def display_projects():
     project_path = read_main_config()['project_path']
-    print('Projects location: {}'.format(project_path))
+    print('Projects location: {}'.format(text_color('green', project_path)))
     projects = get_all_projects()
-    print('Total {} projects.'.format(len(projects)))
+    print('Total projects:    {}'.format(text_color('green', len(projects))))
     for project_name in projects:
         config = read_project_config(project_name)
         len_channels = len(config['channels']) if config else 0
@@ -348,7 +348,7 @@ def display_projects():
         button_name = get_button(project_name)
 
         if button_name:
-            button_name = color('black', 'grey', 'Button: {} '.format(button_name))
+            button_name = color('black', 'grey', 'Button: {}'.format(button_name))
         else:
             button_name = ''
 

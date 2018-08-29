@@ -67,20 +67,19 @@ def record(project_name, channel_name):
 
 @cli.command()
 @click.argument('project_name', default=False)
-# @click.option('--bt_only', default=False, help='Only projects which are set by buttons')
-@click.option('--bt_only/--no-bt_only', default=False)
+@click.option('--bt_only/--no-bt_only', default=False, help='Display projects which are button controlled')
 def ls(project_name, bt_only):
     """
     Examine projects in waldo_projects
     """
-    if project_name:
+    if project_name or bt_only:
         print_projects(project_name, bt_only)
 
     else:
         action = click.prompt('What do you want to do?\n'
-                              '  A) Display all project names\n'
-                              '  B) Display projects which are button controlled\n'
-                              '  C) Display all projects and details\n'
+                              '  A - Display all project names\n'
+                              '  B - Display projects which are button controlled\n'
+                              '  C - Display all projects and details\n'
                               'Answer',
                               type=str)
 
@@ -114,7 +113,7 @@ def copy(project_name_from, channel_name_old, project_name_to, channel_name_new,
 @click.argument('project_name')
 def empty_trash(project_name):
     """
-    Show legal info
+    Delete all files in 'project_name/trash'
     """
     empty_project_trash(project_name)
 
