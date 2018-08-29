@@ -8,7 +8,7 @@ import click
 from waldo.helpers.autostart import run_daemon
 from waldo.player import Player
 from waldo.recorder import record_setup, record_channel, set_servo, check_project
-from waldo.utils import show_legal, print_projects, display_projects, copy_channel
+from waldo.utils import show_legal, print_projects, display_projects, copy_channel, empty_project_trash
 
 
 @click.group()
@@ -108,6 +108,15 @@ def copy(project_name_from, channel_name_old, project_name_to, channel_name_new,
         channel_name_new = project_name_to
         project_name_to = project_name_from
     copy_channel(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode)
+
+
+@cli.command()
+@click.argument('project_name')
+def empty_trash(project_name):
+    """
+    Show legal info
+    """
+    empty_project_trash(project_name)
 
 
 @cli.command()

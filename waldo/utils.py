@@ -390,6 +390,18 @@ def copy_channel(project_name_from, channel_name_old, project_name_to, channel_n
         print("\033[31mx\033[0m\033[0m File or config data for channel '%s' in project '%s' already exists." % (channel_name_new, project_name_to))
 
 
+def empty_project_trash(project_name):
+    project_path = read_main_config()['project_path']
+    file_list = os.listdir(os.path.join(project_path, project_name, 'trash'))
+    for file_name in file_list:
+        os.remove(os.path.join(project_path, project_name, 'trash', file_name))
+    len_files = len(file_list)
+    if len_files > 0:
+        print('Emptied trash in \'{}\': {} {}'.format(project_name, len_files, 'file' if len_files == 1 else 'files'))
+    else:
+        print('Trash is empty.')
+
+
 def show_legal():
     print(""" _ _ _ _____ __    ____  _____ 
 | | | |  [] |  |  |    \|     | analog
