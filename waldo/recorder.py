@@ -396,7 +396,7 @@ def record_channel(project_name, channel_name):
 
 
 if __name__ == '__main__':
-    FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    FORMAT = '%(asctime)s - %(name)-12s - %(levelname)s - %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
 
     record_channel('ohappyday_test', 'blaaaaaaaa')

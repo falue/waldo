@@ -30,6 +30,7 @@ class Servo(object):
         logger.debug('Servo {}\tgoing to {}'.format(self.servo_pin, new_pos))
         # new generation servos check only total length of duty cycle
         self.servo_obj.setPWM(channel=self.servo_pin, on=0, off=new_pos)
+        sleep(1.0 / self.pwm_freq)
 
     @staticmethod
     def _get_servo_connection(servo_pin):
@@ -50,6 +51,8 @@ class ServoChannel(object):
         self.servo = None
         self.ready = False
         self.running = False
+        self.start_time = None
+        self.go = False
         self.servo_number = servo_number
         self.map_min = map_min
         self.map_max = map_max
@@ -64,19 +67,27 @@ class ServoChannel(object):
             for line in pulse_file.readlines():
                 timestamp, value = line.split(': ')
                 self.pulse_list.append((float(timestamp), int(value)))
+        # print('servo {} ready'.format(self.servo_number))
+        self.servo = Servo(servo_number=self.servo_number, start_pos=self.start_pos)
         self.ready = True
+
+    def set_start_time(self, start_time):
+        self.start_time = start_time
 
     @threaded
     def play(self, play_from=0):
-        self.servo = Servo(servo_number=self.servo_number, start_pos=self.start_pos)
-
-        start_time = time()
         self.running = True
+        # print('replay nr. {}'.format(self.servo_number))
 
-        while self.running:
+        while not self.go:
+            sleep(0.01)
+
+        now = time()
+
+        while self.running and (self.start_time + self.pulse_list[-1][0]) > now:
             try:
                 now = time()
-                timestamp, pulse = self._get_value(self.pulse_list, now - start_time + play_from)
+                timestamp, pulse = self._get_value(self.pulse_list, now - self.start_time + play_from)
                 pulse_map = map_value(pulse, 0, 1024, self.map_min, self.map_max)
                 self.servo.set_pos(pulse_map)
                 logger.debug(
@@ -86,19 +97,27 @@ class ServoChannel(object):
                                                                                                  pulse_map,
                                                                                                  self.servo.servo_pin,
                                                                                                  )
-                    )
-                sleep(1.0 / self.servo.pwm_freq)
+                )
             except IndexError:
-                self.stop()
+                pass
 
+        # print('stopped {}'.format(self.servo_number))
+        self.stop()
+
+
+    # FIXME: do every stopping parallell (threaded / processed)
+    @threaded
     def stop(self):
         if self.servo:
+            self.ready = False
+            self.go = False
             self.running = False
-            pulse_map = map_value(self.start_pos, 0, 1024, self.map_min, self.map_max)
-            logger.info("Go to start {}: servo {}".format(pulse_map, self.servo_number))
-            self.servo.set_pos(pulse_map)
-            sleep(0.001)
+            # pulse_map = map_value(self.start_pos, 0, 1024, self.map_min, self.map_max)
+            logger.info("Go to start {}: servo {}".format(self.start_pos, self.servo_number))
+            self.servo.set_pos(self.start_pos)
+            sleep(0.1)
             self.servo.turn_off()
+            sleep(0.1)
 
     @staticmethod
     def _get_value(l, t):
