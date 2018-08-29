@@ -116,7 +116,7 @@ def record_setup(project_name, channel_name):
                      )
         elif answer == "n":
             print("Abort.")
-            return
+            exit()
         else:
             print("[Y/N] murmel, murmel")
             record_setup(project_name, channel_name)

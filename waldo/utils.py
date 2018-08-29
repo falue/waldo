@@ -345,8 +345,6 @@ def copy_channel(project_name_from, channel_name_old, project_name_to, channel_n
     Copies file channel_name_old to channel_name_new with matching config data. preserve_pin increments the total
     amount of servo channels if 'pin_inc' (default), copies servo pin 1:1 if 'pin_copy', or sets integer if is integer.
     """
-    print(project_name_from, channel_name_old, project_name_to, channel_name_new, pin_mode)
-
     project_path = read_main_config()['project_path']
     config_old = read_project_config(project_name_from)
     config_new = read_project_config(project_name_to)
