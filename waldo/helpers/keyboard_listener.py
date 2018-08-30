@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import logging
 import os
+import subprocess
 from time import sleep
 
 from evdev import InputDevice, ecodes
@@ -32,6 +33,8 @@ def run_listener(autostart=None):
         if event.value == 1:
             try:
                 command = config['buttons'][ecodes.KEY[event.code]]
+
+                subprocess.call(['killall', '-9', 'play'])
 
                 for p in players.values():
                     if p.running:
