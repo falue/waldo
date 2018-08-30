@@ -69,6 +69,7 @@ measure_temp: true                      # starts on startup and measures temp ev
 autostart: true                         # Set to false if you don't want anything to start on startup.
                                         # ^Set to true if you want to start everything needed to start replaying
                                         # ^Set to project name to play automatically after startup
+volume: 30                              # Set volume on startup (> 30 sound is clipping)
 ```
 
 

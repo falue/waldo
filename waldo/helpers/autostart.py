@@ -15,11 +15,12 @@ def run_daemon():
 
     autostart = preferences['autostart']
     measure_temp = preferences['measure_temp']
+    volume = preferences['volume']
 
     shutdown_on_button_press()
 
     # Set volume to 30%
-    subprocess.call(['amixer', '-q', 'set', 'Speaker', '30%'])  # amixer set PCM -- 100% amixer sset 'Master' 50%
+    subprocess.call(['amixer', '-q', 'set', 'Speaker', '{}%'.format(volume)])  # amixer set PCM -- 100% amixer sset 'Master' 50%
 
     if measure_temp:
         monitor_temperature()
