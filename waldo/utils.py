@@ -149,16 +149,22 @@ def bar(value, max_bar=30):
         return "░"
 
 
+def get_all_files(path):
+    if os.path.isdir(path):
+        file_list = os.listdir(path)
+        audio_files = [a for a in file_list if not a.startswith('.')]
+        if len(audio_files):
+            return sorted(audio_files)
+        else:
+            return None
+
+
 def get_first_file(path, suffix=False):
     if not suffix:
         suffix = ''
-    if os.path.isdir(path):
-        file_list = os.listdir(path)
-        audio_files = [a for a in file_list if a.lower().endswith(suffix) and not a.startswith('.')]
-        if len(audio_files):
-            return audio_files[0]
-        else:
-            return None
+    audio_files = get_all_files(path)
+    filtered_audio_files = [a for a in audio_files if a.lower().endswith(suffix)]
+    return filtered_audio_files[0]
 
 
 def threaded(fn):
@@ -228,6 +234,33 @@ def print_projects(project_name, bt_only=False):
             button_name = ''
 
         print('{}{}{}'.format(text_color('yellow', project_name), spacer, button_name))
+
+        # audio files check
+        if os.path.isdir(os.path.join(project_path, project_name, 'audio')):
+            audio_files = get_all_files(os.path.join(project_path, project_name, 'audio'))
+            if audio_files:
+                for audio_file in audio_files:
+                    index = audio_files.index(audio_file)
+                    print('{}  {} {}'.format(
+                        'Audio file{}:'.format('s' if len(audio_files) > 1 else '') if index == 0 else '            ',
+                        audio_file, '(ignored)' if index != 0 else ''))
+            else:
+                print('✖  No audio files in folder \'audio\'')
+
+        # audio folder check
+        else:
+            print('{}  There is no folder \'audio\''.format(text_color('red', '✖')))
+
+        # trash folder check
+        trash_path = os.path.join(project_path, project_name, 'trash')
+        if os.path.isdir(trash_path):
+            trash = get_all_files(trash_path)
+            trash_size = get_filesize(sum(
+                os.path.getsize(os.path.join(project_path, project_name, 'trash', f)) for f in os.listdir(trash_path) if
+                os.path.isfile(os.path.join(project_path, project_name, 'trash', f))), 2)
+            print('{} file(s) in the trash ({})'.format(len(trash) if trash else 0, trash_size))
+        else:
+            print('✖  There is no folder \'trash\'')
 
         # Read config of channel
         project = read_project_config(project_name)
