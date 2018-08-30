@@ -163,8 +163,11 @@ def get_first_file(path, suffix=False):
     if not suffix:
         suffix = ''
     audio_files = get_all_files(path)
-    filtered_audio_files = [a for a in audio_files if a.lower().endswith(suffix)]
-    return filtered_audio_files[0]
+    if audio_files:
+        filtered_audio_files = [a for a in audio_files if a.lower().endswith(suffix)]
+        return filtered_audio_files[0]
+    else:
+        return None
 
 
 def threaded(fn):
