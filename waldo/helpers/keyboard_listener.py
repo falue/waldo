@@ -19,7 +19,18 @@ logger = logging.getLogger(__name__)
 def run_listener(autostart=None):
     config = read_main_config()
 
-    dev = InputDevice('/dev/input/event1')
+    print('Checking for keyboard..')
+    dev = False
+    while not dev:
+        try:
+            dev = InputDevice('/dev/input/event1')
+        except OSError:
+            print('No keyboard found..')
+        sleep(0.75)
+        rg_led('green')
+        sleep(0.25)
+        rg_led('red')
+
 
     players = preload_players()
     AudioPlayer(os.path.expanduser('~/Scripts/waldo/waldo/sounds/chime.mp3')).play()
