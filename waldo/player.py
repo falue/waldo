@@ -31,6 +31,10 @@ class Player(object):
         # FIXME: find a better name to distinguish between this projects path and the path of all projects
         self.song_path = os.path.join(project_path, self.project_name)
 
+        # TODO: Auto-detect I2C devices: ServoHats
+        # used_i2c_addresses = subprocess.Popen(['i2cdetect', '-y', '1'], stdout=subprocess.PIPE)
+        self.used_i2c_addresses = preferences['used_i2c_addresses']
+
         self._read_config()
         self._create_servo_channels()
         self._create_audio_player()
@@ -92,7 +96,8 @@ class Player(object):
                                            channel_config['servo_pin'],
                                            channel_config['map_min'],
                                            channel_config['map_max'],
-                                           channel_config['start_pos']
+                                           channel_config['start_pos'],
+                                           self.used_i2c_addresses
                                            )
                     self._servo_channels.append(s)
                 else:

@@ -300,7 +300,8 @@ def get_dof(mcp_in, servo_pin):
     On enter return of current value.
     """
     potentiometer = Potentiometer(mcp_in)
-    servo = Servo(servo_pin)
+    main_config = read_main_config()
+    servo = Servo(servo_pin, used_i2c_addresses=main_config['used_i2c_addresses'])
 
     while True:
         reading = potentiometer.read()
@@ -329,10 +330,11 @@ def record_channel(project_name, channel_name):
     map_max = config['channels'][channel_name]['map_max']
     mcp_in = config['channels'][channel_name]['mcp_in']
 
-    servo = Servo(servo_pin)
+    main_config = read_main_config()
+    project_path = main_config['project_path']
+    servo = Servo(servo_pin, used_i2c_addresses=main_config['used_i2c_addresses'])
     potentiometer = Potentiometer(mcp_in)
     player = Player(project_name)
-    project_path = read_main_config()['project_path']
 
     data = []
     # Countdown for slow recordists

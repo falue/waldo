@@ -15,13 +15,16 @@ logger = logging.getLogger(__name__)
 
 
 class Servo(object):
-    def __init__(self, servo_number, start_pos=300):
+    def __init__(self, servo_number, start_pos=300, used_i2c_addresses=[0x40]):
         self.servo_number = servo_number
         self.start_pos = start_pos
         self.servo_pin, self.servo_hat_address = self._get_servo_connection(servo_number)
-        self.servo_obj = PWM(self.servo_hat_address)
-        self.pwm_freq = 50
-        self.servo_obj.setPWMFreq(self.pwm_freq)  # 60hz = 16.666ms, 50hz = 20ms, 40hz = 25ms
+        self.used_i2c_addresses = used_i2c_addresses
+
+        if self.servo_hat_address in self.used_i2c_addresses:
+            self.servo_obj = PWM(self.servo_hat_address)
+            self.pwm_freq = 50
+            self.servo_obj.setPWMFreq(self.pwm_freq)  # 60hz = 16.666ms, 50hz = 20ms, 40hz = 25ms
 
     def turn_off(self):
         self.servo_obj.setPWM(self.servo_pin, 0, 4096)
@@ -46,7 +49,7 @@ class Servo(object):
 
 
 class ServoChannel(object):
-    def __init__(self, channel_file_path, servo_number, map_min, map_max, start_pos):
+    def __init__(self, channel_file_path, servo_number, map_min, map_max, start_pos, used_i2c_addresses):
         self.pulse_list = None
         self.servo = None
         self.ready = False
@@ -57,6 +60,7 @@ class ServoChannel(object):
         self.map_min = map_min
         self.map_max = map_max
         self.start_pos = start_pos
+        self.used_i2c_addresses = used_i2c_addresses
         self.channel_file_path = channel_file_path
         self.read_channel_file(channel_file_path)
 
@@ -68,7 +72,7 @@ class ServoChannel(object):
                 timestamp, value = line.split(': ')
                 self.pulse_list.append((float(timestamp), int(value)))
         # print('servo {} ready'.format(self.servo_number))
-        self.servo = Servo(servo_number=self.servo_number, start_pos=self.start_pos)
+        self.servo = Servo(servo_number=self.servo_number, start_pos=self.start_pos, used_i2c_addresses=self.used_i2c_addresses)
         self.ready = True
 
     def set_start_time(self, start_time):

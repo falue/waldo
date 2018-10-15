@@ -69,6 +69,7 @@ autostart: true                         # Set to false if you don't want anythin
                                         # ^Set to true if you want to start everything needed to start replaying
                                         # ^Set to project name to play automatically after startup
 volume: 30                              # Set volume on startup (> 30 sound is clipping)
+used_i2c_addresses: [0x40]              # [0x40] for 16 channels, [0x40, 0x41] for 32, etc
 ```
 
 
