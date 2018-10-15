@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import logging
 import os
+import subprocess
 from time import sleep
 
 from evdev import InputDevice, ecodes
@@ -26,10 +27,14 @@ def run_listener(autostart=None):
             dev = InputDevice('/dev/input/event1')
         except OSError:
             print('No keyboard found..')
-        sleep(0.75)
-        rg_led('green')
-        sleep(0.25)
-        rg_led('red')
+            sleep(0.5)
+            rg_led('green')
+            sleep(0.15)
+            rg_led('red')
+            sleep(0.15)
+            rg_led('green')
+            sleep(0.15)
+            rg_led('red')
 
 
     players = preload_players()
@@ -44,12 +49,14 @@ def run_listener(autostart=None):
             try:
                 command = config['buttons'][ecodes.KEY[event.code]]
 
+                subprocess.call(['killall', '-9', 'play'])
+
                 for p in players.values():
                     if p.running:
                         p.stop()
 
                 if command != 'cancel':
-                    players[command].play()
+                    players[command].play(pre_loaded=True)
 
             except KeyError:
                 pass
@@ -79,7 +86,7 @@ def run_listener(autostart=None):
 
 
 if __name__ == '__main__':
-    FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    FORMAT = '%(asctime)s - %(name)-12s - %(levelname)s - %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.INFO)  # DEBUG / INFO / WARNING
 
     run_listener()

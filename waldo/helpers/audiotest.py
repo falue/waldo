@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import subprocess
 import time
 
-from waldo.audio import AudioPlayer
-
-AudioPlayer('/home/pi/Scripts/waldo/waldo/sounds/chime.mp3').play()
+left = '/home/pi/Scripts/waldo/waldo/sounds/audiotest_l.wav'
+right = '/home/pi/Scripts/waldo/waldo/sounds/audiotest_r.wav'
 
 while True:
-    AudioPlayer('/home/pi/Scripts/waldo/waldo/sounds/audiotest_l.wav').play()
+    cmd = ['/usr/bin/play', '-v', '0.99', '-q', left]
+    print('Left')
+    subprocess.Popen(cmd)
     time.sleep(1)
 
-    AudioPlayer('/home/pi/Scripts/waldo/waldo/sounds/audiotest_r.wav').play()
+    cmd = ['/usr/bin/play', '-v', '0.99', '-q', right]
+    print('Right')
+    subprocess.Popen(cmd)
     time.sleep(1)

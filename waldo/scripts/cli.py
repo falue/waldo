@@ -28,18 +28,26 @@ def daemon():
 
 @cli.command()
 @click.option('--start_from', default=0, help='Start point in seconds')
-@click.argument('project_name')
+@click.argument('project_name', default=False)
 def play(start_from, project_name):
     """
     Playback of every servo channel in PROJECT_NAME and, if existent, audio file (alphabetical first
     in folder), optional from start point [start_from] in seconds.
     """
-    click.echo('Playing {} from {}'.format(project_name, start_from))
-    player = Player(project_name)
-    player.play()
-    while True:
-        sleep(1)
-
+    if project_name:
+        click.echo('Playing {} from {}'.format(project_name, start_from))
+        player = Player(project_name)
+        player.play()
+        while True:
+            sleep(1)
+    else:
+        click.echo('These projects are available:')
+        display_projects()
+        project_name = click.prompt('Name of project to play', type=str)
+        player = Player(project_name)
+        player.play()
+        while True:
+            sleep(1)
 
 @cli.command()
 @click.argument('project_name')
