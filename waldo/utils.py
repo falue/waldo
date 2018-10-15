@@ -215,7 +215,7 @@ def print_projects(project_name, bt_only=False):
         projects = get_all_projects()
         print('List every project and show errors.')
 
-    print(text_color('grey', '────────────────────────────────────────────────────────────────────────'))
+    print(text_color('grey', '────────────────────────────────────────────────────────────────────────────'))
 
     if not projects:
         print('There are no project folders in \'{}\'.'.format(project_path))
@@ -230,7 +230,7 @@ def print_projects(project_name, bt_only=False):
         # Display button
         button_name = get_button(project_name)
         if button_name:
-            spacer = ' ' * (62 - len(project_name) - len(button_name))
+            spacer = ' ' * (66 - len(project_name) - len(button_name))
             button_name = color('black', 'grey', 'Button: {}'.format(button_name))
         else:
             spacer = ''
@@ -302,9 +302,9 @@ def print_projects(project_name, bt_only=False):
                     reversed_channel = ''
 
                 # Create visual representation of max degrees of angular freedom
-                graph_rep = bg_color('grey', ' ', False) * map_value(dof_prepend, 0, servo_dof_deg, 0, 60) + \
-                            '█' * map_value(dof, 0, servo_dof_deg, 0, 60) + \
-                            bg_color('grey', ' ', False) * map_value(dof_append, 0, servo_dof_deg, 0, 60)
+                graph_rep = bg_color('grey', ' ', False) * map_value(dof_prepend, 0, servo_dof_deg, 0, 68) + \
+                            '█' * map_value(dof, 0, servo_dof_deg, 0, 68) + \
+                            bg_color('grey', ' ', False) * map_value(dof_append, 0, servo_dof_deg, 0, 68)
 
                 # Correct table layout if long channel name
                 if len(channel) < 8:
@@ -313,9 +313,10 @@ def print_projects(project_name, bt_only=False):
                     name_space = ''
 
                 # Sum up channel content
-                ch += '\t{}\t{}{}\t{}\t{}\t{}\t{}\t{}°\n\t{}{}\n'.format(channel,
+                ch += '\t{}{}\t#{}\t{}\t{}\t{}\t{}\t{}\t{}°\n\t{}{}\n'.format(channel,
                                                                           name_space,
-                                                                          data['servo_pin'],
+                                                                          format(data['servo_pin']+1, '02d'),
+                                                                          format(data['servo_pin'], '02d'),
                                                                           data['mcp_in'],
                                                                           data['map_min'],
                                                                           data['map_max'],
@@ -337,13 +338,13 @@ def print_projects(project_name, bt_only=False):
                     error += '✖  No specs in config for file \'{}\'\n'.format(item)
 
             # Print table header and all channels
-            thead = text_color('grey', '\tchannel file\tservo\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF')
+            thead = text_color('grey', '\tchannel file\t#cable\tpin\tmcp_in\tmap_min\tmap_max\tst._pos\t°DOF')
             print('{}{}\n{}'.format(error, thead, ch))
 
         else:
             print('✖  No channels in config file.\n')
 
-        print(text_color('grey', '────────────────────────────────────────────────────────────────────────'))
+        print(text_color('grey', '────────────────────────────────────────────────────────────────────────────'))
 
 
 def get_button(project_name):
