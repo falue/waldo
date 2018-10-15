@@ -20,6 +20,24 @@ logger = logging.getLogger(__name__)
 def run_listener(autostart=None):
     config = read_main_config()
 
+    dev = wait_for_keyboard()
+
+    players = preload_players()
+    print('All players loaded.')
+    AudioPlayer(os.path.expanduser('~/Scripts/waldo/waldo/sounds/chime.mp3')).play()
+    rg_led('green')
+
+    if autostart:
+        players[autostart].play()
+
+    try:
+        read_loop(dev, config, players)
+    except IOError:
+        print('Keyboard unplugged.')
+        run_listener(autostart=autostart)
+
+
+def wait_for_keyboard():
     print('Checking for keyboard..')
     dev = False
     while not dev:
@@ -35,15 +53,12 @@ def run_listener(autostart=None):
             rg_led('green')
             sleep(0.15)
             rg_led('red')
+    print('Keyboard found.')
+    rg_led('red')
+    return dev
 
 
-    players = preload_players()
-    AudioPlayer(os.path.expanduser('~/Scripts/waldo/waldo/sounds/chime.mp3')).play()
-    rg_led('green')
-
-    if autostart:
-        players[autostart].play()
-
+def read_loop(dev, config, players):
     for event in dev.read_loop():
         if event.value == 1:
             try:
