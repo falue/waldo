@@ -32,3 +32,6 @@ def run_daemon():
 
     while True:
         sleep(1)
+
+if __name__ == '__main__':
+    run_daemon()
