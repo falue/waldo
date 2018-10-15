@@ -16,10 +16,9 @@
   * [Legal information](#legal-information)
   * [Listing of project details](#listing-of-project-details)
   * [Play](#play)
-  * [(Re)calibrate a servo](#-re-calibrate-a-servo)
-    + [Requirements](#requirements)
+  * [Record](#record)
+  * [Setup project or servo](#setup-project-or-servo)
     + [Steps](#steps)
-  * [Record channel](#record-channel)
 - [Helpers](#helpers)
   * [audiotest.py: Test R&L channels](#audiotestpy--test-r-l-channels)
   * [autostart.py: Files on startup](#autostartpy--files-on-startup)
@@ -69,6 +68,7 @@ measure_temp: true                      # starts on startup and measures temp ev
 autostart: true                         # Set to false if you don't want anything to start on startup.
                                         # ^Set to true if you want to start everything needed to start replaying
                                         # ^Set to project name to play automatically after startup
+volume: 30                              # Set volume on startup (> 30 sound is clipping)
 ```
 
 
@@ -85,6 +85,9 @@ sudo -u pi /usr/local/bin/waldo daemon
 
 
 # Main functions / CLI
+You can [play](#play), [record](#record), [setup servos and projects](#-re-calibrate-a-servo),
+[copy channel files](#copy-channel) (recorded PWM signals with a timestamp) and
+[get a list](#listing-of-project-details) of all projects with all details.
 
 ## Copy channel
 ```
@@ -104,8 +107,8 @@ You can choose to duplicate a config file from another project.
 Things you may want to do:
 - Add audio file in path/to/project/audio (`.mp3`, `.wave`, `.aiff`)
     - Audio should be 32-bit sampled, 24-bit raises SOX's alsa driver error.
-- Delete channels that are not needed anymore from the config file
-- [Setup a servo](#Recalibrate-a-servo) for all channels if the servos are not calibrated
+- Delete channels that are not needed anymore from the config file (manually)
+- [Setup a new servo](#setup-project-or-servo)
 - [Record](#Record-channel) inputs for servo movements
 
 
@@ -116,7 +119,8 @@ waldo deamon
 Runs all things necessary for listening to keyboard strokes and replaying projects. This gets started if
 autostart is `true` in [main-config-file](main config file).
 See [Setup as independent unit](setup-as-independent-unit).
-Kill running process with `killall -9 python`
+
+Kill running daemon with `killall -9 waldo`
 
 
 ## Help
@@ -135,9 +139,9 @@ waldo legal
 ```
 waldo ls [project_name] [--bt_only]
 ```
-Lists a specific project with [-p project_name] and every channel of it and their details.
+Lists a specific project with [project_name] and every channel of it and their details.
 Points out difficulties like multiple use of servo_pin, missing files or config data.
-Omit [-p project_name] to get prompted var options.
+Omit [project_name] to get prompted var options.
 Only prints projects which are defined as buttons with option [--bt_only]
 
 ```
@@ -179,23 +183,31 @@ Displays button key on top right if project has set one in the main config file.
 
 ## Play
 ```
-waldo play project_name [--start_from int]
+waldo play [project_name] [--start_from int]
 ```
-Plays every channel of project_name and its sound file.
-Optional argument --start_from: Start after n seconds. Press `enter` to stop replaying.
+Plays every channel of optional [project_name] and its sound file.
+If [project_name] is omitted, a list of projects is displayed.
+Optional argument [--start_from]: Start after n seconds.
+
+Press `enter` to stop replaying.
 
 
-## (Re)calibrate a servo
+## Record
 ```
-waldo setup project_name channel_name
+waldo record project_name channel_name
+```
+This starts the setup/recording process for channel_name in project_name.
+It records PWM signals with a timestamp to a file named channel_file.
+If you record channel_name with a not existing project_name, you will be guided to [create a new project](#create-new-project).
+
+
+## Setup project or servo
+```
+waldo setup project_name [channel_name]
 ```  
-This functionality is used to store the settings of a certain servo for a certain channel within a certain project.
-
-
-### Requirements
-1. Potentiometer is connected to the top row of connectors (labelled 0-23), on Pin 14.
-2. Servo to calibrate is connected to servo hat, to one of the pins.
-
+Omit [channel_name] and you setup a new empty project without any channel_files.
+This functionality is used to store or change the settings of a certain servo for a certain
+channel within a certain project.
 
 ### Steps
 (Servo on Pin 2, Potentiometer on Pin 14)
@@ -208,13 +220,6 @@ Set minimum position:        # hit 'm' to set the min movement of the servo
 Set maximum position:        # hit 'm' to set the max movement of the servo
 Set start position:          # usually use the minimum position to start/stop closed
 ```
-
-
-## Record channel
-```
-waldo record project_name channel_name
-```
-If you record channel_name with a not existing project_name, you will be guided to [create a new project](#create-new-project).
 
 
 # Helpers
