@@ -42,6 +42,7 @@ def wait_for_keyboard():
     dev = False
     while not dev:
         try:
+            # TODO: /dev/input/event1 can also be the LCD-touchscreen
             dev = InputDevice('/dev/input/event1')
         except OSError:
             print('No keyboard found..')
