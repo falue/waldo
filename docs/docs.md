@@ -1,9 +1,10 @@
-![](images/Logo_Black_RGB.png)  
+![](images/logo.jpg)  
 
 # o/Waldo
 <!-- auto create table of contents: http://ecotrust-canada.github.io/markdown-toc --> 
 - [General Setup](#general-setup)
   * [Powering raspberry Pi](#powering-raspberry-pi)
+  * [SSH to Pi](#ssh-to-pi)
   * [Mount remote file system](#mount-remote-file-system)
   * [Raspberry Pi credentials](#raspberry-pi-credentials)
   * [Main config file](#main-config-file)
@@ -37,11 +38,30 @@ Use a 5V 2.5A power adaptor. 2.2A is too few and the yellow "flash" icon is disp
 potentially corrupting SD cards or causing other problems.  
 
 
+## SSH to Pi
+Edit file using command-line:
+```
+ssh pi@waldo
+```
+or type `arp -a` and look for the local RasPi IP and enter `ssh pi@169.254.179.14`.
+
 ## Mount remote file system
+To have the files of Pi display in OS X' Finder like this:
+![](images/mounted.png)  
+
+On the Pi, get local IP address:
+```
+hostname -I
+169.254.121.76 192.168.1.106 2a02:1205:34e9:29d0:7cdc:2d55:9c8:5603
+```
+On OS X, create folder anywhere. This is where the  and use IP address from above:
 ```
 mkdir  remote_waldo
-sshfs pi@192.168.0.4:/home/pi/tmp_waldo_projects remote_waldo/
+sshfs pi@192.168.1.106:/home/pi remote_waldo/
 ```
+Sometimes its the local IP, sometimes the public.  
+Projects are in `/home/pi/waldo_projects` and logs and main config file are in `/home/pi/.waldo`
+
 
 ## Raspberry Pi credentials
 pi / ...
