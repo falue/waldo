@@ -43,7 +43,7 @@ def wait_for_keyboard():
     while not dev:
         try:
             # TODO: /dev/input/event1 can also be the LCD-touchscreen
-            dev = InputDevice('/dev/input/event1')
+            dev = InputDevice('/dev/input/event0')  #event1 it with USB soundcard. event0 if without.
         except OSError:
             print('No keyboard found..')
             sleep(0.5)
