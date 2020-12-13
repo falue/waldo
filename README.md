@@ -11,7 +11,10 @@ in a 1942 novella by Robet Heinlein who builds a robot to amplify his limited ab
 
 
 # Video
+![gif](./docs/images/example.gif)
+
 https://www.youtube.com/watch?v=EwRgvFQqLwY
+
 https://www.youtube.com/watch?v=tUBdy3g_34A
 
 # Startup
